@@ -1,0 +1,38 @@
+# 深度学习框架
+torch>=1.12.0
+torchvision>=0.13.0
+ultralytics>=8.0.0  # YOLOv8
+tensorflow>=2.10.0  # DeepLabV3+ (可选，也可用PyTorch版本)
+
+# 计算机视觉
+opencv-python>=4.5.0
+opencv-contrib-python>=4.5.0
+pillow>=9.0.0
+
+# 点云处理
+open3d>=0.15.0
+numpy>=1.21.0
+scipy>=1.7.0
+
+# 数据标注
+labelme>=5.0.0
+
+# RealSense相机
+pyrealsense2>=2.50.0
+
+# 可视化
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# 工具库
+tqdm>=4.64.0
+pyyaml>=6.0
+scikit-learn>=1.0.0
+scikit-image>=0.19.0
+
+# 数据增强
+albumentations>=1.2.0
+
+# 评估指标
+pycocotools>=2.0.4
+

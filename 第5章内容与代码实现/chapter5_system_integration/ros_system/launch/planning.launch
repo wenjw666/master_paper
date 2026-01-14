@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- 抓取规划节点启动文件（Ch3） -->
+    
+    <arg name="robot_type" default="ur5"/>
+    
+    <!-- 启动MoveIt!（如果使用） -->
+    <!-- <include file="$(find ur5_moveit_config)/launch/planning_context.launch"/> -->
+    
+    <!-- 启动规划节点 -->
+    <node name="planning_node" pkg="chapter5_system_integration" 
+          type="planning_node.py" output="screen">
+        <param name="grasp_model_path"
+               value="$(find chapter5_system_integration)/../../第3章内容与代码实现/chapter3_grasp_planning/weights/contact_graspnet.pt"/>
+        <param name="robot_type" value="$(arg robot_type)"/>
+        <param name="camera_intrinsic_path"
+               value="$(find chapter5_system_integration)/calibration/calibration_data/camera_params.yaml"/>
+    </node>
+    
+</launch>
+

@@ -1,0 +1,11 @@
+# 抓取规划服务请求
+geometry_msgs/PoseStamped target_pose
+geometry_msgs/Vector3 cable_vector
+std_msgs/String target_tag_id
+---
+# 服务响应
+bool success
+string message
+geometry_msgs/PoseStamped grasp_pose
+trajectory_msgs/JointTrajectory path
+

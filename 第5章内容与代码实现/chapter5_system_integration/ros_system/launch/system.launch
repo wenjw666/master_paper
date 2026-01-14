@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- 第5章：电连接器自主装配系统总启动文件 -->
+    
+    <!-- 系统参数 -->
+    <arg name="robot_type" default="ur5e"/>
+    <arg name="camera_type" default="realsense_d435i"/>
+    <arg name="use_sim" default="false"/>
+    
+    <!-- 加载配置文件 -->
+    <rosparam file="$(find chapter5_system_integration)/config/system_config.yaml" command="load"/>
+    
+    <!-- 启动视觉节点（Ch2） -->
+    <include file="$(find chapter5_system_integration)/ros_system/launch/vision.launch">
+        <arg name="camera_type" value="$(arg camera_type)"/>
+    </include>
+    
+    <!-- 启动规划节点（Ch3） -->
+    <include file="$(find chapter5_system_integration)/ros_system/launch/planning.launch">
+        <arg name="robot_type" value="$(arg robot_type)"/>
+    </include>
+    
+    <!-- 启动控制节点（Ch4） -->
+    <include file="$(find chapter5_system_integration)/ros_system/launch/control.launch">
+        <arg name="robot_type" value="$(arg robot_type)"/>
+    </include>
+    
+    <!-- 启动状态机节点 -->
+    <node name="state_manager" pkg="chapter5_system_integration" 
+          type="state_manager_node.py" output="screen">
+        <param name="robot_type" value="$(arg robot_type)"/>
+    </node>
+    
+    <!-- 启动数据记录节点（可选） -->
+    <node name="data_recorder" pkg="chapter5_system_integration"
+          type="data_recorder.py" output="screen" if="$(arg record_data)">
+        <param name="output_bag" value="$(find chapter5_system_integration)/data_collection/experiments/auto_record.bag"/>
+    </node>
+    
+</launch>
+

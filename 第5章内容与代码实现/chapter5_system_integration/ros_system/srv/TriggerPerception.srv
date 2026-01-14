@@ -1,0 +1,7 @@
+# 触发视觉感知服务请求
+std_msgs/String target_tag_id
+---
+# 服务响应
+bool success
+string message
+

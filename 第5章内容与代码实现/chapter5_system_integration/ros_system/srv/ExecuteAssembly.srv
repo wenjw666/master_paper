@@ -1,0 +1,9 @@
+# 执行装配服务请求
+geometry_msgs/Vector3 cable_vector
+geometry_msgs/PoseStamped target_pose
+---
+# 服务响应
+bool success
+string message
+string error_code  # SUCCESS, FORCE_OVERFLOW, ASSEMBLY_FAILED, TIMEOUT
+

@@ -1,0 +1,39 @@
+# 深度学习框架
+torch>=1.12.0
+torchvision>=0.13.0
+
+# 点云处理
+open3d>=0.15.0
+numpy>=1.21.0
+scipy>=1.7.0
+
+# 物理仿真
+pybullet>=3.2.0
+
+# 路径规划
+ompl>=1.5.0  # Open Motion Planning Library (Python绑定)
+
+# 碰撞检测
+# FCL需要通过conda或源码安装，这里提供Open3D作为替代
+# fcl>=0.6.0
+
+# 机器人接口（可选，用于ROS集成）
+# rospy  # 需要ROS环境
+
+# 可视化
+matplotlib>=3.5.0
+mayavi>=4.7.0  # 3D可视化（可选）
+
+# 工具库
+tqdm>=4.64.0
+pyyaml>=6.0
+scikit-learn>=1.0.0
+
+# 数据处理
+pandas>=1.3.0
+h5py>=3.6.0  # 用于抓取数据集
+
+# 图像处理（用于处理Ch2的掩膜）
+opencv-python>=4.5.0
+pillow>=9.0.0
+

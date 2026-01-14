@@ -1,0 +1,29 @@
+# SAC训练配置文件
+
+algorithm: "SAC"
+device: "cuda"  # 或 "cpu"
+
+# 训练参数
+total_steps: 1000000
+batch_size: 256
+warmup_steps: 10000  # 预热步数（随机探索）
+update_frequency: 1  # 更新频率（每N步更新一次）
+save_frequency: 100000  # 保存频率
+
+# 学习率
+learning_rate:
+  actor: 3e-4
+  critic: 3e-4
+  alpha: 3e-4
+
+# 回放缓冲区
+replay_buffer_size: 1000000
+
+# 算法超参数
+gamma: 0.99  # 折扣因子
+tau: 0.005  # 软更新系数
+alpha_auto_tune: true  # 自动调节温度系数
+
+# 域随机化
+use_domain_randomization: true
+

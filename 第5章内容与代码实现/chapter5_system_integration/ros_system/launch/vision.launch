@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- 视觉感知节点启动文件（Ch2） -->
+    
+    <arg name="camera_type" default="realsense_d435i"/>
+    
+    <!-- 启动RealSense相机 -->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="camera" value="camera"/>
+        <arg name="enable_depth" value="true"/>
+        <arg name="align_depth.enable" value="true"/>
+    </include>
+    
+    <!-- 启动视觉感知节点 -->
+    <node name="vision_node" pkg="chapter5_system_integration" 
+          type="vision_node.py" output="screen">
+        <param name="yolov8_model_path" 
+               value="$(find chapter5_system_integration)/../../第2章内容与代码实现/chapter2_vision_perception/weights/yolov8_seg.pt"/>
+        <param name="deeplab_model_path"
+               value="$(find chapter5_system_integration)/../../第2章内容与代码实现/chapter2_vision_perception/weights/deeplabv3_keypoints.pt"/>
+        <param name="camera_intrinsic_path"
+               value="$(find chapter5_system_integration)/calibration/calibration_data/camera_params.yaml"/>
+    </node>
+    
+</launch>
+

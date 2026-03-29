@@ -1,0 +1,611 @@
+﻿% !TeX root = ../thesis.tex
+\chapter{电连接器柔顺装配控制方法研究}
+
+\section{引言}
+针对航空制造场景下带柔性拖缆电连接器的精密装配问题，本章构建视觉前馈、力位混合控制和深度强化学习的递进式装配框架，建立含柔性线缆干扰的装配动力学模型，并将线缆方向向量引入控制器，构造面向拖缆主扰动方向的视觉前馈补偿项；随后设计装配过程的状态空间、动作空间与奖励函数，构建强化学习交互环境，基于 SoftActor-Critic 实现装配策略学习，能够在接触建立后完成搜孔、姿态修正与稳定插接。通过仿真训练与真实平台实验对接触力峰值、装配时间与装配成功的安全性表现进行验证。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-1\\（空白占位图：第四章总体技术路线与输入输出接口示意图）}}
+  \caption{第四章总体技术路线与输入输出接口示意图（第三章预装配初值与线缆先验驱动插入阶段控制与策略学习的接口关系）}
+  \label{fig:ch4:tech-route}
+\end{figure}
+
+\section{含线缆干扰的轴孔装配动力学建模与控制器设计}
+电连接器插接过程受几何约束、接触切换和柔性扰动共同影响。为面向轴孔对齐的控制设计建立统一任务空间表达，本节首先从受力关系与运动约束出发，对带柔性线缆干扰的装配过程进行动力学建模；随后在引入力位混合控制框架下，将位置调节与接触力约束统一表征，并利用视觉获得的线缆方向信息构造方向相关的前馈补偿项，从而使后续误差分解与阻抗控制律构造具有一致的物理变量定义。
+
+\subsection{轴孔装配误差描述}
+预装配操作完成后，机械臂末端已进入插孔前方局部邻域，装配控制的核心目标转化为轴孔对齐误差的精细调节。考虑柔性线缆干扰会在接触建立前后改变末端受力与运动耦合关系，误差表达形式需要同时满足两点要求：一方面将横向对齐、轴向推进与姿态失配分解为可独立加权的任务空间通道；另一方面使其能够直接作为后续力位混合/阻抗控制律中的通道误差信号，从而形成方向相关的柔顺调节机制。
+
+设连接器装配轴线方向为 $z_a$、插孔轴线方向为 $z_h$（均为单位向量）。取连接器末端参考点位置为 $\mathbf{p}_{c}$，插孔参考点位置为 $\mathbf{p}_{h}$，平移误差定义为 $\Delta \mathbf{p}=\mathbf{p}_{c}-\mathbf{p}_{h}$。横向对齐误差取为在插入轴法向平面的投影：
+$$
+\mathbf{e}_{xy}=(\mathbf{I}-z_h z_h^{\top})\,\Delta \mathbf{p},
+$$
+其中，$\mathbf{I}$ 为单位矩阵，$\mathbf{e}_{xy}$ 表示垂直于插入轴线的侧向对齐误差向量。轴向推进误差取为沿插入轴方向的投影标量：
+$$
+e_{z}=z_h^{\top}\Delta \mathbf{p},
+$$
+其中，$e_{z}$ 表示沿插入轴线方向的剩余推进距离误差。姿态失配误差由连接器与插孔的相对旋转确定，采用相对旋转对数映射得到的旋转向量：
+$$
+\mathbf{e}_{R}=\mathrm{Log}\!\left(\mathbf{R}_{h}^{\top}\mathbf{R}_{c}\right)^{\vee},
+$$
+其中，$\mathbf{R}_{c}$ 与 $\mathbf{R}_{h}$ 分别为连接器与插孔的姿态矩阵，$\vee$ 表示旋转对数输出的向量化映射。将上述三通道误差合并，可得装配误差向量：
+$$
+\mathbf{e}_{t}=
+\begin{bmatrix}
+\mathbf{e}_{xy}^{\top}\\
+e_{z}\\
+\mathbf{e}_{R}^{\top}
+\end{bmatrix}.
+$$
+该误差建模将几何偏差显式分解为横向对齐、轴向推进与姿态失配三个可独立加权的物理量，并与后续变刚度阻抗控制律所采用的任务空间广义误差分量建立对应关系：其中 $\mathbf{e}_{xy}$ 与 $e_z$ 对应平移误差在插入轴方向与横向平面的分量，$\mathbf{e}_{R}$ 对应姿态失配的恢复调节。该对应使通道刚度矩阵与阻尼矩阵能够对不同方向误差施加方向相关的恢复力与耗能，从而在航空非结构化环境与柔性线缆干扰条件下实现先抑制横向楔入风险、再在安全接触约束下逐步减小轴向误差的控制目标分解。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-2\\（空白占位图：轴孔装配误差分解与几何含义说明图）}}
+  \caption{轴孔装配误差分解与几何含义说明图（横向对齐、轴向推进与姿态失配误差在孔口局部的几何含义示意）}
+  \label{fig:ch4:err-decomp}
+\end{figure}
+
+图4-2 以几何形式标定 $\mathbf{e}_{xy}$、$e_z$ 与 $\mathbf{e}_{R}$ 的对应含义：当端面相对插孔轴线存在侧向偏移时，$\mathbf{e}_{xy}$ 增大；当插接尚处于未建立稳定接触的推进阶段时，沿插入轴的剩余推进距离表现为 $e_z$；当连接器轴线与插孔轴线存在姿态不一致时，姿态失配由 $\mathbf{e}_{R}$ 表征并带来端面楔入倾向，从而放大附加接触力矩。该几何对应关系为后续变刚度阻抗控制器中通道刚度/阻尼的配置提供直接依据：系统可在插接初期优先收敛对准相关误差，再在接触切换过程中逐步减小轴向误差，使柔性线缆干扰引起的横向耦合被约束在受控的柔顺通道内。
+
+\subsection{含线缆干扰的装配动力学模型}
+电连接器插接过程属于刚柔耦合接触过程，连接器与底座插孔之间存在法向接触、切向摩擦与几何约束；连接器尾部柔性线缆在机械臂带动下产生方向性拖拽力和回复力矩，对末端轨迹与接触状态形成持续扰动。
+
+设末端在笛卡尔空间中的位姿为 $\mathbf{x}$，则考虑接触作用与线缆扰动后的装配动力学方程可写为
+\begin{equation}
+M_{x}\ddot{\mathbf{x}} + C_{x}\dot{\mathbf{x}} + G_{x}
+= \mathbf{F}_{ctr l} + \mathbf{F}_{ext} + \mathbf{F}_{cable}.
+\end{equation}
+其中，$M_{x}$ 为等效惯性矩阵，$C_{x}$ 为速度相关项，$G_{x}$ 为重力项，$\mathbf{F}_{ctrl}$ 为控制输入在任务空间的等效作用，$\mathbf{F}_{ext}$ 为连接器与插孔之间的接触作用力，$\mathbf{F}_{cable}$ 为柔性线缆对末端施加的附加干扰力。线缆为典型柔性体，其精确高维动力学难以在工程与学习阶段同时获得可靠参数，因此本文采用便于控制设计与策略学习的等效建模方式。
+
+结合线缆方向信息，将线缆视为沿主方向作用的等效弹性—阻尼元件。设线缆方向单位向量为 $\hat{v}_{cable}$，等效伸长量为 $\Delta l$，则有
+\begin{equation}
+\mathbf{F}_{cable}=
+k_{c}(\Delta l)\Delta l\,\hat{v}_{cable} + c_{c}\dot{\Delta l}\,\hat{v}_{cable}.
+\end{equation}
+其中，$k_{c}(\Delta l)$ 为与线缆形变量相关的等效刚度系数，$c_{c}$ 为等效阻尼系数，$\dot{\Delta l}$ 为长度变化率。式中引入 $(\Delta l,\dot{\Delta l})$ 的关键原因在于：柔性线缆在孔口局部尺度下的主导作用可由沿拖拽约束方向的伸长/压缩一维坐标刻画；若直接采用线缆高维形变参数将导致控制与强化学习阶段的可辨识性不足，从而增大闭环的不确定性传播。第二章得到的线缆掩膜与线缆方向先验用于确定 $\hat{v}_{cable}$ 的空间一致性，而第三章的规划输出提供末端在插孔邻域的相对位移参考，使该等效坐标能够与几何误差分解结果在同一任务空间中对齐。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-3\\（空白占位图：含线缆干扰的轴孔装配动力学建模示意图）}}
+  \caption{含线缆干扰的轴孔装配动力学建模示意图（接触作用与柔性线缆等效弹性—阻尼扰动的作用关系示意）}
+  \label{fig:ch4:dynamics-model}
+\end{figure}
+
+图4-3 将接触作用与等效线缆弹簧—阻尼元件的作用关系进行示意：当线缆在拖拽主方向 $\hat{v}_{cable}$ 上发生有效约束与回复，其等效弹性—阻尼会向末端注入与 $\Delta l$ 对应的扰动加速度。该物理对应使后续阻抗控制器中通过通道刚度矩阵 $K_c$ 与阻尼矩阵 $D_c$ 的配置，能够以可解释的方式改变等效线缆扰动注入强度，从而抑制柔性线缆诱发的横向耦合放大。
+
+为保证等效方向单位向量 $\hat{v}_{cable}$ 与轴孔装配任务坐标的一致性，需要将第二章由线缆掩膜获得的方向先验从视觉坐标系映射至控制任务坐标系。设孔口坐标系为 $\{O\}$、机器人基坐标系为 $\{B\}$、视觉相机坐标系为 $\{C\}$，以及末端坐标系为 $\{E\}$，则刚体变换满足
+$$
+{}^{B}\!T_{O} = {}^{B}\!T_{E}\,{}^{E}\!T_{C}\,{}^{C}\!T_{O}.
+$$
+其中，${}^{B}\!T_{E}$ 为末端坐标系相对基坐标系的位姿变换，${}^{E}\!T_{C}$ 为相机坐标系相对末端坐标系的外参变换，${}^{C}\!T_{O}$ 为孔口坐标系相对相机坐标系的标定变换；该等式的旋转子块用于方向向量变换。记 ${}^{C}\!\hat{v}_{cable}$ 为线缆方向先验在相机坐标系下的单位向量表示，则映射到基坐标系下的方向单位向量可写为
+$$
+\hat v_{cable}=\frac{{}^{B}\!R_{C}\,{}^{C}\!\hat{v}_{cable}}{\left\|{}^{B}\!R_{C}\,{}^{C}\!\hat{v}_{cable}\right\|},
+$$
+其中，${}^{B}\!R_{C}$ 为相机到基坐标系的旋转矩阵。由于插接阶段的规划视域限定在孔口局部邻域，等效方向在短时窗内可近似为常向量，从而保证后续 $\Delta l$ 的一维坐标化表达能够与 $\mathbf{e}_{xy}$ 与 $e_{z}$ 的几何投影保持确定性耦合。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-4\\（空白占位图：视觉线缆方向映射与$\Delta l$投影几何示意）}}
+  \caption{视觉线缆方向映射与$\Delta l$投影几何示意（给出${}^{B}\!T_{E}\,{}^{E}\!T_{C}\,{}^{C}\!T_{O}$下方向向量变换及$\Delta\mathbf{p}$分解到$e_{z}$与$\mathbf{e}_{xy}$后形成$\Delta l=\hat v_{cable}^{\top}\Delta\mathbf{p}$的投影关系）}
+  \label{fig:ch4:cable-projection}
+\end{figure}
+
+图4-4 将视觉获得的线缆方向先验转化为控制任务空间中的等效方向单位向量，并在孔口局部几何中完成投影分解：平移误差 $\Delta\mathbf{p}$ 被分解为沿插孔轴线的标量分量 $e_z$ 与垂直平面的向量分量 $\mathbf{e}_{xy}$，同时将等效方向 $\hat v_{cable}$ 与该误差分量进行内积得到一维伸长坐标 $\Delta l$。该图示关系使$\Delta l$不仅有物理含义，也与后续线缆等效弹性—阻尼力 $\mathbf{F}_{cable}$ 的注入幅值建立了直接可计算通道。
+
+为了给出 $\Delta l$ 的几何计算依据，记末端参考点与插孔参考点之间的平移误差为 $\Delta\mathbf{p}=\mathbf{p}_{c}-\mathbf{p}_{h}$。由 $4.2.1$ 的误差分解可得
+$$
+\Delta\mathbf{p}=z_{h}e_{z}+\mathbf{e}_{xy},
+$$
+其中，$z_{h}$ 为插孔轴线方向单位向量。进一步定义线缆等效伸长量为沿主方向的投影
+$$
+\Delta l=\hat v_{cable}^{\top}\Delta\mathbf{p}
+=\left(\hat v_{cable}^{\top}z_{h}\right)e_{z}+\hat v_{cable}^{\top}\mathbf{e}_{xy},
+$$
+由此可见线缆扰动与 $\mathbf{e}_{xy}$、$e_{z}$ 存在方向耦合：横向偏移会等效改变一维伸长坐标 $\Delta l$，进而影响 $\mathbf{F}_{cable}$ 的注入强度。该耦合结构可由下一节通过通道刚度矩阵 $K_c$ 与阻尼矩阵 $D_c$ 重塑，从而抑制柔性线缆诱发的横向耦合放大。
+
+由 $\Delta l=\hat v_{cable}^{\top}\Delta\mathbf{p}$ 可进一步得到长度变化率。考虑 $\hat v_{cable}$ 的时间变化，长度变化率为
+$$
+\dot{\Delta l}=\dot{\hat v}_{cable}^{\top}\Delta\mathbf{p}+\hat v_{cable}^{\top}\left(\dot{\mathbf{p}}_{c}-\dot{\mathbf{p}}_{h}\right),
+$$
+其中，$\mathbf{p}_{c}$ 与 $\mathbf{p}_{h}$ 分别为连接器末端参考点与孔口参考点的位置；$\dot{\hat v}_{cable}$ 为方向单位向量变化率。由于第二章的线缆方向先验在孔口局部邻域内具有较高一致性，并且规划阶段给定了有限速度范围，短时窗内可令 $\dot{\hat v}_{cable}\approx 0$，从而得到
+$$
+\dot{\Delta l}\approx \hat v_{cable}^{\top}\left(\dot{\mathbf{p}}_{c}-\dot{\mathbf{p}}_{h}\right).
+$$
+结合 $4.2.1$ 的几何分解 $\Delta\mathbf{p}=z_{h}e_{z}+\mathbf{e}_{xy}$，进一步有
+$$
+\dot{\Delta l}\approx \left(\hat v_{cable}^{\top}z_{h}\right)\dot e_{z}+\hat v_{cable}^{\top}\dot{\mathbf{e}}_{xy}.
+$$
+将上述结果代入线缆等效弹性—阻尼力表达式，可得线缆扰动力对误差通道的显式依赖关系：
+$$
+\mathbf{F}_{cable}=
+\left(k_c(\Delta l)\Delta l+c_c\dot{\Delta l}\right)\hat v_{cable}
+=\left(k_c(\Delta l)\big(\left(\hat v_{cable}^{\top}z_{h}\right)e_{z}+\hat v_{cable}^{\top}\mathbf{e}_{xy}\big)
+c_c\big(\left(\hat v_{cable}^{\top}z_{h}\right)\dot e_{z}+\hat v_{cable}^{\top}\dot{\mathbf{e}}_{xy}\big)\right)\hat v_{cable}.
+$$
+该式表明线缆等效扰动力注入幅值由 $\mathbf{e}_{xy}$ 与 $e_{z}$ 的投影决定，且可通过通道刚度矩阵 $K_c$ 与阻尼矩阵 $D_c$ 的配置抑制其横向耦合效应。
+
+为保证等效能量与耗散一致，线缆等效弹性—阻尼力由保守弹性项与等效粘性耗散项构造。以伸长坐标 $\Delta l$ 构造弹性势能
+$$
+U_c(\Delta l)=\int_{0}^{\Delta l} k_c(s)s\,\mathrm{d}s,
+$$
+则沿主方向的弹性力分量为 $F_{e}=\frac{\partial U_c}{\partial \Delta l}=k_c(\Delta l)\Delta l$。再叠加耗散项 $F_d=c_c\dot{\Delta l}$，得到
+$$
+\mathbf{F}_{cable}=\left(k_c(\Delta l)\Delta l+c_c\dot{\Delta l}\right)\hat v_{cable}.
+$$
+该构造使等效线缆弹簧—阻尼力可由几何误差通道计算得到，并作为下一节 $K_c$ 与 $D_c$ 通道整定的物理依据。
+
+\subsection{视觉前馈变刚度阻抗控制器设计}
+由 $4.2.2$ 可知，线缆等效扰动力沿 $\hat v_{cable}$ 注入，且其幅值由等效伸长坐标 $\Delta l$ 表征。为实现线缆方向扰动与通道柔顺调节的一致交互，本文采用笛卡尔空间变刚度阻抗控制，将位姿误差 $\mathbf{e}$ 通过通道相关的 $K_c$ 与 $D_c$ 映射为任务空间恢复力并输出关节力矩指令。
+
+在时刻 $t$，强化学习智能体输出归一化动作向量 $\mathbf{a}_{t}\in[-1,1]^6$，其各分量分别对应末端在笛卡尔空间沿 $x,y,z$ 轴的平移增量以及绕各轴的旋转增量。为满足装配工艺与安全约束，本文依据末端允许的最大线速度与角速度，将归一化动作线性缩放为期望位姿偏移量 $\Delta \mathbf{X}_{RL}$。当前实际位姿记为 $\mathbf{X}_{c}=[\mathbf{P}_{c}^{\top},\mathbf{Q}_{c}^{\top}]^{\top}$，则强化学习给出的目标位姿为
+\begin{equation}
+\mathbf{X}_{target}=\mathbf{X}_{c}+\Delta \mathbf{X}_{RL}.
+\end{equation}
+其中，$\mathbf{P}$ 表示位置向量，$\mathbf{Q}$ 表示四元数姿态表示。
+
+由于强化学习推理频率为 10–20 Hz，而底层力矩控制频率为 1000 Hz，若将离散的 $\mathbf{X}_{target}$ 直接映射到 1 kHz 阻抗误差，将造成目标突变并诱发峰值力矩。为保证目标位姿在控制环内连续可实现，本文在阻抗内环引入指数移动平均滤波器（Exponential Moving Average, EMA）对目标位姿进行低通平滑。记第 $k$ 个 1 ms 控制周期内的期望位姿为 $\mathbf{X}_{d}^{(k)}=[\mathbf{P}_{d}^{(k)},\mathbf{Q}_{d}^{(k)}]$，其更新形式为
+\begin{equation}
+\mathbf{P}_{d}^{(k)}=\alpha \mathbf{P}_{target}+(1-\alpha)\mathbf{P}_{d}^{(k-1)},
+\end{equation}
+\begin{equation}
+\mathbf{Q}_{d}^{(k)}=\mathrm{Slerp}\left(\mathbf{Q}_{d}^{(k-1)},\mathbf{Q}_{target},\alpha\right).
+\end{equation}
+其中，$\alpha\in(0,1)$ 为滤波系数，Slerp 表示四元数球面插值算子。通过选取较小的 $\alpha$ 使目标位姿变化连续，从而限制冲击力矩峰值。
+
+
+记实际末端平移向量为 $\mathbf{P}_{c}$、期望平移向量为 $\mathbf{P}_{d}^{(k)}$，则平移误差为
+\begin{equation}
+\mathbf{e}_{p}=\mathbf{P}_{c}-\mathbf{P}_{d}^{(k)}.
+\end{equation}
+姿态误差采用单位四元数描述。记实际姿态为 $\mathbf{Q}_{c}$、期望姿态为 $\mathbf{Q}_{d}^{(k)}$，通过四元数乘积构造相对姿态
+\begin{equation}
+\mathbf{Q}_{e}=\mathbf{Q}_{c}^{-1}*\mathbf{Q}_{d}^{(k)},
+\end{equation}
+再提取其向量部分作为姿态误差
+\begin{equation}
+\mathbf{e}_{o}=\mathcal{R}\left(\mathbf{Q}_{e}\right)_{vec}.
+\end{equation}
+其中，$\mathcal{R}(\cdot)_{vec}$ 表示取四元数的虚部向量。将平移与姿态误差合并，可得广义位姿误差
+\begin{equation}
+\mathbf{e}=
+\begin{bmatrix}
+\mathbf{e}_{p}^{\top} \\
+\mathbf{e}_{o}^{\top}
+\end{bmatrix}^{\top}.
+\end{equation}
+
+在静力学等效与雅可比转置映射基础上，可将期望的笛卡尔阻抗特性映射为关节空间任务力矩
+\begin{equation}
+\widehat{\mathbf{F}}_{cable}=\left(k_c(\Delta l)\Delta l+c_c\dot{\Delta l}\right)\hat v_{cable},\quad
+\mathbf{f}_{ff}=\widehat{\mathbf{F}}_{cable},\quad
+\mathbf{f}_{d}=f_{d}z_{h},\quad
+\mathbf{f}_{ref}=\mathbf{f}_{d}+\mathbf{f}_{ff},
+\end{equation}
+其中，$\mathbf{f}_{ff}$ 为视觉前馈补偿力，采用 $4.2.2$ 的线缆等效弹性—阻尼模型估计；$\mathbf{f}_{d}$ 为插入推进参考力（$z_h$ 方向），$\mathbf{f}_{ref}$ 为合成参考交互力。等效伸长坐标 $\Delta l$ 与其变化率 $\dot{\Delta l}$ 由 $4.2.1$ 的几何分解与 $4.2.2$ 的短时窗近似确定。
+\begin{equation}
+\boldsymbol{\tau}_{task}=J^{\top}\left(\mathbf{f}_{ref}-K_{c}\mathbf{e}-D_{c}J\dot{\mathbf{q}}\right),
+\end{equation}
+在静力学等效与局部线性化假设下，可将末端等效交互力写为期望阻抗动力学
+$$
+\mathbf{M}_{d}\ddot{\mathbf{e}}+\mathbf{D}_{c}\dot{\mathbf{e}}+\mathbf{K}_{c}\mathbf{e}=\mathbf{f}_{ref}-\mathbf{f}_{ext},
+$$
+其中，$\mathbf{M}_d$ 为等效期望惯性矩阵，$\mathbf{f}_{ref}$ 为合成参考交互力；$\mathbf{f}_{ext}$ 为外界等效交互力（含插接接触力与线缆扰动等效分量），$\mathbf{e}$ 为广义位姿误差（由平移误差与姿态误差构造）。
+其中，$J\in\mathbb{R}^{6\times 7}$ 为当前构型下末端雅可比矩阵，$\dot{\mathbf{q}}$ 为关节角速度向量，$K_{c},D_{c}\in\mathbb{R}^{6\times 6}$ 分别为笛卡尔空间的对角刚度和阻尼矩阵。
+
+本文采用方向相关变刚度：由 $4.2.2$ 的等效伸长坐标
+$\Delta l=\left(\hat v_{cable}^{\top}z_{h}\right)e_{z}+\hat v_{cable}^{\top}\mathbf{e}_{xy}$ 可知线缆扰动主要通过 $e_z$ 与 $\mathbf{e}_{xy}$ 通道注入交互能量；视觉前馈补偿 $\mathbf{f}_{ff}$ 取自线缆等效弹性—阻尼模型，可在等效方向上抵消主要扰动分量，因此变刚度主要约束残余横向与姿态耦合。由此插入轴向相关通道取高刚度、横向对齐与姿态通道取低刚度，并令 $D_i=2K_i$ 以维持接触切换阶段的阻尼裕度。
+
+
+Franka 机械臂具有 7 个关节自由度，在六维任务空间下存在冗余。为约束肘部内部构型并避免奇异位形与线缆/结构件干涉，控制器在任务空间阻抗控制基础上引入零空间姿态优化项。
+
+对雅可比矩阵 $J$ 进行伪逆计算得到 $J^{+}$，可构造零空间投影矩阵
+\begin{equation}
+P_{null}=I-J^{\top}(J^{+})^{\top}.
+\end{equation}
+其中，$I$ 为单位矩阵。将预先规划的安全肘部构型记为 $\mathbf{q}_{null}$，零空间优化力矩设计为
+\begin{equation}
+\boldsymbol{\tau}_{null}=P_{null}\left[K_{null}(\mathbf{q}_{null}-\mathbf{q})-D_{null}\dot{\mathbf{q}}\right],
+\end{equation}
+其中，$K_{null}$ 为零空间刚度系数，$D_{null}=2K_{null}$ 为其临界阻尼系数。该项力矩通过零空间投影被约束在冗余自由度内，用于稳定肘部构型并减少非期望内部运动。
+
+结合机械臂刚体动力学模型，最终下发的关节力矩指令采用动力学前馈补偿
+\begin{equation}
+\boldsymbol{\tau}_{cmd}=
+\boldsymbol{\tau}_{task}+\boldsymbol{\tau}_{null}+\boldsymbol{\tau}_{coriolis}.
+\end{equation}
+其中，$\boldsymbol{\tau}_{coriolis}$ 表示科里奥利力与离心力等非线性动力学项，由底层软件接口计算；前馈补偿用于提升模型一致性与力矩响应稳定性。
+
+为保证硬件在强化学习早期探索阶段的执行安全，本文在理论力矩叠加后加入基于物理阈值的力矩限幅器。对于每个关节 $i$，最终指令力矩在软件层面被逐元素裁剪为
+\begin{equation}
+\tau_{cmd,i}=\min\left(\tau_{limit,i},\max\left(-\tau_{limit,i},\tau_{cmd,i}\right)\right),
+\end{equation}
+其中，$\tau_{limit,i}$ 为对应关节的额定安全力矩范围，结合厂家手册与实验经验设定。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-5\\（空白占位图：面向轴孔对齐装配的视觉前馈控制框图）}}
+  \caption{面向轴孔对齐装配的视觉前馈控制框图（线缆方向先验经视觉前馈补偿注入力位混合控制的数据流示意）}
+  \label{fig:ch4:vision-ff}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-6\\（空白占位图：控制器关键响应曲线示意图）}}
+\caption{控制器关键响应曲线示意图（位姿误差收敛、接触阶段力响应及线缆扰动下阻尼衰减过程）}
+  \label{fig:ch4:controller-response}
+\end{figure}
+\FloatBarrier
+
+\section{面向轴孔对齐插接任务的强化学习环境构建}
+仅依赖解析模型和固定控制律能够缓解装配过程中的刚性冲击，但面对孔口搜索、姿态微调与柔性扰动耦合的复杂工况，传统方法仍可能出现调节迟滞、收敛缓慢与鲁棒性不足等问题。为提升系统在复杂接触过程中的自主调节能力，本节将电连接器装配问题表述为强化学习框架下的序贯决策过程，并分别设计状态空间、动作空间与奖励函数，使智能体能够在交互中学习搜索、修正与推进的策略，使系统在保证接触安全性的同时获得更强环境适应性与策略优化能力。
+
+本节同时体现与第三章的接口约束：第三章规划阶段得到的抓取姿态与插接方向相容性作为插入阶段初始对准的几何先验，使环境状态在马尔可夫意义下包含对下一步装配演化具有充分统计量的信息，从源头上减少无效探索。
+
+\subsection{任务形式化与状态空间设计}
+设单次装配回合刻画从预装配结束到插装完成的插入阶段，包含最多 $T$ 个决策步。初始状态 $s_0$ 对应连接器已被机械臂夹持并处于插座附近预对位区域的位置姿态，其概率分布记为 $\rho(s_0)$。在任意时刻 $t$，机器人根据当前状态 $s_t$ 选择动作 $a_t$，并由机舱环境依据几何约束、机器人动力学与接触力学转移到下一状态 $s_{t+1}$，即
+\begin{equation}
+s_{t+1}\sim \mathcal{P}(\cdot|s_t,a_t),
+\end{equation}
+并返回即时奖励 $r_t$。
+
+在给定策略 $\pi(a|s)$ 的情况下，插入阶段的性能可用折扣累计回报表示为
+\begin{equation}
+J(\pi)=\mathbb{E}_{s_0\sim\rho}\mathbb{E}_{a_t\sim \pi,\, s_{t+1}\sim \mathcal{P}}\left[\sum_{t=0}^{T}\gamma^t r(s_t,a_t)\right],
+\end{equation}
+其中，$\gamma\in(0,1)$ 为折扣因子。
+
+本文采用结果导向的稀疏奖励结构：仅在插入成功时给出一次性正奖励，在失败或非期望行为时给出零或惩罚。在回合长度与终止规则给定的条件下，最大化 $J(\pi)$ 与提高成功插入回合占比具有一致的优化方向，因而可作为预装配后插入工序产率与合格率的代理目标。对于每条插入轨迹 $\tau=\{s_0,a_0,\ldots,s_T\}$，其不仅是动作序列，更是具有明确工程含义的插装过程样本：状态演化反映从预对位到完全插入的几何进展，动作序列体现连接器轴向推进与姿态微调的控制策略，累计回报刻画该插入过程的安全性与成功质量。
+
+面向航空非结构化环境与带柔性线缆的电连接器自主装配任务，插入阶段策略需在孔口邻域同时感知几何对准与接触力学演化。为完整描述预装配结束后连接器与插座之间的局部几何关系及接触状态，本文将状态 $s_t$ 分解为视觉观测与本体观测两部分：
+\begin{equation}
+s_t=[o_t^{img},o_t^{pro}].
+\end{equation}
+其中，$o_t^{img}$ 承载插座邻域及拖缆相关的可见几何线索（与第二章视觉输出在接口上相容），$o_t^{pro}$ 承载机器人内部运动与力觉信息，使 $s_t$ 在马尔可夫决策过程意义下能够同时覆盖宏观对准态势与微观接触趋势。
+
+视觉观测采用多视角 RGB 图像。原始图像 $I_t^{(k)}$ 经 ROI 裁剪、分辨率缩放与像素归一化后得到
+\begin{equation}
+o_t^{img}=\left\{\mathrm{Norm}\left(\mathrm{Resize}\left(\mathrm{Crop}\left(I_t^{(k)}\right)\right)\right)\right\}_{k=1}^{N_c},
+\end{equation}
+其中，$N_c$ 为相机数量，Crop 表示 ROI 提取算子，Resize 表示分辨率变换算子，Norm 表示像素归一化算子。该观测支路为策略提供连接器—插孔—线缆在图像域的共现场景表达，用于区分未对准、轻微错位与接触建立后的阶段性差异。
+
+本体观测以预装配初值为参考，定义为
+\begin{equation}
+o_t^{pro}=[\,{}^{B}\mathbf{x}_t-{}^{B}\mathbf{x}_0,\ \mathbf{q}_t-\mathbf{q}_0,\ \dot{\mathbf{q}}_t,\ \mathbf{f}_t,\ g_t\,].
+\end{equation}
+其中，${}^{B}\mathbf{x}_t\in\mathbb{R}^6$ 为末端在基准坐标系下的位姿参数化表示，$\mathbf{q}_t$ 与 $\dot{\mathbf{q}}_t$ 分别为关节角与关节角速度，$\mathbf{f}_t$ 为末端六维力/力矩，$g_t$ 为夹爪开度。相对量构造使状态对插入推进与姿态微调的局部变化更敏感，并与六维力/力矩趋势共同反映接触载荷演化及末端振荡风险，从而与视觉支路形成互补。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-7\\（空白占位图：强化学习状态空间观测信息示意图）}}
+  \caption{强化学习状态空间观测信息示意图（多视角图像与本体观测共同构成状态向量的组织示意）}
+  \label{fig:ch4:rl-state}
+\end{figure}
+\FloatBarrier
+
+\subsection{动作空间与下位控制约束}
+插入阶段需在任务空间完成孔口搜索、轴向推进与必要的姿态微调，并伴随夹爪保持或释放等离散切换。相较在关节力矩空间直接决策，连续末端笛卡尔增量与离散夹爪动作并用的混合空间维数可控，且便于将接触柔顺与安全约束下沉至下位控制器。据此定义
+\begin{equation}
+a_t=[a_t^{eef},a_t^{grip}],
+\end{equation}
+其中，$a_t^{eef}\in\mathbb{R}^6$，$a_t^{grip}\in\mathcal{A}_{grip}$。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-8\\（空白占位图：插入阶段连续离散混合动作与阻抗控制结构示意图）}}
+  \caption{插入阶段连续离散混合动作与阻抗控制结构示意图（末端连续增量与夹爪离散动作映射至下位阻抗控制结构的关系示意）}
+  \label{fig:ch4:action-impedance}
+\end{figure}
+\FloatBarrier
+
+策略输出至可执行关节力矩呈分层结构：$a_t^{eef}$ 与 $a_t^{grip}$ 分别进入任务空间映射与夹爪通道，经阻抗结构生成 $\boldsymbol{\tau}_t$，在插入力—位移约束下形成关节空间轨迹；强化学习层给出平滑任务空间增量，关节级高速力学调节由环境与控制器承担。末端增量在末端坐标系下写为
+\begin{equation}
+a_t^{eef}=[\Delta x_t,\Delta y_t,\Delta z_t,\Delta\phi_t,\Delta\theta_t,\Delta\psi_t]^{\top}.
+\end{equation}
+环境通过 ${}^{E}T_{B}(\cdot)$ 将其映射至基准坐标系并与当前 ${}^{B}\mathbf{x}_t$ 叠加得到期望位姿
+\begin{equation}
+{}^{B}\mathbf{x}_{t+1}^* = {}^{B}\mathbf{x}_{t} + {}^{E}T_{B}\left(a_t^{eef}\right),
+\end{equation}
+其中，${}^{E}T_{B}(\cdot)$ 表示末端坐标系增量到基准坐标系增量的映射（在微量近似下由旋转与微分运动学关系确定）。下位关节空间阻抗控制律为
+\begin{equation}
+\boldsymbol{\tau}_t = J_t^{\top}\left(K_p\mathbf{e}_x + K_d\dot{\mathbf{e}}_x\right)+\boldsymbol{\tau}_{grav},
+\end{equation}
+其中，$J_t$ 为雅可比矩阵，$\mathbf{e}_x={}^{B}\mathbf{x}_{t+1}^*-{}^{B}\mathbf{x}_t$ 为任务空间跟踪误差，$\dot{\mathbf{e}}_x$ 为其数值差分，$K_p,K_d$ 为刚度与阻尼参数，$\boldsymbol{\tau}_{grav}$ 为重力补偿项。
+
+环境在状态—动作层面定义安全集合
+\begin{equation}
+\mathcal{X}_{safe}=\{\mathbf{x}\mid \mathbf{x}_{min}\le \mathbf{x}\le \mathbf{x}_{max},\ \mathbf{f}_{min}\le \mathbf{f}\le \mathbf{f}_{max}\},
+\end{equation}
+其中，$\mathbf{x}$ 为末端任务空间状态量，$\mathbf{f}$ 为相关力/力矩分量；若预测越界则对末端增量裁剪：
+\begin{equation}
+\tilde{a}_t^{eef}=\mathrm{clip}\left(a_t^{eef},\mathbf{a}_{min},\mathbf{a}_{max}\right).
+\end{equation}
+夹爪离散集合为
+\begin{equation}
+\mathcal{A}_{grip}=\{\mathrm{open},\mathrm{close},\mathrm{stay}\},
+\end{equation}
+环境据 $a_t^{grip}$ 更新开度与接触状态，以支持保持插入、插入后保持与释放等阶段切换。
+
+\subsection{稀疏奖励与成功判定机制}
+预装配后的插入阶段以工艺结果为准：电连接器是否在轴孔公差内完全插入且无损伤。航空非结构化环境中，柔性线缆遮挡与光照变化使中间位姿、深度与力信号不足以唯一对应“插妥”语义；若强行构造稠密奖励，易引入与工艺不一致的 shaping。环境采用结果导向稀疏奖励，使策略优化目标与插入合格率一致：
+\begin{equation}
+r(s_t,a_t)=
+\begin{cases}
+1, & s_t\in\mathcal{S}_{succ},\\
+-\lambda_{fail}, & s_t\in\mathcal{S}_{unsafe},\\
+-\lambda_{grip}\mathbb{I}\left[a_t^{grip}\ne \mathrm{stay}\right], & \mathrm{otherwise}.
+\end{cases}
+\end{equation}
+其中，$\lambda_{fail}>0$ 为失败惩罚权重，$\lambda_{grip}>0$ 为夹爪动作惩罚权重，$\mathbb{I}[\cdot]$ 为指示函数；中间步无正回报，仅通过夹爪项抑制无效开合。
+
+成功由几何、力学与视觉联合判定：
+\begin{equation}
+\label{eq:ch4:succ-set}
+\mathcal{S}_{succ}=\left\{s\ \middle|\ d_{pose}(s)\le \varepsilon_p,\ \Delta z_{ins}(s)\ge z_{min},\ F_{ins}(s)\le F_{max},\ C_{img}(s)\ge \tau\right\}.
+\end{equation}
+其中，$d_{pose}(s)$ 为连接器壳体相对插座的位姿偏差度量，$\Delta z_{ins}(s)$ 为沿插入方向的插入深度，$F_{ins}(s)$ 为插入力峰值；$C_{img}(s)\in[0,1]$ 表示将状态 $s$ 所含末端视野图像输入二分类网络得到的成功置信度，与几何、力学量共同构成联合判据。阈值 $\varepsilon_p,z_{min},F_{max},\tau$ 由轴孔装配公差与离线标定确定。
+
+在稀疏奖励仅在终态给出一次正回报的设置下，若成功条件仅由 $d_{pose}$、$\Delta z_{ins}$ 与 $F_{ins}$ 等可测标量构成，在航空非结构化环境中受柔性线缆遮挡、相近外观与照度变化影响，终态边界可能与工艺定义的“插妥”语义产生偏差。为此，本文另行训练基于末端视野图像的二分类成功判别器：训练样本为人工判定的成功/未成功插入终态图像 $\{(I_i,y_i)\}_{i=1}^{N}$，$y_i\in\{0,1\}$，网络输出 $\hat{p}_i=C_{img}(I_i)$，与式 \eqref{eq:ch4:succ-set} 中 $C_{img}(s)$ 在部署时一致（$I_i$ 与状态 $s$ 的图像观测分支同源）。成功判定仍以式 \eqref{eq:ch4:succ-set} 的联合条件为准：视觉置信度与几何、力学量同时满足逻辑与关系，不以单一图像输出替代 $d_{pose}$、$\Delta z_{ins}$ 或 $F_{ins}$ 约束，用于降低“几何接近但插针未到底或锁壳未啮合”等单靠标量阈值易出现的漏检。损失函数取交叉熵形式：
+\begin{equation}
+\label{eq:ch4:cls-loss}
+\mathcal{L}_{cls}=-\frac{1}{N}\sum_{i=1}^{N}\left(y_i\log \hat{p}_i + (1-y_i)\log(1-\hat{p}_i)\right).
+\end{equation}
+
+失败终止由越界、力超限与步数上限共同定义：
+\begin{equation}
+\mathcal{S}_{unsafe}=\left\{s\ \middle|\ \mathbf{x}\notin \mathcal{X}_{safe}\ \vee\ \|\mathbf{f}\|>F_{safe}\ \vee\ t\ge T_{max}\right\}.
+\end{equation}
+若 $s_t\in\mathcal{S}_{unsafe}$，回合立即终止并回报 $-\lambda_{fail}$。在该映射下，$\mathcal{S}_{succ}$ 对应一次性正回报，$\mathcal{S}_{unsafe}$ 对应失败惩罚，其余步仅受夹爪项约束，使优化搜索集中于满足公差与损伤约束的终态边界。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-9\\（空白占位图：插入阶段奖励与成功失败判定机制示意图）}}
+  \caption{插入阶段奖励与成功失败判定机制示意图（几何—力学—视觉联合成功判定与失败终止条件的奖励映射示意）}
+  \label{fig:ch4:reward-judge}
+\end{figure}
+\FloatBarrier
+
+\subsection{人在回路交互与数据记录机制}
+面向航空非结构化环境下带柔性线缆的电连接器插入任务，纯随机探索难以在柔顺接触与孔口搜索并存的状态—动作空间中稳定产生成功样本；实机训练还须将末端工作空间约束、接触力趋势与插针/壳体损伤风险纳入同一闭环。人在回路数据获取上，先由操作员完成若干条完整插入示教，再在策略在线执行过程中于异常工况下短时接管纠正；训练所用经验按来源分池存储，更新时与自主探索样本联合采样。上层路径规划已将机械臂引导至插座邻域的预对准位姿，且抓取姿态与插入轴向相容，示教起点因而落在可插入通道内，有利于缩短无效探索。
+
+训练初期进入示教阶段：操作员自该预对准位姿起，通过示教设备输出末端任务空间增量及夹爪开闭指令，完成孔口搜索、轴向推进与保持或释放等阶段。第 $k$ 条示例轨迹记为
+\begin{equation}
+\tau_k^{demo}=\{(s_t^{(k)},a_t^{(k)})\}_{t=0}^{T_k},
+\quad k=1,\ldots,N_{demo},
+\end{equation}
+汇总为 $\mathcal{D}_{human}=\bigcup_{k=1}^{N_{demo}}\tau_k^{demo}$。与仅记录末端位姿的抓取示教不同，插入示教同步记录六维力/力矩与夹爪事件时间轴，使每条 transition 的即时奖励与环境内稀疏回报及联合成功/失败判定一致，避免示教标签与回报接口脱节。
+
+策略具备初步执行能力后转入在线交互：机器人按当前策略 $\pi$ 在仿真或实机上滚动，操作员依据末端位姿相对 $\mathcal{X}_{safe}$ 的裕度、插入力突变与视觉上的孔轴偏离进行监视；一旦出现越界趋势、力异常或明显错向，即短时接管并输出长度为 $\Delta$ 的纠正动作片段 $\{\bar{a}_t,\ldots,\bar{a}_{t+\Delta}\}$。整条回合可写为
+\begin{equation}
+\tau=\tau_{pre}\oplus \tau_{human}\oplus \tau_{post},
+\end{equation}
+其中 $\tau_{pre}$、$\tau_{post}$ 为策略片段，$\tau_{human}$ 为人工片段。环境对每个 transition 记录来源标签（策略/人工），并标注该步是否属于落入 $\mathcal{S}_{unsafe}$ 前的人工纠正序列，使后续学习能够区分“探索失败—纠正—再尝试”与“连续自主成功”两类时间结构；纠正片段与成功示教一并写入 $\mathcal{D}_{human}$，用于抬高关键状态处的行为质量估计并抑制重复性危险动作。
+
+环境维护自主回放缓冲 $\mathcal{B}_{self}$ 与含示教及人工片段的 $\mathcal{B}_{human}$，统一写为
+\begin{equation}
+\mathcal{B}=\mathcal{B}_{self}\cup \mathcal{B}_{human}.
+\end{equation}
+两池分别承接不同来源的状态—动作—回报转移，训练时汇入同一集合 $\mathcal{B}$ 供离策略更新读取。如图4-10所示，多视角与本体观测经环境动力学与内嵌的回报、终止判定形成逐步标量反馈；策略与环境交互产生的转移进入 $\mathcal{B}_{self}$，示教与人工纠正片段进入 $\mathcal{B}_{human}$，学习端自 $\mathcal{B}$ 采样并向策略与价值网络回传梯度，图中给出了示范缓冲与在线经验缓冲的来源组织、汇入 $\mathcal{B}$ 的路径及环境与回放接口边界。在此基础上，离策略更新按设定比例自 $\mathcal{B}_{self}$ 抽取当前策略在真实工况下的交互样本，以跟踪摩擦、线缆姿态与初始偏置等时变因素；自 $\mathcal{B}_{human}$ 抽取高质量片段，用于值函数在专家支撑集附近的监督约束与对危险状态—动作对的抑制。二者联合等价于在固定 MDP 上对回放分布做质量加权：提高高回报、低干预轨迹的采样权重，降低无效失败片段对值估计的稀释作用，从而在样本量受限时兼顾安全性与收敛速度；学习端仅经统一的 $\mathcal{B}$ 访问经验，环境与回放的数据面约定不因具体优化实现而改动。上述分池与统一采样使示范、纠正与自主探索在训练更新中按权重汇合，有利于抑制失败轨迹对关键状态价值估计的过度稀释，并与后续装配策略学习模块保持经验接口一致。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-10\\（空白占位图：人在回路强化学习环境与数据缓冲结构图）}}
+  \caption{人在回路强化学习环境与数据缓冲结构图（示范缓冲与在线经验缓冲的来源组织及策略更新数据流示意）}
+  \label{fig:ch4:rl-buffer}
+\end{figure}
+\FloatBarrier
+
+\section{人在回路强化学习装配策略学习与虚实迁移方法}
+由于装配动作表现为连续位姿微调与力控修正，并且训练过程对样本利用效率与策略稳定性要求较高，算法选择直接影响策略收敛效果与实机部署可行性。本文选用 SoftActor-Critic 作为装配策略学习核心算法。该算法基于最大熵强化学习框架，适用于连续动作空间，并在策略探索能力与训练稳定性之间取得平衡。在此基础上进一步讨论策略网络与价值网络结构设计、训练参数设置以及面向真实平台的 Sim-to-Real 迁移策略。
+
+\subsection{人在回路装配策略学习框架}
+面向航空非结构化环境下带柔性线缆的电连接器轴孔插入任务，孔口相对位姿受装配偏差、线缆姿态扰动与视觉测量噪声共同影响；柔顺接触阶段的成功回报具有显著稀疏性，而失败样本往往伴随接触力突变与拖缆偏拉。装配系统需在底层阻抗控制与安全裁剪保证稳定性的前提下，学习能够输出任务空间残差微调（连续末端增量）与夹爪开闭决策（离散动作）的混合策略，使策略在有限交互轮次内形成可收敛的“对准—接触—推进/保持—脱开”行为序列。
+
+承接前述分池与统一回放接口，学习端以同一 $\mathcal{B}$ 为训练数据源。面向“装配策略”这一高层决策对象，本文将人在回路装配策略学习表述为闭环：机器人以当前 $\pi_\theta$ 在孔口邻域内执行插入相关子任务，操作员在示教阶段提供可复用的对准—推进先验，在在线阶段于偏孔、卡滞、力异常或柔性线缆拖曳等工况下短时接管；学习端在同一 $\mathcal{B}$ 上开展离策略更新，并以 RLPD（Reinforcement Learning with Policy-Dependent Value Function Distillation）组织 Critic/Actor 的协同，使人工提供的专家支撑与自主交互转移在优化目标上可区分、可汇合，而非混为单一模仿目标。
+
+设高层策略为 $\pi_\theta(a|s)$，软状态动作值函数为 $Q_\phi(s,a)$，目标网络为 $Q_{\bar{\phi}}$。在温度系数 $\alpha>0$ 下，最大熵强化学习目标可写为折扣累计回报与熵增广项之和的期望最大化：
+\begin{equation}
+\label{eq:ch4:maxent-objective}
+\mathcal{J}_{\mathrm{ME}}(\theta)=\mathbb{E}_{\rho,\pi_\theta,\mathcal{P}}\left[\sum_{t=0}^{T}\gamma^t\left(r(s_t,a_t)+\alpha\,\mathcal{H}\big(\pi_\theta(\cdot|s_t)\big)\right)\right],
+\end{equation}
+式中，$\mathcal{H}(\pi_\theta(\cdot|s))=-\mathbb{E}_{a\sim\pi_\theta}\left[\log\pi_\theta(a|s)\right]$ 为策略熵；$r(s_t,a_t)$ 与环境内稀疏奖励及底层映射一致；$\gamma\in(0,1)$ 为折扣因子。
+
+专家支撑集 $\mathcal{D}_{exp}$ 与人在回路记录规则对齐：由完整示教轨迹、插入成功终止邻域转移（与稀疏奖励及成功/失败判定一致）以及在线接管纠正片段汇总得到，用于标记“应当被策略优先复现”的装配行为片段。训练更新时，Critic 一方面对 $\mathcal{B}$ 中转移执行软贝尔曼 TD 备份以跟踪摩擦、线缆姿态与初始偏置等时变因素；另一方面对 $\mathcal{D}_{exp}$ 施行价值蒸馏，使孔口搜索、轴孔对准与柔顺推进等插入子阶段在 $Q_\phi$ 上形成相对清晰的价值排序，从而降低高失败率滚动对装配成功路径的压制。Actor 以最大熵形式输出任务空间残差动作并经 $\mathcal{C}(\cdot)$ 映射为底层阻抗控制指令；熵项用于在孔口局部可行域保留必要的微调探索，以应对柔性线缆干扰与接触不确定性，同时避免策略退化为仅复述示教轨迹而缺乏在线纠错余量。上述机制直接对应本节标题中“人在回路”与“装配策略学习”的分工：人工提供可记录、可汇入 $\mathcal{B}$ 的纠正与高质量片段，学习端将其转化为可自主滚动的 $\pi_\theta$。损失函数显式形式与蒸馏/行为克隆权重调度在下一小节给出。
+
+执行端、学习端与人工操作员在装配策略学习框架中的接口关系如图4-11所示：执行端输出 $\pi_\theta$ 的任务空间指令并经 $\mathcal{C}(\cdot)$ 进入阻抗与安全约束闭环；学习端从 $\mathcal{B}$ 采样并交替更新 $Q_\phi$ 与 $\pi_\theta$，其中 RLPD 蒸馏支路读取 $\mathcal{D}_{exp}$；操作员通过示教与接管为 $\mathcal{D}_{exp}$ 提供样本支撑。图中同时给出最大熵策略支路与蒸馏支路在学习端的汇合位置。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-11\\（空白占位图：人在回路装配策略学习流程图）}}
+  \caption{人在回路装配策略学习流程图（人在回路交互与 RLPD/最大熵目标驱动的整体学习流程示意）}
+  \label{fig:ch4:rl-flow}
+\end{figure}
+\FloatBarrier
+
+在上述框架下，考虑底层阻抗与安全裁剪后，高层策略所优化的期望回报可写为
+\begin{equation}
+\label{eq:ch4:high-level-j}
+J(\theta)=\mathbb{E}_{s_0\sim\rho}\mathbb{E}_{a_t\sim \pi_\theta,\, s_{t+1}\sim \mathcal{P}}\left[\sum_{t=0}^{T}\gamma^t r\left(s_t,\mathcal{C}(s_t,a_t)\right)\right],
+\end{equation}
+式中，$\mathcal{C}$ 表示由任务空间动作到底层阻抗控制器与安全约束的复合映射，与插入阶段任务空间—阻抗分层结构一致。式 \eqref{eq:ch4:high-level-j} 与式 \eqref{eq:ch4:maxent-objective} 在工程上通过熵项权重 $\alpha$ 与最大熵机制联结，用于与仿真—实机实验中的评价指标（成功率、接触力峰值、干预次数等）对照。
+
+\subsection{装配策略网络结构与在线优化训练方法}
+在前述 RLPD 学习框架与人在回路数据接口基础上，本节给出策略与价值网络的具体结构以及训练阶段的优化目标。面向航空非结构化环境下带柔性线缆的电连接器插入任务，网络需同时处理多路视觉图像与本体力觉信号，并在连续末端增量与离散夹爪指令共存的混合动作空间上完成高效推理。本节依次从视觉编码与网络结构设计、价值函数与策略的联合优化模型以及人在回路在线训练流程三方面展开。
+
+\subsubsection{基于预训练视觉编码的策略与价值网络结构}
+高层策略与动作值函数网络基于状态 $s_t=[o_t^{img},o_t^{pro}]$ 与动作 $a_t=[a_t^{eef},a_t^{grip}]$ 建模。视觉编码部分采用在 ImageNet 上预训练的 ResNet-10 作为共享特征提取骨干，多路相机图像（腕部与侧方）经裁剪至感兴趣区域并缩放至 $128\times 128$ 后，由同一骨干网络输出各路嵌入向量。设第 $i$ 路图像的嵌入为 $\mathbf{e}_i\in\mathbb{R}^{d_e}$，本体观测经独立全连接层映射为 $\mathbf{h}_{pro}\in\mathbb{R}^{d_p}$，拼接后的状态特征为
+\begin{equation}
+z_s=\mathrm{MLP}_{enc}\!\left(\left[\mathbf{e}_1;\ldots;\mathbf{e}_K;\mathbf{h}_{pro}\right]\right),
+\end{equation}
+式中，$K$ 为相机数量，$[\cdot;\cdot]$ 表示向量拼接，$\mathrm{MLP}_{enc}$ 为两层全连接编码器。预训练骨干在训练过程中冻结参数，以保持优化稳定性并降低真实平台上的梯度计算开销。
+
+连续末端增量动作 $a_t^{eef}$ 与离散夹爪指令 $a_t^{grip}$ 分属两套不同性质的决策空间，统一建模易导致连续高斯尾部对离散开/闭/保持三态的拟合模糊。为此本文将装配任务拆分为共享状态观测的两个并行子问题 $\mathcal{M}_1=\{\mathcal{S},\mathcal{A}_1,\mathcal{P}_1,r,\gamma\}$ 与 $\mathcal{M}_2=\{\mathcal{S},\mathcal{A}_2,\mathcal{P}_2,r,\gamma\}$，其中 $\mathcal{A}_1$ 为连续末端增量空间，$\mathcal{A}_2=\{\text{开},\text{闭},\text{保持}\}$ 为离散夹爪空间。对 $\mathcal{M}_1$，策略网络 $\pi_\theta(a^{eef}|s)$ 以 $z_s$ 为输入，通过两层全连接隐层（256 维）输出高斯分布的均值 $\mu_\theta(s)$ 与对数标准差 $\log\sigma_\theta(s)$；动作值函数 $Q_\phi(s,a^{eef})$ 以 $[z_s,a^{eef}]$ 为输入，经同规模隐层输出标量软 $Q$ 值。对 $\mathcal{M}_2$，单独训练夹爪值网络 $Q_\psi(s,a^{grip})$，以 $z_s$ 为输入对三个离散动作分别输出 $Q$ 值。推理时先由 $\pi_\theta$ 采样 $a_t^{eef}$，再由 $\arg\max_{a^{grip}}Q_\psi(s_t,a^{grip})$ 选取夹爪指令，两者拼合后经 $\mathcal{C}(\cdot)$ 映射至底层阻抗控制器。该设计使策略与夹爪网络可独立优化，如图4-12所示给出了上述网络中各模块的信息流与输入输出关系。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-12\\（空白占位图：预训练视觉编码策略与价值网络架构图）}}
+  \caption{预训练视觉编码策略与价值网络架构图（共享 ResNet 骨干编码多路图像并与本体信息拼接，分别输入策略、连续动作值与夹爪值网络的信息流示意）}
+  \label{fig:ch4:nn-arch}
+\end{figure}
+
+\subsubsection{基于异质回放均衡采样的联合优化模型}
+RLPD 的核心采样策略为：每个训练批次从示范缓冲 $\mathcal{B}_{human}$ 与在线经验缓冲 $\mathcal{B}_{self}$ 中各抽取等量转移拼合为训练批，使高质量示范与当前策略探索在梯度更新中获得均衡权重。在此基础上，连续动作值函数 $Q_\phi$ 的软贝尔曼 TD 备份目标定义为
+\begin{equation}
+\label{eq:ch4:td-target}
+y_t=r_t+\gamma\,\mathbb{E}_{a_{t+1}\sim\pi_\theta(\cdot|s_{t+1})}\!\left[Q_{\bar{\phi}}(s_{t+1},a_{t+1})-\alpha\log\pi_\theta(a_{t+1}|s_{t+1})\right],
+\end{equation}
+式中，$\bar{\phi}$ 为目标网络参数，由 Polyak 平滑更新 $\bar{\phi}\leftarrow\tau\phi+(1-\tau)\bar{\phi}$ 得到；$\alpha>0$ 为自适应熵权重。连续动作值函数损失为
+\begin{equation}
+\label{eq:ch4:critic-loss}
+\mathcal{L}_{Q}(\phi)=\mathbb{E}_{(s_t,a_t,r_t,s_{t+1})\sim\mathcal{B}}\!\left[\left(Q_\phi(s_t,a_t)-y_t\right)^2\right]
++\lambda_{dist}\,\mathbb{E}_{(s,a)\sim\mathcal{D}_{exp}}\!\left[\left(Q_\phi(s,a)-Q^{exp}(s,a)\right)^2\right],
+\end{equation}
+式中，第一项在来自 $\mathcal{B}$ 的均衡采样批上强制软贝尔曼一致性；$\lambda_{dist}$ 为蒸馏权重，$Q^{exp}(s,a)$ 为沿专家轨迹的折扣回报估计，第二项在成功装配片段附近抬升 $Q_\phi$ 以形成对偏孔与力超限动作的抑制梯度。策略网络在更新后的 $Q_\phi$ 上执行最大熵改进：
+\begin{equation}
+\label{eq:ch4:actor-loss}
+\mathcal{L}_{\pi}(\theta)=-\mathbb{E}_{s_t\sim\mathcal{B}}\!\left[\mathbb{E}_{a_t\sim\pi_\theta}\!\left(Q_\phi(s_t,a_t)-\alpha\log\pi_\theta(a_t|s_t)\right)\right].
+\end{equation}
+
+对离散夹爪子问题 $\mathcal{M}_2$，值网络 $Q_\psi$ 按 DQN 形式更新，备份目标为
+\begin{equation}
+\label{eq:ch4:dqn-grip}
+\mathcal{L}_{grip}(\psi)=\mathbb{E}_{(s_t,a_t^{grip},r_t,s_{t+1})\sim\mathcal{B}}\!\left[\left(r_t+\gamma\,Q_{\bar{\psi}}\!\left(s_{t+1},\arg\max_{a'}Q_\psi(s_{t+1},a')\right)-Q_\psi(s_t,a_t^{grip})\right)^2\right],
+\end{equation}
+式中，$\bar{\psi}$ 为夹爪目标网络参数。该分离式设计避免连续与离散动作在同一网络头中产生梯度冲突。
+
+为在训练早期约束策略靠近示教分布，附加行为克隆辅助损失
+\begin{equation}
+\label{eq:ch4:bc-loss}
+\mathcal{L}_{BC}(\theta)=\mathbb{E}_{(s,a^{exp})\sim\mathcal{D}_{exp}}\!\left[\left\|\mu_\theta(s)-a^{exp}\right\|_2^2\right],
+\end{equation}
+式中，$\mu_\theta(s)$ 为策略高斯均值输出。策略总损失为
+\begin{equation}
+\label{eq:ch4:total-pi}
+\mathcal{L}_{\pi,total}(\theta)=\mathcal{L}_\pi(\theta)+\lambda_{BC}\,\mathcal{L}_{BC}(\theta).
+\end{equation}
+$\lambda_{BC}$ 在训练初期取较大值以使策略快速覆盖孔口对准与柔顺推进的关键动作模式，随插入成功率提升逐渐递减，使优化由模仿主导平滑过渡到以 $\mathcal{L}_Q$ 与最大熵目标主导的自主强化。
+
+\subsubsection{执行-学习异步架构与人在回路训练流程}
+训练阶段采用执行进程与学习进程异步通信的分布式架构。执行进程在真实机器人上按当前 $\pi_\theta$ 与 $Q_\psi$ 输出装配动作，并将每步转移写入 $\mathcal{B}_{self}$；学习进程从 $\mathcal{B}$ 中均衡采样并交替计算式 \eqref{eq:ch4:critic-loss}、式 \eqref{eq:ch4:actor-loss} 与式 \eqref{eq:ch4:dqn-grip} 的梯度以更新 $Q_\phi$、$\pi_\theta$ 与 $Q_\psi$，完成后将新参数同步至执行进程。两进程异步运行使策略推理与梯度计算在时间上重叠，有利于在真实平台有限交互速率下提高数据利用率。
+
+在在线执行阶段，若当前策略动作为 $a_t^{RL}$，人工接管动作为 $a_t^{H}$，人工接管标志为 $m_t\in\{0,1\}$，则实际执行动作为
+\begin{equation}
+\label{eq:ch4:human-switch}
+a_t^{exec}=(1-m_t)\,a_t^{RL}+m_t\,a_t^{H}.
+\end{equation}
+当操作员观察到偏孔、接触力突增或柔性线缆拖曳导致轴线偏离时令 $m_t=1$，人工动作经阻抗控制器直接作用于机器人以避免对插座与连接器造成损伤，同时将 $(s_t,a_t^{H})$ 写入 $\mathcal{D}_{exp}$ 与 $\mathcal{B}_{human}$ 用于后续蒸馏与行为克隆更新。随训练轮次推进，接管频率逐步下降，标志策略已从示范先验过渡到以强化回报为主导的自主执行阶段。图4-13给出了示范引导、在线人工纠正与异步参数更新在训练各阶段的协同关系。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-13\\（空白占位图：执行-学习异步架构与人在回路训练流程图）}}
+  \caption{执行-学习异步架构与人在回路训练流程图（执行进程与学习进程异步通信、示范引导到在线人工纠正再到自主强化的阶段性训练流程示意）}
+  \label{fig:ch4:train-flow}
+\end{figure}
+
+\subsection{基于 IsaacSim 的仿真预训练与虚实迁移方法}
+直接在真实平台从零训练装配策略面临两方面约束：电连接器插针与孔壁间隙极小，训练早期随机探索易产生过大接触力而损伤插针或壳体；真实平台单次交互周期受限，冷启动阶段获取足量转移样本耗时较长。为此，本文采用"仿真预训练—真实精化"两阶段虚实迁移策略：在 IsaacSim 中以与真实平台一致的网络结构与 RLPD 算法预训练，获取具备初步轴孔对准能力的策略参数 $(\theta^*_{sim},\phi^*_{sim},\psi^*_{sim})$ 作为先验；随后将该检查点加载至真实平台执行-学习异步架构，以人在回路方式在线精化至最终收敛。
+
+仿真环境包含 Franka 机械臂、Robotiq 2F-85 夹爪、电连接器公头、底座插孔与柔性线缆的刚柔耦合模型。仿真侧的动作空间、阻抗控制器参数与观测空间均与真实平台严格对齐，$\pi_\theta$、$Q_\phi$ 与 $Q_\psi$ 的输入输出接口无需修改即可在两端复用。如图~\ref{fig:ch4:sim2real-flow}所示，迁移时仅需加载仿真末期检查点作为真实平台的初始参数。
+
+仿真与真实环境在接触动力学、摩擦、视觉渲染及线缆柔性响应方面存在域差异。为提升迁移鲁棒性，本文对多项物理与感知参数施加域随机化，设随机化参数集合为
+\begin{equation}
+\label{eq:ch4:dr-set}
+\Xi=\{\delta_p,\,\delta_R,\,\delta_c,\,\delta_l,\,k_l,\,c_l,\,\mu,\,\eta_f\},
+\end{equation}
+式中，$\delta_p\in\mathbb{R}^3$ 与 $\delta_R\in\mathbb{R}^3$ 分别为预装配位置偏差与姿态偏差，$\delta_c$ 为相机视角微扰，$\delta_l$ 为线缆方向偏置角，$k_l$、$c_l$ 为线缆等效刚度与阻尼，$\mu$ 为接触摩擦系数，$\eta_f$ 为力觉噪声标准差。每条轨迹起始时独立采样一组 $\Xi$，仿真预训练目标为
+\begin{equation}
+\label{eq:ch4:sim-obj}
+J_{sim}(\theta,\phi)=\mathbb{E}_{\Xi\sim p(\Xi)}\,\mathbb{E}_{\tau\sim\pi_\theta,\,\Xi}\!\left[\sum_{t=0}^{T}\gamma^t\,r_t\right],
+\end{equation}
+式中，$r_t$ 为与真实平台一致的稀疏成功/失败回报。该目标促使策略在多变摩擦、线缆姿态与视觉偏差下学习鲁棒的孔口搜索与对准行为，避免在单一名义参数下过拟合。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-14\\（空白占位图：基于 IsaacSim 的虚实迁移流程图）}}
+  \caption{基于 IsaacSim 的虚实迁移流程图（仿真预训练与真实精化共享网络结构与优化算法的两阶段迁移机制示意）}
+  \label{fig:ch4:sim2real-flow}
+\end{figure}
+
+迁移流程分两阶段执行。第一阶段在 IsaacSim 中按式~\eqref{eq:ch4:sim-obj} 以 RLPD 均衡采样交替更新 $\pi_\theta$、$Q_\phi$ 与 $Q_\psi$，直至装配成功率收敛并趋于稳定；该阶段同时完成动作边界验证与奖励逻辑检查。第二阶段将检查点加载至真实平台学习进程，在同一 RLPD 框架下以人在回路方式继续在线训练；由于策略已具备基本对准与推进能力，冷启动碰撞风险与干预频率显著降低，策略在真实接触摩擦、线缆刚度与渲染差异下逐步适应并完成最终收敛。如图~\ref{fig:ch4:sim2real-curves}所示，两阶段回报曲线的对照可表明仿真预训练提供了有效参数先验，域随机化赋予的分布鲁棒性有助于缩短真实平台适应周期。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-15\\（空白占位图：仿真预训练与真实精化阶段训练曲线对照图）}}
+  \caption{仿真预训练与真实精化阶段训练曲线对照图（域随机化条件下的回报收敛与迁移后在线适应趋势对照）}
+  \label{fig:ch4:sim2real-curves}
+\end{figure}
+
+\section{装配实验与结果分析}
+为验证本章所提装配控制与策略学习方法对带柔性线缆电连接器插入任务的有效性，分别在 IsaacSim 仿真环境与真实机器人平台上进行实验。实验按本章方法的递进关系组织：首先在仿真中验证底层阻抗控制与高层残差策略的协同效果及域随机化预训练的收敛性，随后将仿真所得策略参数迁移至真实平台，验证人在回路在线精化的训练过程与最终装配性能。实验平台参数如表~\ref{tab:ch4:platform}所示。
+
+\begin{table}[htbp]
+\centering
+\caption{装配实验平台参数}
+\label{tab:ch4:platform}
+\begin{tabular}{ll}
+\toprule
+参数 & 配置 \\
+\midrule
+机械臂 & Franka Emika Panda 七自由度 \\
+夹爪 & Robotiq 2F-85 二指平行夹爪 \\
+力/力矩传感器 & 末端六维力/力矩传感器 \\
+视觉 & 腕部 + 侧方相机（$128\times 128$ 裁剪） \\
+仿真平台 & NVIDIA IsaacSim \\
+学习端 GPU & NVIDIA RTX 3090 \\
+视觉骨干 & ResNet-10（ImageNet 预训练，冻结） \\
+策略/值网络 MLP & $256\times 256$ 两层全连接 \\
+本体编码器 & 64 维全连接 \\
+折扣因子 $\gamma$ & 0.97 \\
+示范轨迹数 & 20--30 条 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{IsaacSim 仿真预训练验证}
+仿真预训练用于验证底层阻抗控制器与高层残差策略接口的协同性、奖励函数与成功/失败判定逻辑的有效性以及域随机化参数范围的合理性。在 IsaacSim 中，对预装配位置偏差、姿态偏差、线缆等效刚度与接触摩擦系数分别施加域随机化，以 RLPD 均衡采样方式训练策略网络与价值网络至收敛。
+
+如图~\ref{fig:ch4:sim-convergence}所示，以训练轮次为横轴、累计回报为纵轴绘制仿真阶段训练曲线。训练初期回报波动较大，反映策略在域随机化参数空间内的探索过程；随训练推进，回报曲线逐渐上升并趋于稳定，表明策略在多种摩擦、线缆姿态与位姿偏差组合下均能完成孔口搜索与轴孔对准。底层阻抗控制器有效限制了接触初期的碰撞力峰值，高层残差策略在此基础上输出横向与姿态修正增量，使对准收敛速度相较于仅依赖底层控制显著提升。仿真训练末期保存的策略检查点作为真实平台训练的初始参数。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-16\\（空白占位图：仿真预训练阶段累计回报收敛曲线）}}
+  \caption{仿真预训练阶段累计回报收敛曲线}
+  \label{fig:ch4:sim-convergence}
+\end{figure}
+
+\subsection{真实平台人在回路训练与装配验证}
+将仿真检查点加载至真实平台后，按以下流程开展人在回路在线训练：首先采集正负样本训练二值奖励分类器；随后由操作员完成 20--30 条示范轨迹并写入示范缓冲；最后启动在线训练，策略在执行-学习异步架构下滚动，操作员在偏孔、卡滞、力异常或拖缆偏拉等工况下短时接管纠正。
+
+如图~\ref{fig:ch4:compare-train}所示，以训练轮次为横轴、装配成功率与人工干预次数为纵轴绘制真实平台训练曲线。由于策略从仿真预训练检查点出发而非随机初始化，训练起始阶段即具备基本的孔口搜索与轴向推进能力，初始成功率高于零且干预频率处于可控水平。随在线轮次增加，成功率逐步提升，干预次数逐步下降，表明策略在真实接触摩擦、线缆实际刚度与视觉渲染差异下完成了有效适应。训练后期干预趋近于零，标志策略已过渡至以强化回报为主导的自主执行阶段。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-17\\（空白占位图：真实平台训练过程成功率与干预次数曲线）}}
+  \caption{真实平台训练过程成功率与干预次数曲线}
+  \label{fig:ch4:compare-train}
+\end{figure}
+
+为验证底层阻抗控制在接触阶段的柔顺性与高层策略动作的阶段性，选取训练收敛后的典型成功插入回合，记录六维接触力/力矩的时域响应。如图~\ref{fig:ch4:contact-force-curve}所示，对准阶段横向力分量 $F_x$、$F_y$ 在策略修正增量驱动下振幅逐渐衰减；进入轴向推进阶段后 $F_z$ 平稳上升至插入完成并回落，全程未出现超出安全阈值的力冲击。该结果表明底层阻抗控制器有效抑制了接触瞬态冲击，高层策略的"先对准、后推进"动作模式在真实平台上得到复现。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-18\\（空白占位图：典型成功插入回合六维接触力时域响应曲线）}}
+  \caption{典型成功插入回合六维接触力时域响应曲线}
+  \label{fig:ch4:contact-force-curve}
+\end{figure}
+
+如图~\ref{fig:ch4:keyframes}所示，给出训练收敛后一次完整装配过程的关键帧序列，依次覆盖预对位、孔口搜索、轴孔对准、柔顺推进与插装完成五个阶段。策略在孔口搜索阶段输出横向微调使连接器逐步趋近插孔轴线，在柔顺推进阶段沿插入方向平稳前进直至公头完全就位。在存在柔性线缆侧向拖拽的工况下，策略仍能通过连续修正维持轴线对准，验证了本章所提方法对航空非结构化环境下带柔性线缆电连接器插入任务的有效性。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图4-19\\（空白占位图：训练收敛后完整装配过程关键帧序列图）}}
+  \caption{训练收敛后完整装配过程关键帧序列图}
+  \label{fig:ch4:keyframes}
+\end{figure}
+
+\section{本章小结}
+本章围绕预装配结果基础上的最终装配任务，建立了含线缆附加扰动的轴孔装配动力学模型，并将装配误差分解为横向对齐误差、轴向推进误差和姿态误差。设计了融合视觉前馈补偿的导纳/阻抗控制器，使线缆方向信息能够直接参与装配控制律构造，为接触过程中的柔顺执行与抗扰补偿提供基础。构建了面向轴孔对齐插接任务的多模态强化学习环境，通过示范样本、在线经验与人工纠正机制提升真实平台策略学习的样本效率和稳定性。引入基于 IsaacSim 的虚实迁移训练流程，在统一的 Franka 机械臂与 Robotiq 二指夹爪接口下完成仿真预验证、策略初始化与真实平台在线精化，形成可用于装配系统集成的柔顺控制与学习策略组合。
+
+

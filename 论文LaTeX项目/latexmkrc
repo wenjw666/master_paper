@@ -1,0 +1,6 @@
+﻿$pdf_mode = 1;
+$bibtex_use = 2;
+$recorder = 1;
+$clean_ext = "acn acr alg aux bbl blg brf fdb_latexmk glg glo gls idx ilg ind lof log lot out run.xml synctex.gz toc thm toe";
+$pdflatex = "xelatex -file-line-error -synctex=1 -interaction=nonstopmode %O %S";
+$pdf_update_method = 0;

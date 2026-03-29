@@ -1,0 +1,169 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\pp@pagectr{footnote}{2}{20}{12}
+\@writefile{toc}{\contentsline {chapter}{\numberline {第2章}基于深度学习的电连接器识别与位姿估计研究}{12}{chapter.2}\protected@file@percent }
+\@writefile{lof}{\addvspace {10.0pt}}
+\@writefile{lot}{\addvspace {10.0pt}}
+\@writefile{loa}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {section}{\numberline {2.1}引言}{12}{section.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-1}{\ignorespaces 第二章级联视觉感知系统总体架构图（YOLOv8-seg—ROI裁剪—改进DeepLabV3+—EPnP/RANSAC—手眼标定的端到端数据流）}}{12}{figure.2.1}\protected@file@percent }
+\newlabel{fig:ch2:overview}{{2-1}{12}{第二章级联视觉感知系统总体架构图（YOLOv8-seg—ROI裁剪—改进DeepLabV3+—EPnP/RANSAC—手眼标定的端到端数据流）}{figure.2.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.2}标签识别数据集的制作与分析}{12}{section.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-2}{\ignorespaces 航空机舱非结构化环境中电连接器多实例堆叠、金属反光/阴影与柔性线缆遮挡的典型视觉场景对比图}}{13}{figure.2.2}\protected@file@percent }
+\newlabel{fig:ch2:scene}{{2-2}{13}{航空机舱非结构化环境中电连接器多实例堆叠、金属反光/阴影与柔性线缆遮挡的典型视觉场景对比图}{figure.2.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.1}数据采集与标注方案}{13}{subsection.2.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-3}{\ignorespaces 电连接器采集硬件布局示意图（机械臂腕部安装RealSense相机获取多视角RGB图像）}}{13}{figure.2.3}\protected@file@percent }
+\newlabel{fig:ch2:hardware}{{2-3}{13}{电连接器采集硬件布局示意图（机械臂腕部安装RealSense相机获取多视角RGB图像）}{figure.2.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.2}数据增强}{14}{subsection.2.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-4}{\ignorespaces 真实采集样本与仿真合成样本的混合数据集对比示例图（含TagID、实例掩膜、关键点与线缆掩膜标注展示）}}{15}{figure.2.4}\protected@file@percent }
+\newlabel{fig:ch2:mix-data}{{2-4}{15}{真实采集样本与仿真合成样本的混合数据集对比示例图（含TagID、实例掩膜、关键点与线缆掩膜标注展示）}{figure.2.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}数据集特征分析}{15}{subsection.2.2.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-5}{\ignorespaces 数据增强效果示例图（高斯噪声、随机旋转、亮度扰动等对标签区与线缆细结构的影响对比）}}{16}{figure.2.5}\protected@file@percent }
+\newlabel{fig:ch2:aug}{{2-5}{16}{数据增强效果示例图（高斯噪声、随机旋转、亮度扰动等对标签区与线缆细结构的影响对比）}{figure.2.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-6}{\ignorespaces 不同TagID、遮挡率区间与线缆方向样本的分布统计图（增强前后类别分布与工况覆盖对比）}}{16}{figure.2.6}\protected@file@percent }
+\newlabel{fig:ch2:dataset-stat}{{2-6}{16}{不同TagID、遮挡率区间与线缆方向样本的分布统计图（增强前后类别分布与工况覆盖对比）}{figure.2.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.3}基于 YOLOv8-seg 的目标检测与实例分割}{17}{section.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}算法选型与总体结构}{17}{subsection.2.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-7}{\ignorespaces YOLOv8-seg网络结构图（Backbone/Neck/Head与检测-分割联合输出的多尺度特征融合示意）}}{18}{figure.2.7}\protected@file@percent }
+\newlabel{fig:ch2:yolov8-arch}{{2-7}{18}{YOLOv8-seg网络结构图（Backbone/Neck/Head与检测-分割联合输出的多尺度特征融合示意）}{figure.2.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-8}{\ignorespaces YOLOv8-seg在多实例堆叠与线缆遮挡条件下的检测与实例分割效果图（含TagID识别结果展示）}}{19}{figure.2.8}\protected@file@percent }
+\newlabel{fig:ch2:yolov8-vis}{{2-8}{19}{YOLOv8-seg在多实例堆叠与线缆遮挡条件下的检测与实例分割效果图（含TagID识别结果展示）}{figure.2.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}损失函数与训练参数设置}{19}{subsection.2.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-9}{\ignorespaces YOLOv8-seg训练过程曲线图（分类/置信度/框回归/分割等损失与关键指标随epoch变化）}}{21}{figure.2.9}\protected@file@percent }
+\newlabel{fig:ch2:yolov8-train}{{2-9}{21}{YOLOv8-seg训练过程曲线图（分类/置信度/框回归/分割等损失与关键指标随epoch变化）}{figure.2.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}动态 ROI 裁剪策略}{22}{subsection.2.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-10}{\ignorespaces 基于检测置信度的动态ROI裁剪示意图（\(\gamma (s)\)自适应扩展与仿射回映射关系）}}{23}{figure.2.10}\protected@file@percent }
+\newlabel{fig:ch2:roi}{{2-10}{23}{基于检测置信度的动态ROI裁剪示意图（\(\gamma (s)\)自适应扩展与仿射回映射关系）}{figure.2.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.4}基于改进 DeepLabV3+的关键特征提取与线缆分割}{23}{section.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}网络模型分析}{24}{subsection.2.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-11}{\ignorespaces DeepLabV3+网络结构示意图（ASPP多空洞率上下文建模与编码器-解码器融合路径）}}{25}{figure.2.11}\protected@file@percent }
+\newlabel{fig:ch2:deeplab-arch}{{2-11}{25}{DeepLabV3+网络结构示意图（ASPP多空洞率上下文建模与编码器-解码器融合路径）}{figure.2.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}高斯热力图建模方法}{25}{subsection.2.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-12}{\ignorespaces 关键点监督形式对比示意图（单点坐标回归/高斯热力图软标签/soft-argmax解码）}}{26}{figure.2.12}\protected@file@percent }
+\newlabel{fig:ch2:heatmap-vs-reg}{{2-12}{26}{关键点监督形式对比示意图（单点坐标回归/高斯热力图软标签/soft-argmax解码）}{figure.2.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-13}{\ignorespaces 关键点高斯热力图建模示意图（\(\sigma \)控制扩散半径与峰值-邻域软标签监督形式）}}{27}{figure.2.13}\protected@file@percent }
+\newlabel{fig:ch2:heatmap}{{2-13}{27}{关键点高斯热力图建模示意图（\(\sigma \)控制扩散半径与峰值-邻域软标签监督形式）}{figure.2.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.3}改进输出头与联合损失设计}{28}{subsection.2.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-14}{\ignorespaces 改进DeepLabV3+双分支输出头示意图（关键点热力图分支+线缆分割分支的共享特征与输出通道定义）}}{29}{figure.2.14}\protected@file@percent }
+\newlabel{fig:ch2:deeplab-head}{{2-14}{29}{改进DeepLabV3+双分支输出头示意图（关键点热力图分支+线缆分割分支的共享特征与输出通道定义）}{figure.2.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-15}{\ignorespaces 二级网络训练与推理效果示意图（关键点热力图峰值定位+线缆精细分割结果可视化）}}{30}{figure.2.15}\protected@file@percent }
+\newlabel{fig:ch2:deeplab-vis}{{2-15}{30}{二级网络训练与推理效果示意图（关键点热力图峰值定位+线缆精细分割结果可视化）}{figure.2.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.5}基于 EPnP 与 RANSAC 的电连接器位姿解算}{31}{section.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5.1}相机投影模型与 EPnP 求解}{32}{subsection.2.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-16}{\ignorespaces 相机模型与PnP位姿解算统一示意图（光心\(O\)、图像平面、物体系\(\{\mathcal  {O}\}\)与相机系\(\{\mathcal  {C}\}\)、三维点\(\mathbf  {P}_i^{\mathcal  {O}}\)/\(\mathbf  {P}_i^{\mathcal  {C}}\)、像素\(\mathbf  {p}_i\)、控制点\(\mathbf  {C}_j\)及位姿\(\mathbf  {R},\mathbf  {t}\)的几何与解算流程）}}{32}{figure.2.16}\protected@file@percent }
+\newlabel{fig:ch2:camera-model}{{2-16}{32}{相机模型与PnP位姿解算统一示意图（光心\(O\)、图像平面、物体系\(\{\mathcal {O}\}\)与相机系\(\{\mathcal {C}\}\)、三维点\(\mathbf {P}_i^{\mathcal {O}}\)/\(\mathbf {P}_i^{\mathcal {C}}\)、像素\(\mathbf {p}_i\)、控制点\(\mathbf {C}_j\)及位姿\(\mathbf {R},\mathbf {t}\)的几何与解算流程）}{figure.2.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5.2}基于 RANSAC 的外点剔除}{33}{subsection.2.5.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algocf}{\numberline {2-1}{\ignorespaces 基于 EPnP 的 RANSAC 位姿估计}}{34}{algocf.2-1}\protected@file@percent }
+\newlabel{alg:ch2:ransac}{{2-1}{34}{基于 RANSAC 的外点剔除}{algocf.2-1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-17}{\ignorespaces EPnP+RANSAC位姿解算流程图（关键点输入→EPnP初值→重投影误差判据→外点剔除→位姿重估）}}{34}{figure.2.17}\protected@file@percent }
+\newlabel{fig:ch2:pnp-flow}{{2-17}{34}{EPnP+RANSAC位姿解算流程图（关键点输入→EPnP初值→重投影误差判据→外点剔除→位姿重估）}{figure.2.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-18}{\ignorespaces RANSAC外点剔除效果图（剔除前后重投影误差分布与内点集合可视化）}}{35}{figure.2.18}\protected@file@percent }
+\newlabel{fig:ch2:ransac}{{2-18}{35}{RANSAC外点剔除效果图（剔除前后重投影误差分布与内点集合可视化）}{figure.2.18}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5.3}手眼标定与坐标系转换}{35}{subsection.2.5.3}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {2-1}}{35}{equation.2.1}\protected@file@percent }
+\newlabel{eq:ch2:handeye-chain}{{2-1}{35}{手眼标定与坐标系转换}{equation.2.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-19}{\ignorespaces Eye-in-Hand手眼标定过程与坐标系关系图（\(\{B\},\{E\},\{C\},\{O\}\)及\({}^{B}\mathbf  {T}_{O}\)链式变换）}}{36}{figure.2.19}\protected@file@percent }
+\newlabel{fig:ch2:handeye}{{2-19}{36}{Eye-in-Hand手眼标定过程与坐标系关系图（\(\{B\},\{E\},\{C\},\{O\}\)及\({}^{B}\mathbf {T}_{O}\)链式变换）}{figure.2.19}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.6}算法验证实验}{36}{section.2.6}\protected@file@percent }
+\newlabel{sec:ch2:verify}{{2.6}{36}{算法验证实验}{section.2.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-20}{\ignorespaces 第二章端到端验证链路图（RGB输入→YOLOv8-seg检测/粗分割/TagID→动态ROI裁剪→改进DeepLabV3+关键点+线缆→EPnP/RANSAC位姿→手眼变换到\(\{B\}\)）}}{37}{figure.2.20}\protected@file@percent }
+\newlabel{fig:ch2:eval-flow}{{2-20}{37}{第二章端到端验证链路图（RGB输入→YOLOv8-seg检测/粗分割/TagID→动态ROI裁剪→改进DeepLabV3+关键点+线缆→EPnP/RANSAC位姿→手眼变换到\(\{B\}\)）}{figure.2.20}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-21}{\ignorespaces YOLOv8-seg阶段输出可视化图（多实例堆叠与线缆遮挡场景下的检测框、实例掩膜与TagID识别结果）}}{37}{figure.2.21}\protected@file@percent }
+\newlabel{fig:ch2:yolo-verify}{{2-21}{37}{YOLOv8-seg阶段输出可视化图（多实例堆叠与线缆遮挡场景下的检测框、实例掩膜与TagID识别结果）}{figure.2.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-22}{\ignorespaces 改进DeepLabV3+阶段输出可视化图（ROI内关键点热力图峰值定位与线缆精细分割结果叠加展示）}}{38}{figure.2.22}\protected@file@percent }
+\newlabel{fig:ch2:deeplab-verify}{{2-22}{38}{改进DeepLabV3+阶段输出可视化图（ROI内关键点热力图峰值定位与线缆精细分割结果叠加展示）}{figure.2.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-23}{\ignorespaces EPnP/RANSAC位姿估计结果可视化图（模型坐标轴或CAD投影轮廓叠加到图像，显示外点剔除前后的一致性差异）}}{38}{figure.2.23}\protected@file@percent }
+\newlabel{fig:ch2:pnp-verify}{{2-23}{38}{EPnP/RANSAC位姿估计结果可视化图（模型坐标轴或CAD投影轮廓叠加到图像，显示外点剔除前后的一致性差异）}{figure.2.23}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.7}本章小结}{39}{section.2.7}\protected@file@percent }
+\@setckpt{body/chapter02}{
+\setcounter{page}{40}
+\setcounter{equation}{1}
+\setcounter{enumi}{0}
+\setcounter{enumii}{0}
+\setcounter{enumiii}{0}
+\setcounter{enumiv}{0}
+\setcounter{footnote}{0}
+\setcounter{mpfootnote}{0}
+\setcounter{part}{0}
+\setcounter{chapter}{2}
+\setcounter{section}{7}
+\setcounter{subsection}{0}
+\setcounter{subsubsection}{0}
+\setcounter{paragraph}{0}
+\setcounter{subparagraph}{0}
+\setcounter{figure}{23}
+\setcounter{table}{0}
+\setcounter{parentequation}{0}
+\setcounter{endNonectr}{11}
+\setcounter{currNonectr}{0}
+\setcounter{AM@survey}{0}
+\setcounter{pp@a@footnote}{2}
+\setcounter{LT@tables}{0}
+\setcounter{LT@chunks}{0}
+\setcounter{section@level}{0}
+\setcounter{Item}{0}
+\setcounter{Hfootnote}{0}
+\setcounter{Hy@AnnotLevel}{0}
+\setcounter{bookmark@seq@number}{34}
+\setcounter{NAT@ctr}{0}
+\setcounter{cp@cntr}{0}
+\setcounter{subfigure}{0}
+\setcounter{lofdepth}{1}
+\setcounter{subtable}{0}
+\setcounter{lotdepth}{1}
+\setcounter{@contsubnum}{0}
+\setcounter{newflo@tctr}{8}
+\setcounter{pubctr}{0}
+\setcounter{translationbibi}{0}
+\setcounter{currproofctr}{0}
+\setcounter{endproofctr}{0}
+\setcounter{proof}{0}
+\setcounter{currassumptionctr}{0}
+\setcounter{endassumptionctr}{0}
+\setcounter{assumption}{0}
+\setcounter{currdefinitionctr}{0}
+\setcounter{enddefinitionctr}{0}
+\setcounter{definition}{0}
+\setcounter{currpropositionctr}{0}
+\setcounter{endpropositionctr}{0}
+\setcounter{proposition}{0}
+\setcounter{currlemmactr}{0}
+\setcounter{endlemmactr}{0}
+\setcounter{lemma}{0}
+\setcounter{currtheoremctr}{0}
+\setcounter{endtheoremctr}{0}
+\setcounter{theorem}{0}
+\setcounter{curraxiomctr}{0}
+\setcounter{endaxiomctr}{0}
+\setcounter{axiom}{0}
+\setcounter{currcorollaryctr}{0}
+\setcounter{endcorollaryctr}{0}
+\setcounter{corollary}{0}
+\setcounter{currexercisectr}{0}
+\setcounter{endexercisectr}{0}
+\setcounter{exercise}{0}
+\setcounter{currexamplectr}{0}
+\setcounter{endexamplectr}{0}
+\setcounter{example}{0}
+\setcounter{currremarkctr}{0}
+\setcounter{endremarkctr}{0}
+\setcounter{remark}{0}
+\setcounter{currproblemctr}{0}
+\setcounter{endproblemctr}{0}
+\setcounter{problem}{0}
+\setcounter{currconjecturectr}{0}
+\setcounter{endconjecturectr}{0}
+\setcounter{conjecture}{0}
+\setcounter{currfactctr}{0}
+\setcounter{endfactctr}{0}
+\setcounter{fact}{0}
+\setcounter{r@tfl@t}{0}
+\setcounter{AlgoLine}{11}
+\setcounter{algocfline}{1}
+\setcounter{algocfproc}{1}
+\setcounter{algocf}{1}
+\setcounter{algoen}{0}
+\setcounter{aendepth}{1}
+\setcounter{lstnumber}{1}
+\setcounter{lstlisting}{0}
+}

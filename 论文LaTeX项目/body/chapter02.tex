@@ -1,0 +1,621 @@
+\chapter{基于深度学习的电连接器识别与位姿估计研究}
+
+\section{引言}
+航空机舱内电连接器的视觉感知同时受到多实例混叠、金属反光、深阴影以及柔性线缆遮挡等因素影响，传统依赖边缘、纹理或模板匹配的视觉方法难以在该场景下同时完成目标身份识别、关键结构恢复与高精度位姿求解。为满足后续自主抓取与柔顺装配对目标状态的精确需求，本文构建了一种由粗到精的级联视觉感知方法：首先利用 YOLOv8-seg 在整图中完成连接器实例定位、标签识别与粗分割，其次利用改进 DeepLabV3+ 在局部 ROI 内提取定位孔、线缆根部等关键特征并完成线缆精细分割，最后结合 EPnP 与 RANSAC 实现鲁棒 6D 位姿解算。本章围绕数据集构建、网络设计、几何建模与实验验证展开，为第三章抓取规划和第四章线缆干扰补偿提供统一视觉输入。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-1\\（空白占位图）}}
+  \caption{第二章级联视觉感知系统总体架构图（YOLOv8-seg—ROI裁剪—改进DeepLabV3+—EPnP/RANSAC—手眼标定的端到端数据流）}
+  \label{fig:ch2:overview}
+\end{figure}
+
+\section{标签识别数据集的制作与分析}
+为支撑本章中的目标检测、标签识别、关键点提取、线缆分割和位姿解算任务，本文构建了面向航空电连接器视觉感知的混合数据集。该数据集由真实采集数据与仿真合成数据组成，在样本数量、工况覆盖范围和标注类型上兼顾了工程真实性与网络训练需求。如图\ref{fig:ch2:scene}所示，航空机舱非结构化环境下电连接器视觉观测常同时伴随多实例堆叠、金属反光/阴影与柔性线缆遮挡等复合干扰，因此数据集需在采集覆盖与标注类型上同步支持一级网络的实例定位与标签身份识别，并为二级网络的关键结构提取与线缆掩膜表达提供监督信息。本节从数据采集与标注、数据增强与分布均衡以及数据集特征分析三个方面展开说明。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-2\\（空白占位图）}}
+  \caption{航空机舱非结构化环境中电连接器多实例堆叠、金属反光/阴影与柔性线缆遮挡的典型视觉场景对比图}
+  \label{fig:ch2:scene}
+\end{figure}
+
+\subsection{数据采集与标注方案}
+在数据采集硬件方面，本文采用机械臂腕部搭载 Intel RealSense D435i 相机的方式获取 RGB 图像，相机与末端执行器固连，可在抓取与装配工作空间内实现多视角、近距离观测。RGB 流分辨率设置为 \(1920\times 1080\)，帧率设置为 \(30\,\mathrm{fps}\)，以尽可能保留连接器标签区域、壳体边缘及线缆细轮廓等细节信息；同时通过机械臂轨迹规划控制相机绕目标进行环绕扫描，使采集到的样本覆盖不同视角、高度与工作姿态下的成像效果。如图\ref{fig:ch2:hardware}所示，相机安装位置与视场范围能够充分覆盖典型航空机舱设备舱段内部的连接器分布区域，为后续在同一硬件平台上完成在线检测与抓取提供了条件。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-3\\（空白占位图）}}
+  \caption{电连接器采集硬件布局示意图（机械臂腕部安装RealSense相机获取多视角RGB图像）}
+  \label{fig:ch2:hardware}
+\end{figure}
+
+在真实数据采集方面，本文围绕航空非结构化环境下电连接器的典型布置形式与照明条件，构建了包含机舱设备舱段、线槽附近以及模拟工装夹具等多种场景的采集工况。整体共获取约 2500 张真实 RGB 图像，覆盖单连接器与多连接器堆叠、不同背景纹理（舱壁、线槽、线束束缚件等）、不同光照强度以及不同线缆形态（自然下垂、搭靠设备边缘、跨越连接器阵列）等情况，在每类工况下均采集多组不同姿态和距离的样本，以提高后续网络对空间布局变化与成像噪声的适应能力。
+
+在仿真数据集构建方面，本文基于 Blender 建立了包含连接器本体、柔性线缆与机舱局部环境的参数化场景，如图\ref{fig:ch2:sim-data}所示。通过对相机位姿、连接器姿态、线缆形态、背景纹理以及光照条件进行域随机化，并在同一渲染流程中自动输出检测框、实例掩膜、关键点与线缆掩膜等多任务标注，最终生成约 5000 张仿真合成图像。将上述 2500 张真实样本与 5000 张仿真样本统一整理后，按 7:2:1 的比例划分为训练集、验证集和测试集，使整体数据集既保留航空机舱真实成像特性，又在姿态与遮挡分布上具有足够的覆盖度。
+
+在标注策略上，本文采用与两级处理流程一致的层级组织方式组织监督信息。其一，一级层级以整幅 RGB 图像为输入，对每个连接器目标同时标注边界框、实例掩膜以及标签 ID/类别身份；对应网络输出边界框集合、实例掩膜集合，并得到用于单目标 ROI 裁剪的候选区域。该层级主要用于完成目标锁定与单目标 ROI 提取。其二，二级层级以一级裁剪后的单目标 ROI 图像为输入，在同一 ROI 内标注三个定位孔中心、一个线缆根部坐标以及线缆像素级掩膜；网络输出由四通道关键点热力图与一通道线缆掩膜组成，用于描述关键结构与柔性线缆的空间占据特征。该分层标注结构使得 2.3 节与 2.4 节的网络训练能够对应获得监督信号，并保证 2.5 节位姿解算以及第三章线缆障碍建模与第四章力控前馈补偿所需几何/形态观测可由同一套标签逻辑直接继承。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-4\\（空白占位图）}}
+  \caption{真实采集样本与仿真合成样本的混合数据集对比示例图（含TagID、实例掩膜、关键点与线缆掩膜标注展示）}
+  \label{fig:ch2:mix-data}
+\end{figure}
+
+\subsection{数据增强}
+为提升航空非结构化环境中柔性线缆干扰下的识别与位姿估计稳定性，本文将训练期数据增强区分为真实数据增强与仿真数据增强两部分：真实增强校准成像噪声与外观变化，仿真增强扩展极端姿态与遮挡分布。
+
+针对真实采集数据，本文构建与掩膜同步的在线增强流水线，包括按概率 0.5 叠加高斯噪声、随机旋转、色彩抖动、水平/垂直翻转以及随机裁剪缩放。设像素强度为 \(I(x,y)\)，高斯噪声扰动为
+$$
+I_{\mathrm{aug}}(x,y)=\mathrm{clip}\left(I(x,y)+n(x,y)\right),\quad n(x,y)\sim\mathcal{N}(0,\sigma^{2}),
+$$
+其中，\(\sigma=0.1\) 表示噪声标准差，\(\mathrm{clip}(\cdot)\) 表示截断到合法强度范围。随机旋转角度 \(\theta\) 采样于 \([-180^{\circ},180^{\circ}]\)，并对图像与掩膜同步进行仿射变换以保持几何一致性；色彩抖动在 HSV 空间对亮度、对比度、饱和度与色相实施随机扰动，Brightness=0.5。为覆盖狭窄视野下的局部截断情形，增强流程引入随机翻转与随机裁剪缩放（scale\(\in[0.8,1.0]\) 且重采样到 \(640\times 640\)）。
+
+针对仿真合成数据，本文将增强转化为渲染域随机化：设渲染参数为 \(\theta\)，则
+$$
+I=f(\theta),
+$$
+其中，\(f(\cdot)\) 为基于 Blender 的渲染映射函数，\(I\) 表示渲染得到的图像。通过对 \(\theta\) 在工程可行范围内随机采样，并在训练中最小化期望监督损失
+$$
+\min_{\phi}\ \mathbb{E}_{\theta\sim p(\theta)}\left[\mathcal{L}\Big(g_{\phi}(f(\theta)),y\Big)\right],
+$$
+其中，\(\phi\) 表示网络参数，\(g_{\phi}(\cdot)\) 表示从图像到预测结果的网络映射，\(\mathcal{L}(\cdot)\) 表示监督损失，\(y\) 为对应的自动渲染标签。渲染参数同时扰动相机位姿、连接器姿态、线缆形态与光照纹理等因素，从而扩展线缆掩膜形态与可见性变化的联合分布。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-5\\（空白占位图）}}
+  \caption{数据增强效果示例图（高斯噪声、随机旋转、亮度扰动等对标签区与线缆细结构的影响对比）}
+  \label{fig:ch2:aug}
+\end{figure}
+
+\textbf{如图\ref{fig:ch2:aug}所示}，高斯噪声与色彩扰动改变了标签边缘的成像纹理强度，随机旋转扩展了线缆方向在画面中的几何可见性范围，随机裁剪缩放则模拟了狭窄视野下细结构的局部截断与重排。该增强在保持掩膜同步变换的前提下，使训练输入覆盖“柔性线缆干扰 + 成像退化”的联合外观变化。
+
+\subsection{数据集特征分析}
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-6\\（空白占位图）}}
+  \caption{不同TagID、遮挡率区间与线缆方向样本的分布统计图（增强前后类别分布与工况覆盖对比）}
+  \label{fig:ch2:dataset-stat}
+\end{figure}
+如图\ref{fig:ch2:dataset-stat}所示，增强后不同 TagID、遮挡率区间与线缆方向样本的覆盖更趋均衡，从而降低中高遮挡与特定线缆方向样本不足引起的训练偏置。
+
+在数据特征分析中，针对用于 `YOLOv8-seg` 的整幅图像数据，统计重点对应到图\ref{fig:ch2:dataset-stat} 中的三类联合观测变量。图2-6 的左图以柱状形式统计不同 TagID 的样本占比，用于衡量目标身份在整体数据中的覆盖均衡性；图2-6 的中图与右图均以散点形式刻画空间覆盖，其中中图用于描述目标中心在图像平面内的分布范围，右图用于刻画随线缆方向变化的目标尺度离散程度。上述统计共同表明，在航空非结构化环境中，多实例堆叠与柔性线缆遮挡会改变目标的表观形状与实例边界清晰度：当目标在图像平面内的中心落点更广、同时不同 TagID 与遮挡区间保持分桶均衡时，边界框与实例掩膜在遮挡条件下出现的外轮廓缺失与局部碎片化将具有更充分的样本支撑，从而使实例分割监督能够学习更具适应性的外观边界分布。
+
+针对用于 `DeepLabV3+` 的 ROI 局部数据，特征分析将统计焦点从整幅身份与尺度覆盖转移到 ROI 内关键结构可见性的空间分布，以及线缆像素级掩膜监督的有效覆盖范围。结合图\ref{fig:ch2:dataset-stat} 的统计含义，ROI 关键结构的出现位置会随线缆方向发生系统性偏移；其中图2-6 的中图所反映的中心落点覆盖范围可对应理解为关键结构在裁剪平面内的空间落点区间，从而影响关键点热力图峰值在 ROI 内的离散程度；图2-6 的右图所反映的尺度参数离散性则可对应理解为局部孔位与线缆根部的局部可见尺度差异，进而改变掩膜监督能够覆盖到的有效像素比例。由于柔性线缆干扰会造成定位孔边缘纹理被部分覆盖、线缆根部在 ROI 中出现不同程度的遮挡隐蔽，ROI 内热力图峰值位置与掩膜覆盖比例将随线缆方向与遮挡强度呈现多样变化；通过在数据生成与增强阶段保持线缆方向与遮挡条件的覆盖一致性，ROI 内关键结构的相对位置分布与掩膜覆盖分布能够保持多模态特性，使局部分割监督在强干扰条件下仍具备足够的样本多样性与监督有效性。
+
+\section{基于 YOLOv8-seg 的目标检测与实例分割}
+在航空机舱电连接器装配场景中，视觉系统首先需要完成目标实例定位与目标对象区分，为后续关键点提取和位姿解算提供稳定的局部输入区域。考虑到该场景中连接器本体、标签区域与柔性线缆通常同时出现，且目标之间存在尺度变化大、遮挡关系复杂和实例间距离较近等特点，本文选用 YOLOv8-seg 作为感知流程的一级网络，用于实现目标检测、标签身份识别与实例分割的联合输出。
+
+该网络输出的边界框、类别信息和实例掩膜共同构成后续 ROI 裁剪与局部精细分析的基础数据，其中 TagID 用于确定目标对象，实例掩膜用于削弱背景干扰，边界框用于确定局部图像范围。
+
+\subsection{算法选型与总体结构}
+电连接器的视觉观测需要同时完成实例级定位与像素级轮廓约束。航空机舱非结构化环境中，连接器本体、标签区域与柔性线缆在同一画面内并存，遮挡边界容易出现不完整结构；在此条件下，单纯依赖边界框进行目标锁定难以稳定反映遮挡处的形态变化。YOLOv8-seg 的检测-分割联合输出使得 TagID 关联、边界定位与遮挡边界的像素级约束可以在同一模型预测阶段获得一致监督，从而提升实例可分性与候选区域的几何稳定性。
+
+YOLOv8-seg 采用 Anchor-free 的中心与尺度回归机制，通过直接学习目标中心位置与边界参数完成定位，不依赖预设锚框匹配。在连接器任务中，壳体、标签与拖拽线缆对应的长宽比跨度较大，锚框匹配会引入尺度先验偏差；Anchor-free 回归能够更直接地适应该类尺度变化特征。设网络对第 \(i\) 个预测实例给出边界框参数
+$$
+\hat{\mathbf{b}}_i=(\hat{x}_i,\hat{y}_i,\hat{w}_i,\hat{h}_i),
+$$
+其中，\(\hat{x}_i,\hat{y}_i\) 为框中心像素坐标，\(\hat{w}_i,\hat{h}_i\) 为宽高尺度，则该回归过程无需锚框候选匹配即可输出候选定位结果。
+
+同时，YOLOv8-seg 将检测分支与分割分支集成于统一网络框架中，实现一次前向推理同时输出目标位置与实例掩膜。对于实例分割分支，其掩膜预测可形式化表示为
+$$
+\hat{M}_i=\sigma\!\left(f_{\text{seg}}(F)\right),
+$$
+其中，\(\hat{M}_i\) 为第 \(i\) 个实例的像素级掩膜预测，\(f_{\text{seg}}(\cdot)\) 为分割预测头，\(F\) 为共享多尺度特征，\(\sigma(\cdot)\) 表示非线性激活函数。实例掩膜在遮挡边界缺失时仍能够提供像素级拓扑约束，使得目标锁定不再仅依赖框形状，从而降低多实例堆叠与柔性线缆遮挡条件下的实例混淆。
+
+如图\ref{fig:ch2:yolov8-arch}所示，YOLOv8-seg 由 Backbone、Neck 与 Head 三部分组成：Backbone 提取层级语义特征以表征标签与壳体的判别信息；Neck 完成多尺度特征融合以同时保留细粒度边缘响应与跨尺度上下文一致性；Head 将检测与分割预测集成到统一输出端，从而实现边界框与实例掩膜的联合推断。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-7\\（空白占位图）}}
+  \caption{YOLOv8-seg网络结构图（Backbone/Neck/Head与检测-分割联合输出的多尺度特征融合示意）}
+  \label{fig:ch2:yolov8-arch}
+\end{figure}
+
+本文在实现中选用 CSPDarknet53 作为骨干网络，并在 C2f 模块中实现跨阶段特征复用：浅层表征用于保留壳体边缘与标签纹理的局部梯度信息，深层表征用于提供与实例尺度变化相关的语义响应。该特征组织为检测与掩膜分支在遮挡边界处提供共享的判别依据，从而在多实例混叠与柔性线缆遮挡条件下保持实例轮廓的一致性。由检测与分割分支联合输出的目标候选集合可写为
+
+$$
+\mathcal{D}=\left\{ID_i,\;B_i,\;s_i,\;M_i\right\}_{i=1}^{N},
+$$
+
+式中，\(ID_i\) 表示标签身份，\(B_i\) 表示边界框，\(s_i\) 表示检测置信度，\(M_i\) 表示实例分割掩膜，\(N\) 为候选目标数量。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-8\\（空白占位图）}}
+  \caption{YOLOv8-seg在多实例堆叠与线缆遮挡条件下的检测与实例分割效果图（含TagID识别结果展示）}
+  \label{fig:ch2:yolov8-vis}
+\end{figure}
+
+如图\ref{fig:ch2:yolov8-vis}所示，在多连接器实例堆叠与柔性线缆遮挡条件下，边界框用于给出候选定位的空间范围，而实例掩膜用于补足遮挡边缘的像素级轮廓约束。掩膜输出能够在目标轮廓局部不完整时保持拓扑连贯性，从而降低由局部缺失引发的实例交叉干扰，增强 TagID 与对应实例之间的关联稳定性。
+
+\subsection{损失函数与训练参数设置}
+电连接器装配场景中，视觉模型需要同时完成连接器实例的身份判别与遮挡边界的像素级轮廓恢复。YOLOv8-seg 通过检测分支输出候选框集合与置信度，并通过分割分支输出实例掩膜，实现由框约束到掩膜约束的耦合学习。多任务损失函数用于将身份分类、目标定位与实例轮廓学习统一到同一优化目标中，其形式为
+
+$$
+\mathcal{L}_{\mathrm{det}}=\lambda_{\mathrm{cls}}\mathcal{L}_{\mathrm{cls}}+\lambda_{\mathrm{box}}\mathcal{L}_{\mathrm{box}}+\lambda_{\mathrm{obj}}\mathcal{L}_{\mathrm{obj}}+\lambda_{\mathrm{seg}}\mathcal{L}_{\mathrm{seg}},
+$$
+
+其中，\(\mathcal{L}_{\mathrm{cls}}\) 用于约束标签身份与类别预测，\(\mathcal{L}_{\mathrm{box}}\) 用于边界框定位回归，\(\mathcal{L}_{\mathrm{obj}}\) 用于前景置信度估计，\(\mathcal{L}_{\mathrm{seg}}\) 用于实例掩膜预测；权重系数为 \(\lambda_{\mathrm{cls}},\lambda_{\mathrm{box}},\lambda_{\mathrm{obj}},\lambda_{\mathrm{seg}}\)。
+
+为明确各项损失的监督形式，分类与置信度分别采用交叉熵形式建模。以单个候选位置的分类概率 \(p_c\) 与 one-hot 标签 \(y_c\) 为例，分类损失写为
+
+$$
+\mathcal{L}_{\mathrm{cls}}=-\sum_{c}y_c\log p_c.
+$$
+
+对于目标置信度 \(p_{\mathrm{obj}}\) 与目标指示 \(t_{\mathrm{obj}}\in\{0,1\}\)，其损失写为
+
+$$
+\mathcal{L}_{\mathrm{obj}}=-t_{\mathrm{obj}}\log p_{\mathrm{obj}}-(1-t_{\mathrm{obj}})\log(1-p_{\mathrm{obj}}).
+$$
+
+分割分支在像素级对实例掩膜进行监督。令线缆实例掩膜真值为 \(M(x,y)\in\{0,1\}\)，预测概率为 \(\hat{M}(x,y)\)，则二值交叉熵损失为
+
+$$
+\mathcal{L}_{\mathrm{bce}}=-\frac{1}{HW}\sum_{x}\sum_{y}\left(M(x,y)\log \hat{M}(x,y)+\left(1-M(x,y)\right)\log\left(1-\hat{M}(x,y)\right)\right),
+$$
+
+Dice 损失用于增强区域重叠的一致性：
+
+$$
+\mathcal{L}_{\mathrm{dice}}=1-\frac{2\sum_{x}\sum_{y}\hat{M}(x,y)M(x,y)+\epsilon}{\sum_{x}\sum_{y}\hat{M}(x,y)+\sum_{x}\sum_{y}M(x,y)+\epsilon}.
+$$
+
+因此掩膜预测损失可写为
+
+$$
+\mathcal{L}_{\mathrm{seg}}=\mathcal{L}_{\mathrm{bce}}+\lambda_{\mathrm{dice}}\mathcal{L}_{\mathrm{dice}}.
+$$
+
+在定位回归项 \(\mathcal{L}_{\mathrm{box}}\) 中，采用 CIoU 损失对遮挡情形下的框回归进行联合约束。IoU 定义为预测框与真实框交并比：
+
+$$
+\mathrm{IoU}=\frac{\mathrm{area}\left(\mathbf{b}\cap \mathbf{b}^{gt}\right)}{\mathrm{area}\left(\mathbf{b}\cup \mathbf{b}^{gt}\right)}.
+$$
+
+CIoU 在 IoU 约束之外引入中心点距离项与宽高比一致性项，从而将“重叠程度”扩展为“几何接近性 + 形态一致性”的联合优化目标。令预测框中心与真实框中心的欧氏距离为
+
+$$
+\rho(\mathbf{b},\mathbf{b}^{gt})=\sqrt{(x-x^{gt})^2+(y-y^{gt})^2},
+$$
+
+定义最小外接框对角线长度为 \(c\)，则中心距离惩罚项写为 \(\rho^2(\mathbf{b},\mathbf{b}^{gt})/c^2\)。宽高比一致性项定义为
+
+$$
+v=\frac{4}{\pi^2}\left(\arctan\frac{w^{gt}}{h^{gt}}-\arctan\frac{w}{h}\right)^2,
+$$
+
+平衡因子 \(\alpha\) 取
+
+$$
+\alpha=\frac{v}{(1-\mathrm{IoU})+v}.
+$$
+
+最终 CIoU 损失写为
+
+$$
+\mathcal{L}_{\mathrm{CIoU}}=1-\mathrm{IoU}+\frac{\rho^2\!\left(\mathbf{b},\mathbf{b}^{gt}\right)}{c^2}+\alpha v.
+$$
+
+在遮挡边界局部缺失时，重叠区域 \(\mathrm{IoU}\) 会出现波动，但中心距离与整体形态一致性仍提供可用于候选 ROI 稳定生成的几何梯度，因此 CIoU 在航空非结构化环境中对定位回归的鲁棒性更强。
+
+在训练实现方面，输入尺寸设为 \(640\times 640\)，BatchSize 设为 16，训练轮数设为 300，优化器采用 SGD，Momentum 设为 0.937。该参数组合在保证图像细节表达的同时，降低遮挡样本的梯度方差，并提升收敛稳定性。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-9\\（空白占位图）}}
+  \caption{YOLOv8-seg训练过程曲线图（分类/置信度/框回归/分割等损失与关键指标随epoch变化）}
+  \label{fig:ch2:yolov8-train}
+\end{figure}
+
+由图\ref{fig:ch2:yolov8-train}可以观察到，各分项损失随 epoch 的推进呈现整体下降趋势，分类相关损失首先收敛，随后定位回归与掩膜分割损失逐步趋于稳定。该现象对应于优化目标的梯度耦合关系：在初期阶段，分类与置信度监督为候选目标关联建立基础；随着候选框的中心与尺度预测逐步稳定，CIoU 中的中心距离与宽高比一致性项开始提供更有效的回归约束；在后期阶段，分割损失的下降与掩膜形态连贯性的提升共同作用，使得遮挡边缘的像素级轮廓能够更稳定地被学习。训练过程中曲线的同步收敛说明了框回归与掩膜监督在遮挡样本上的协同学习是有效的。
+
+该协同学习可在检测结果中得到体现：如图\ref{fig:ch2:yolov8-vis}所示，多连接器实例堆叠条件下，边界框为实例归属提供空间范围，实例掩膜在遮挡边缘缺失时仍能保持一定拓扑连贯性，从而降低由局部缺失引发的实例混淆概率。该对应关系验证了多任务联合损失对航空非结构化环境下电连接器实例分割的适配性。
+
+\subsection{动态 ROI 裁剪策略}
+一级感知网络的输出用于生成局部精细处理的感兴趣区域 ROI。如果裁剪窗口过小，连接器边缘与线缆上下文会被截断，影响遮挡关系的恢复；若裁剪窗口过大，则引入无关背景削弱二级网络的局部聚焦能力。为此本文根据检测框置信度与目标尺度自适应调整 ROI 窗口大小。
+
+设一级检测边界框为 \(B=(x,y,w,h)\)，其检测置信度为 \(s\in[0,1]\)，则扩展后的裁剪窗口定义为
+
+$$
+B'=(x,y,\gamma(s)w,\gamma(s)h),
+$$
+
+其中，动态扩展因子 \(\gamma(s)\) 定义为
+
+$$
+\gamma(s)=\gamma_{\min}+(\gamma_{\max}-\gamma_{\min})(1-s).
+$$
+
+当检测置信度较高时，可采用较小扩展因子提高局部聚焦性；当检测置信度较低时，适当扩大裁剪区域可以保留更多上下文信息，降低因一级定位偏差造成的二级输入截断风险。为保持二级网络输入尺度统一，裁剪后的 ROI 图像被重采样至固定尺寸 \(I_{\mathrm{roi}}\in\mathbb{R}^{256\times 256\times 3}\)，并记录从原图到 ROI 的仿射变换矩阵，以便后续将关键点坐标映射回原始图像坐标系。
+
+为给出可逆的几何映射关系，令扩展裁剪窗口中心仍为 \(B\) 的中心 \((x,y)\)，则裁剪窗口左上角可写为
+$$
+x_0=x-\frac{\gamma(s)w}{2},\qquad y_0=y-\frac{\gamma(s)h}{2},
+$$
+并定义从裁剪窗口到 ROI 的缩放比例
+$$
+s_x=\frac{256}{\gamma(s)w},\qquad s_y=\frac{256}{\gamma(s)h}.
+$$
+对任意原图坐标 \((X,Y)\)，其对应的 ROI 坐标 \((u,v)\) 通过齐次坐标仿射变换给出：
+$$
+\begin{bmatrix}u\\v\\1\end{bmatrix}
+=
+\begin{bmatrix}
+s_x & 0 & -s_x x_0\\
+0 & s_y & -s_y y_0\\
+0 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}X\\Y\\1\end{bmatrix}.
+$$
+因此，ROI 内关键点预测坐标 \((u_j,v_j)\) 可以通过逆仿射变换映射回原图：
+$$
+\begin{bmatrix}X_j\\Y_j\\1\end{bmatrix}
+=
+\begin{bmatrix}
+1/s_x & 0 & x_0\\
+0 & 1/s_y & y_0\\
+0 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}u_j\\v_j\\1\end{bmatrix}.
+$$
+同理，线缆像素级掩膜在裁剪与重采样过程中采用相同的几何映射规则，从而保证二级网络的关键点热力图监督与线缆掩膜监督在坐标系层面一致。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-10\\（空白占位图）}}
+  \caption{基于检测置信度的动态ROI裁剪示意图（\(\gamma(s)\)自适应扩展与仿射回映射关系）}
+  \label{fig:ch2:roi}
+\end{figure}
+
+如图\ref{fig:ch2:roi}所示，动态扩展因子 \(\gamma(s)\) 决定裁剪窗口的覆盖范围；仿射映射矩阵将原图坐标 \((X,Y)\) 映射到 ROI 坐标 \((u,v)\)，逆变换则保证二级网络输出的关键点坐标能够回到原图参考系。该坐标一致性使关键点热力图监督与线缆像素级掩膜监督在遮挡边界条件下仍保持严格的几何对齐，从而避免标签与预测结果在坐标系层面的偏移误差。
+
+\section{基于改进 DeepLabV3+的关键特征提取与线缆分割}
+一级检测输出的边界框与粗掩膜可用于锁定目标实例的空间范围，但难以直接刻画定位孔、插接端面以及线缆根部等关键几何结构。为此，本文在 ROI 图像上引入改进 DeepLabV3+ 网络，利用大感受野上下文建模能力实现关键点热力图预测与线缆精细分割，并以统一的像素级监督约束提升遮挡条件下的结构可辨性。本节将从网络选型与空洞卷积原理、高斯热力图建模方法以及改进输出头与联合损失设计三个方面展开说明。
+
+\subsection{网络模型分析}
+DeepLabV3+ 的优势在于其对语义与边界的协同建模能力：编码器用于提取具有判别性的高层语义特征，ASPP 模块通过多空洞率分支并行聚合多尺度上下文信息，解码器再引入浅层细节特征对空间边界进行细化恢复。该结构在保证感受野覆盖的同时兼顾局部纹理分辨率，适合处理航空非结构化环境中由金属反光、阴影与柔性线缆遮挡共同引起的外观变化，使得网络能够在局部纹理不稳定时仍保持对端面轮廓与孔位布局的整体一致性判断。
+
+本文二级视觉感知的目标是：在一级网络生成的单目标 ROI 内，同时预测三个定位孔中心与一个线缆根部的关键点热力图，并输出线缆像素级掩膜，以支撑后续位姿解算与线缆方向先验构建。为满足该目标，网络需要在 ROI 局部范围内区分“孔位边缘纹理—壳体边界—线缆细轮廓”三类高频细节，并在遮挡与反光条件下保持关键点响应峰值的稳定性。然而，原始 DeepLabV3+ 的输出端主要面向单一语义分割任务，难以直接满足“多通道关键点热力图 + 线缆分割掩膜”的并行输出需求；同时，线缆像素占比通常远小于背景与壳体区域，若仅采用单一分割监督，容易在训练中出现细线缆断裂、边界收缩等现象。为此，有必要对解码端的输出头进行任务化改造，并在损失函数层面对关键点与线缆两类监督进行联合设计，从而为下一节的改进网络结构与优化目标构建提供依据。
+
+DeepLabV3+ 提取多尺度上下文特征的关键在于空洞卷积，其一维形式为
+
+$$
+y[i]=\sum_{k=1}^{K}x[i+r\cdot k]\,w[k],
+$$
+
+式中，\(x[i]\) 表示输入特征，\(w[k]\) 表示卷积核参数，\(r\) 为空洞率。当 \(r=1\) 时，该运算退化为普通卷积；当 \(r>1\) 时，卷积核在不显著增加参数量的条件下扩大感受野，因此网络能够利用更大范围的结构上下文判断遮挡区域内可能存在的关键特征。对于本文研究对象而言，定位孔与端面轮廓之间具有相对稳定的几何布局，因此只要网络能够同时观察到足够的壳体上下文，就有可能在局部遮挡条件下恢复有效的关键点响应。
+
+如图\ref{fig:ch2:deeplab-arch}所示，多空洞率的并行上下文建模与编码器-解码器的特征融合共同决定了模型的输出特性：一方面，ASPP 的大感受野分支能够在遮挡发生时提供“全局布局一致性”的约束，避免孔位响应被局部线缆边缘牵引；另一方面，解码端引入的浅层细节信息能够对孔位边缘与线缆细结构进行空间细化。基于该结构特性，模型能够输出较为稳定的关键点热力图与线缆概率图。然而，在本文任务中需要同时输出四通道关键点热力图与单通道线缆掩膜，并对两类输出采用差异化的监督权重；同时，线缆遮挡会导致前景/背景像素占比显著不均，使得仅依赖单一分割损失容易出现边界收缩或细线缆断裂。为此，需要对原网络的输出头进行任务化改造，并在损失函数层面对关键点与线缆两类监督实施联合设计，从而保证关键结构定位与线缆分割在遮挡条件下的同步稳定。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-11\\（空白占位图）}}
+  \caption{DeepLabV3+网络结构示意图（ASPP多空洞率上下文建模与编码器-解码器融合路径）}
+  \label{fig:ch2:deeplab-arch}
+\end{figure}
+
+\subsection{高斯热力图建模方法}
+为在柔性线缆遮挡与强反光条件下稳定提取连接器局部关键结构，本文将关键点定位由“直接回归坐标”转化为“回归密集响应图”。与坐标回归仅在单点上提供监督不同，热力图建模在关键点邻域内构造连续的软标签，使网络在训练阶段获得更充分的空间梯度信息；同时，密集监督与 DeepLabV3+ 的全卷积输出形式一致，便于将解码端的像素级特征直接映射为关键点响应分布，从而提高遮挡条件下峰值位置的可辨性与稳定性。
+
+为对比两类监督形式的差异，设第 \(j\) 个关键点的真实坐标为 \(\mathbf{p}_j=[x_j,y_j]^\top\)，坐标回归分支直接输出 \(\hat{\mathbf{p}}_j=[\hat{x}_j,\hat{y}_j]^\top\)，常用的回归损失可写为
+$$
+\mathcal{L}_{\mathrm{reg}}=\frac{1}{N_k}\sum_{j=1}^{N_k}\left\lVert \hat{\mathbf{p}}_j-\mathbf{p}_j\right\rVert_2^2.
+$$
+该损失在监督层面仅对单点坐标误差进行惩罚，等价于在二维平面上以 Dirac 分布 \(\delta(\mathbf{x}-\mathbf{p}_j)\) 作为目标，使得训练梯度主要集中于“坐标偏差”的一阶方向上，难以显式利用关键点邻域内的边缘纹理与几何布局信息。相比之下，热力图建模将关键点表示为二维连续分布。令 \(\mathbf{x}=[x,y]^\top\)，则式(2-xx)可写为
+$$
+H_j(\mathbf{x})=\exp\left(-\frac{\left\lVert \mathbf{x}-\mathbf{p}_j\right\rVert_2^2}{2\sigma^2}\right),
+$$
+并可进一步构造归一化概率分布
+$$
+\tilde{H}_j(\mathbf{x})=\frac{H_j(\mathbf{x})}{\sum_{x}\sum_{y}H_j(x,y)}.
+$$
+在推理阶段，关键点坐标既可由 \(\arg\max\) 得到，也可采用 soft-argmax 的期望形式给出
+$$
+\hat{\mathbf{p}}_j=\sum_{x}\sum_{y}\mathbf{x}\,\tilde{\hat{H}}_j(\mathbf{x}),
+$$
+其中，\(\tilde{\hat{H}}_j\) 为对预测热力图归一化后的分布。如图\ref{fig:ch2:heatmap-vs-reg}所示，热力图监督将误差从“单点坐标偏差”扩展为“邻域分布匹配”，使得损失函数在关键点邻域内产生连续的空间梯度，从而更有利于在遮挡与反光引起的局部纹理不稳定条件下保持峰值位置的鲁棒性。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-12\\（单点坐标回归与热力图软标签监督对比示意图）}}
+  \caption{关键点监督形式对比示意图（单点坐标回归/高斯热力图软标签/soft-argmax解码）}
+  \label{fig:ch2:heatmap-vs-reg}
+\end{figure}
+
+结合本文任务，二级网络在单目标 ROI 内需要同时输出三个定位孔中心与一个线缆根部的二维观测。该关键点集合一方面用于构造稳定的二维—三维对应关系以支撑位姿解算，另一方面与线缆掩膜的主方向信息共同描述线缆根部的几何落点与延伸趋势，使后续“刚体位姿 + 柔性障碍先验”的联合表达具备统一的像素级来源。
+
+在样本预处理阶段，一级网络裁剪得到的 ROI 被统一重采样到固定分辨率输入平面，以消除目标尺度差异对二级网络训练稳定性的影响。对于第 \(j\) 个关键点，设其标注坐标为 \((x_j,y_j)\)，本文采用二维高斯核构造目标热力图 \(H_j(x,y)\)，其表达式为
+
+$$
+H_j(x,y)=\exp\left(-\frac{(x-x_j)^2+(y-y_j)^2}{2\sigma^2}\right),
+$$
+
+式中，\((x,y)\) 表示热力图平面上的任意像素位置，\((x_j,y_j)\) 表示关键点中心位置，\(\sigma\) 控制概率峰的扩散范围。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-13\\（空白占位图）}}
+  \caption{关键点高斯热力图建模示意图（\(\sigma\)控制扩散半径与峰值-邻域软标签监督形式）}
+  \label{fig:ch2:heatmap}
+\end{figure}
+
+在参数设置方面，本文取 \(\sigma=2\) 作为热力图扩散系数，以在定位精度与训练稳定性之间取得平衡。当 \(\sigma\) 过小时，监督有效区域过窄，梯度主要集中于极小邻域，遮挡导致的边缘纹理扰动更易引起峰值漂移；当 \(\sigma\) 过大时，响应分布过于平坦，关键点中心的区分性降低并引入更明显的定位偏差。因此，\(\sigma\) 的选取本质上对应“空间不确定度建模”与“中心可分性”的折中。
+
+在监督组织形式上，若关键点总数记为 \(N_k\)，则网络输出 \(N_k\) 个关键点热力图通道，每个通道仅对应一个语义明确的结构点，如左定位孔、右定位孔、中心定位孔或线缆根部；本文取 \(N_k=4\)。该通道化编码避免不同结构点在同一响应图上的竞争，使解码端能够为每类结构点学习更具针对性的局部判别特征，并与线缆分割分支共享编码与 ASPP 的上下文表示，实现“刚性孔位布局 + 柔性线缆形态”的同域特征表达。
+
+在训练目标上，将热力图视为关键点位置的概率型表征，可将预测热力图 \(\hat{H}_j(x,y)\) 与目标热力图 \(H_j(x,y)\) 的差异转化为像素级能量最小化问题。采用均方误差损失时，优化过程等价于在每个像素位置上对响应幅值进行一致性拟合，其梯度在关键点邻域内连续变化，从而相对降低坐标回归中由单点监督引起的梯度震荡；同时，热力图的峰值幅值可作为关键点置信度的直接度量，为后续在遮挡样本上进行异常点抑制提供可用的质量指标。该建模方式为下一节在 DeepLabV3+ 解码端引入面向关键点与线缆的双分支输出提供了与之匹配的标签定义与优化目标。
+
+关键点热力图分支采用均方误差损失约束预测热力图与目标热力图的一致性。设第 \(j\) 个关键点的预测热力图为 \(\hat{H}_j(x,y)\)，则其损失可写为
+
+$$
+\mathcal{L}_{\mathrm{kp}}=\frac{1}{N_k}\sum_{j=1}^{N_k}\sum_{x}\sum_{y}\left(\hat{H}_j(x,y)-H_j(x,y)\right)^2.
+$$
+
+\subsection{改进输出头与联合损失设计}
+根据上一节的建模结果，二级网络的监督信号由关键点高斯热力图和线缆分割掩膜共同构成。为使网络输出形式与构造的标签保持一致，本文对 DeepLabV3+ 解码端的输出层进行改进，构建面向电连接器局部感知任务的双分支输出头。
+
+在经过编码器、ASPP 模块以及解码器特征融合后，设共享特征图记为 \(F\)。在此基础上，分别设置关键点热力图预测分支和线缆分割分支：关键点分支输出四个关键结构的热力图张量 \(\hat{H}\in\mathbb{R}^{H\times W\times N_k}\)；线缆分支输出单通道线缆概率图 \(\hat{M}_{c}\in\mathbb{R}^{H\times W}\) 并经阈值化得到线缆二值掩膜。
+
+为保证输出与热力图软标签幅值定义一致，关键点分支与线缆分割分支均采用逐位置的线性映射并通过非线性函数约束到概率区间。设共享特征在位置 \((x,y)\) 处的向量为 \(\mathbf{F}(x,y)\in\mathbb{R}^{C}\)，则关键点热力图预测与线缆概率预测可分别表示为
+$$
+\hat{H}_j(x,y)=\sigma\!\left(\mathbf{w}_j^\top \mathbf{F}(x,y)+b_j\right),
+$$
+其中，\(\mathbf{w}_j\) 与 \(b_j\) 为第 \(j\) 个关键点的映射参数，\(\sigma(\cdot)\) 为将输出压缩到 \([0,1]\) 的非线性函数；
+$$
+\hat{M}_c(x,y)=\sigma\!\left(\mathbf{w}_c^\top \mathbf{F}(x,y)+b_c\right),
+$$
+其中，\(\mathbf{w}_c\) 与 \(b_c\) 为线缆分割分支参数。由 \(\hat{H}_j(x,y)\) 在关键点提取阶段采用软-argmax 期望形式得到坐标，归一化预测热力图分布为
+$$
+\tilde{\hat{H}}_j(x,y)=\frac{\hat{H}_j(x,y)}{\sum_{x}\sum_{y}\hat{H}_j(x,y)+\eta_0},
+$$
+其中，\(\eta_0\) 为数值稳定常数，则有
+$$
+\hat{x}_j=\sum_{x}\sum_{y} x\cdot \tilde{\hat{H}}_j(x,y),\qquad
+\hat{y}_j=\sum_{x}\sum_{y} y\cdot \tilde{\hat{H}}_j(x,y).
+$$
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-14\\（空白占位图）}}
+  \caption{改进DeepLabV3+双分支输出头示意图（关键点热力图分支+线缆分割分支的共享特征与输出通道定义）}
+  \label{fig:ch2:deeplab-head}
+\end{figure}
+
+如图\ref{fig:ch2:deeplab-head}所示，双分支输出头通过“共享语义上下文 + 任务专用像素映射”的方式实现并行监督：关键点热力图通道提供定位孔中心的软响应分布，线缆分支提供像素级线缆概率，使两类任务在同一 ROI 内具有一致的监督坐标系。由于关键点通道之间采用独立输出，定位孔中心响应不会被线缆边界的高梯度纹理直接竞争；同时，线缆概率图由像素级损失连续约束细长结构的边界连通性，从而在柔性线缆遮挡与局部反光条件下维持可用于后续 EPnP/RANSAC 的二维观测质量。
+
+在损失函数设计方面，针对两类输出采用分项约束并进行加权求和。线缆分割分支采用加权二值交叉熵损失与 Dice 损失相结合的方式进行监督，其表达式分别为
+
+$$
+\mathcal{L}_{\mathrm{wbce}}=-\frac{1}{HW}\sum_{x}\sum_{y}\left(\beta\; M(x,y)\log \hat{M}_c(x,y)+\left(1-M(x,y)\right)\log\left(1-\hat{M}_c(x,y)\right)\right),
+$$
+
+$$
+\beta=\frac{|\Omega_-|}{|\Omega_+|},
+$$
+
+其中，\(\Omega_+\) 表示线缆像素集合，\(\Omega_-\) 表示非线缆像素集合；\(\beta\) 为正负样本权重系数，用于缓解类别不均衡对细长线缆分割的梯度抑制。
+
+$$
+\mathcal{L}_{\mathrm{dice}}=1-\frac{2\sum_{x}\sum_{y}\hat{M}_c(x,y)M(x,y)+\epsilon}{\sum_{x}\sum_{y}\hat{M}_c(x,y)+\sum_{x}\sum_{y}M(x,y)+\epsilon},
+$$
+
+式中，\(M(x,y)\) 表示线缆分割真值标签，\(\hat{M}_c(x,y)\) 表示预测概率，\(\epsilon\) 为平滑项。由此，线缆分支的损失可写为
+
+$$
+\mathcal{L}_{\mathrm{cable}}=\mathcal{L}_{\mathrm{wbce}}+\lambda_{\mathrm{dice}}\mathcal{L}_{\mathrm{dice}},
+$$
+
+其中，\(\lambda_{\mathrm{dice}}\) 为 Dice 损失权重系数。
+
+最终，二级网络的总损失函数定义为
+
+$$
+\mathcal{L}_{\mathrm{seg}}=\lambda_{\mathrm{kp}}\mathcal{L}_{\mathrm{kp}}+\lambda_{\mathrm{cable}}\mathcal{L}_{\mathrm{cable}},
+$$
+
+式中，\(\lambda_{\mathrm{kp}}\) 和 \(\lambda_{\mathrm{cable}}\) 分别表示关键点热力图任务与线缆分割任务的权重系数。
+
+关键点损失函数采用均方误差形式，其表达为
+$$
+\mathcal{L}_{\mathrm{kp}}=\frac{1}{N_k}\sum_{j=1}^{N_k}\sum_{x}\sum_{y}\left(\hat{H}_j(x,y)-H_j(x,y)\right)^2,
+$$
+其中，\(H_j(x,y)\) 为目标高斯热力图，\(\hat{H}_j(x,y)\) 为预测热力图。
+
+联合损失的梯度耦合关系可写为
+$$
+\nabla_{\theta}\mathcal{L}_{\mathrm{seg}}=\lambda_{\mathrm{kp}}\nabla_{\theta}\mathcal{L}_{\mathrm{kp}}+\lambda_{\mathrm{cable}}\nabla_{\theta}\mathcal{L}_{\mathrm{cable}},
+$$
+其中，\(\theta\) 表示二级网络参数。该形式说明关键点与线缆两类监督在共享解码特征上共同影响梯度方向，从而实现并行收敛。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-15\\（空白占位图）}}
+  \caption{二级网络训练与推理效果示意图（关键点热力图峰值定位+线缆精细分割结果可视化）}
+  \label{fig:ch2:deeplab-vis}
+\end{figure}
+
+在训练实现方面，二级网络输入来自一级检测得到的单目标 ROI，并将 ROI 重采样到固定尺度 \(I_{\mathrm{roi}}\in\mathbb{R}^{256\times 256\times 3}\)。网络前向获得关键点热力图 \(\{\hat{H}_j\}\) 与线缆概率图 \(\hat{M}_c\) 后，按上述损失定义计算 \(\mathcal{L}_{\mathrm{kp}}\) 与 \(\mathcal{L}_{\mathrm{cable}}\)，再由权重系数形成 \(\mathcal{L}_{\mathrm{seg}}\)，并通过反向传播更新参数。参数迭代满足
+$$
+\theta_{t+1}=\theta_t-\eta_t\nabla_{\theta}\mathcal{L}_{\mathrm{seg}},
+$$
+其中，\(\eta_t\) 为迭代学习率。由于线缆分支采用加权 BCE 以及 Dice 项，细长线缆在遮挡条件下仍可保持足够的正类梯度贡献；由于关键点分支采用连续高斯软标签监督，热力图峰值在训练过程中趋于稳定，从而降低 soft-argmax 坐标提取的不连续误差。
+
+如图\ref{fig:ch2:deeplab-vis}所示，在典型柔性线缆遮挡工况下，关键点热力图峰值能够稳定落在定位孔中心邻域，且不同关键点通道之间保持区分性；线缆分割概率图在遮挡边界处仍呈现连续的细长响应，二值掩膜较少出现局部收缩或断裂。该趋势与联合损失的性质相一致：当 \(\mathcal{L}_{\mathrm{kp}}\) 下降时，预测热力图与目标高斯软标签在关键点邻域内差异被抑制，进而减小由峰值漂移引起的坐标误差；当 \(\mathcal{L}_{\mathrm{cable}}\) 降低时，加权 BCE 提高正类像素的优化权重，Dice 项度量区域重叠一致性，从而增强遮挡条件下的边界连贯性。该同步优化结果为第 2.5 节 EPnP/RANSAC 位姿解算提供更可靠的二维关键点观测集合，并为第四章线缆形态先验构建提供可复用的线缆掩膜输入。
+
+为了便于量化训练效果，关键点定位误差可定义为
+$$
+d_j=\sqrt{(\hat{x}_j-x_j)^2+(\hat{y}_j-y_j)^2},
+$$
+其中，\((x_j,y_j)\) 为标注关键点坐标，\((\hat{x}_j,\hat{y}_j)\) 为由预测热力图提取的坐标。平均关键点误差写为
+$$
+\mathrm{MAE}_{\mathrm{kp}}=\frac{1}{N_k}\sum_{j=1}^{N_k}d_j.
+$$
+线缆分割质量可用 Dice 系数表征为
+$$
+\mathrm{Dice}=\frac{2\sum_{x}\sum_{y}\hat{M}_c(x,y)M(x,y)}{\sum_{x}\sum_{y}\hat{M}_c(x,y)+\sum_{x}\sum_{y}M(x,y)+\epsilon}.
+$$
+当 \(\mathrm{MAE}_{\mathrm{kp}}\) 随迭代降低且 \(\mathrm{Dice}\) 随迭代提升时，说明输出头改造与联合损失设计能够在遮挡工况下同时提升关键点峰值定位精度与线缆边界一致性，从而满足后续位姿解算与干扰补偿对观测质量的要求。
+
+\section{基于 EPnP 与 RANSAC 的电连接器位姿解算}
+经过二级网络处理后，系统已经获得定位孔、线缆根部和线缆掩膜等局部精细视觉结果。为实现从图像特征到机器人可执行状态的转换，必须进一步结合相机模型和连接器 CAD 几何先验，将二维关键点映射为三维刚体位姿参数。航空机舱场景中的线缆遮挡、局部反光与分割偏差会使少量关键点观测发生明显漂移，若采用普通 PnP 求解，异常点会显著拉偏最终位姿结果。本文采用 EPnP 进行高效初值求解，并利用 RANSAC 基于重投影误差剔除外点，以在保证解算效率的同时增强对遮挡干扰的鲁棒性。
+
+\subsection{相机投影模型与 EPnP 求解}
+位姿解算基于针孔相机模型。设物体系下第 \(i\) 个三维关键点为 \(\mathbf{P}_i^{\mathcal{O}}=[X_i,Y_i,Z_i]^\top\)，相机系下为 \(\mathbf{P}_i^{\mathcal{C}}=\mathbf{R}\mathbf{P}_i^{\mathcal{O}}+\mathbf{t}\)，像素观测为 \(\mathbf{p}_i=[u_i,v_i]^\top\)，则
+$$
+s_i\begin{bmatrix}u_i\\v_i\\1\end{bmatrix}=\mathbf{K}\mathbf{P}_i^{\mathcal{C}},\qquad
+\mathbf{K}=\begin{bmatrix}f_x&0&c_x\\0&f_y&c_y\\0&0&1\end{bmatrix},
+$$
+其中，\(s_i\) 为深度尺度，\(\mathbf{R}\in SO(3)\)、\(\mathbf{t}\in\mathbb{R}^3\) 为待求位姿，\(f_x,f_y\) 为焦距，\(c_x,c_y\) 为主点。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-16\\（空白占位图）}}
+  \caption{相机模型与PnP位姿解算统一示意图（光心\(O\)、图像平面、物体系\(\{\mathcal{O}\}\)与相机系\(\{\mathcal{C}\}\)、三维点\(\mathbf{P}_i^{\mathcal{O}}\)/\(\mathbf{P}_i^{\mathcal{C}}\)、像素\(\mathbf{p}_i\)、控制点\(\mathbf{C}_j\)及位姿\(\mathbf{R},\mathbf{t}\)的几何与解算流程）}
+  \label{fig:ch2:camera-model}
+\end{figure}
+
+如图\ref{fig:ch2:camera-model}所示，物方点经 \(\mathbf{R},\mathbf{t}\) 变换至相机系后由 \(\mathbf{K}\) 投影为像素，二级网络提供的二维关键点即 \(\mathbf{p}_i\)，与 CAD 三维点 \(\mathbf{P}_i^{\mathcal{O}}\) 构成 2D–3D 对应；EPnP 在该对应下通过控制点参数化将位姿求解转化为线性方程组。
+
+本文采用 EPnP 在给定 2D–3D 对应下求 \(\mathbf{R},\mathbf{t}\)。在物体系中取四个非共面控制点 \(\mathbf{C}_j^{\mathcal{O}}\)（\(j=1,\ldots,4\)），由 CAD 与选点规则确定。物方任意关键点用控制点仿射组合表示：
+$$
+\mathbf{P}_i^{\mathcal{O}}=\sum_{j=1}^{4}\alpha_{ij}\mathbf{C}_j^{\mathcal{O}},\qquad \sum_{j=1}^{4}\alpha_{ij}=1,
+$$
+\(\alpha_{ij}\) 仅与物体几何有关，由 \(\mathbf{P}_i^{\mathcal{O}}\) 与 \(\mathbf{C}_j^{\mathcal{O}}\) 预先算得。记控制点在相机系下坐标为 \(\mathbf{c}_j^{\mathcal{C}}=(x_j,y_j,z_j)^\top\)，则相机系下关键点为
+$$
+\mathbf{P}_i^{\mathcal{C}}=\mathbf{R}\mathbf{P}_i^{\mathcal{O}}+\mathbf{t}=\sum_{j=1}^{4}\alpha_{ij}\mathbf{c}_j^{\mathcal{C}}.
+$$
+将投影方程写为归一化像面形式。记 \(\tilde{u}_i=(u_i-c_x)/f_x\)，\(\tilde{v}_i=(v_i-c_y)/f_y\)，则有 \(X_i^{\mathcal{C}}=\tilde{u}_i Z_i^{\mathcal{C}}\)，\(Y_i^{\mathcal{C}}=\tilde{v}_i Z_i^{\mathcal{C}}\)，其中 \(\mathbf{P}_i^{\mathcal{C}}=(X_i^{\mathcal{C}},Y_i^{\mathcal{C}},Z_i^{\mathcal{C}})^\top\)。代入 \(\mathbf{P}_i^{\mathcal{C}}=\sum_j\alpha_{ij}\mathbf{c}_j^{\mathcal{C}}\) 得
+$$
+\sum_{j=1}^{4}\alpha_{ij}x_j=\tilde{u}_i\sum_{j=1}^{4}\alpha_{ij}z_j,\qquad
+\sum_{j=1}^{4}\alpha_{ij}y_j=\tilde{v}_i\sum_{j=1}^{4}\alpha_{ij}z_j.
+$$
+对每个关键点 \(i\) 得到关于 12 个未知量 \(\mathbf{x}=[x_1,y_1,z_1,\ldots,x_4,y_4,z_4]^\top\) 的两个线性方程。设共有 \(n\) 组 2D–3D 对应（本文为四个关键点，\(n=4\)；RANSAC 子集亦取四点），则得到 \(2n\) 个方程的线性方程组 \(\mathbf{A}\mathbf{x}=\mathbf{0}\)（或齐次形式下求 \(\mathbf{x}\) 的非零解再尺度化）。解出 \(\mathbf{c}_j^{\mathcal{C}}\) 后，由物体系与相机系下控制点对应 \(\mathbf{c}_j^{\mathcal{C}}=\mathbf{R}\mathbf{C}_j^{\mathcal{O}}+\mathbf{t}\) 通过最小二乘或 SVD 恢复 \(\mathbf{R}\) 与 \(\mathbf{t}\)，并施以正交化保证 \(\mathbf{R}\in SO(3)\)。
+
+综上，在当前任务下 EPnP 的输入为：二级网络输出的四个二维关键点 \(\mathbf{p}_i\)（三定位孔中心 + 线缆根部）与 CAD 中对应 \(\mathbf{P}_i^{\mathcal{O}}\)；通过上述控制点参数化建立 \(\mathbf{A}\mathbf{x}=\mathbf{0}\)，求解得控制点相机坐标，再反解位姿。四点对应即可建立 8 个方程、12 个未知量，在齐次约束下可求唯一解，与 2.5.2 节 RANSAC 每次抽取的最小子集规模一致，便于在遮挡导致单点偏差时通过多次抽样得到稳定位姿。
+
+\subsection{基于 RANSAC 的外点剔除}
+考虑部分关键点因线缆遮挡、强反光或热力图漂移而产生错误观测，引入 RANSAC 对关键点集合进行鲁棒估计。其优化目标可表示为
+
+$$
+(\hat{\mathbf{R}},\hat{\mathbf{t}})=\arg\min_{\mathbf{R},\mathbf{t}}\sum_{i\in\mathcal{I}}\left\|\mathbf{p}_i-\pi(\mathbf{P}_i,\mathbf{K},\mathbf{R},\mathbf{t})\right\|_2^2,
+$$
+
+式中，\(\mathcal{I}\) 表示内点集合，\(\pi(\cdot)\) 表示相机投影函数。
+
+在本文任务中，RANSAC 的“模型”即由 2.5.1 节 EPnP 基于 2D–3D 对应求得的位姿 \((\mathbf{R},\mathbf{t})\)；“模型假设”指每次从当前关键点集合中随机抽取一组最小子集，用该子集的 2D–3D 对应通过 EPnP 求得一个候选 \((\mathbf{R},\mathbf{t})\)，并假定该位姿在未被遮挡、无漂移的“内点”上成立。由于 EPnP 需至少四组对应方可求解，最小子集规模取为 4，与二级网络输出的四个关键点（三定位孔中心 + 线缆根部）一致；若抽样到的四点中混入因线缆遮挡或热力图峰值漂移导致的错误观测，则本次假设的位姿将偏离真实值，后续用重投影误差筛选出的内点数量会偏少。因此，RANSAC 通过多次随机抽样，以“内点数量最多”的假设作为最终位姿，从而在部分关键点为外点的条件下仍能稳定估计连接器位姿，满足航空机舱遮挡与反光场景下的鲁棒解算需求。
+
+设第 \(i\) 个关键点的重投影误差为
+
+$$
+e_i=\left\|\mathbf{p}_i-\pi(\mathbf{P}_i,\mathbf{K},\mathbf{R},\mathbf{t})\right\|_2^2,
+$$
+
+则其内点判据为 \(e_i<\tau\)；当前方案中取 \(\tau=3\) 像素，以兼顾高精度装配要求与遮挡条件下的鲁棒性。算法\ref{alg:ch2:ransac}给出基于 EPnP 的 RANSAC 位姿估计流程。
+
+\begin{algorithm}[htbp]
+\caption{基于 EPnP 的 RANSAC 位姿估计}
+\label{alg:ch2:ransac}
+\KwIn{二维关键点 \(\{\mathbf{p}_i\}\)，对应三维点 \(\{\mathbf{P}_i^{\mathcal{O}}\}\)，内参 \(\mathbf{K}\)，重投影阈值 \(\tau\)，最大迭代次数 \(N_{\max}\)}
+\KwOut{位姿 \((\hat{\mathbf{R}},\hat{\mathbf{t}})\) 及内点集合 \(\mathcal{I}^*\)}
+\For{\(k=1\) \KwTo \(N_{\max}\)}{
+  从当前对应中随机抽取 4 组 2D–3D 对\;
+  用 EPnP 求解得候选位姿 \((\mathbf{R}_k,\mathbf{t}_k)\)\;
+  对全部关键点计算 \(e_i=\|\mathbf{p}_i-\pi(\mathbf{P}_i^{\mathcal{O}},\mathbf{K},\mathbf{R}_k,\mathbf{t}_k)\|_2^2\)\;
+  统计内点集合 \(\mathcal{I}_k=\{i:e_i<\tau\}\) 的规模 \(|\mathcal{I}_k|\)\;
+  \If{\(|\mathcal{I}_k|>|\mathcal{I}^*|\)}{
+    更新 \(\mathcal{I}^*:=\mathcal{I}_k\)，并记录 \((\mathbf{R}^*,\mathbf{t}^*):=(\mathbf{R}_k,\mathbf{t}_k)\)\;
+  }
+}
+以 \(\mathcal{I}^*\) 为内点，用全部内点重新运行 EPnP（或最小二乘）得到最终 \((\hat{\mathbf{R}},\hat{\mathbf{t}})\)\;
+\Return \((\hat{\mathbf{R}},\hat{\mathbf{t}})\) 与 \(\mathcal{I}^*\)
+\end{algorithm}
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-17\\（空白占位图）}}
+  \caption{EPnP+RANSAC位姿解算流程图（关键点输入→EPnP初值→重投影误差判据→外点剔除→位姿重估）}
+  \label{fig:ch2:pnp-flow}
+\end{figure}
+
+如图\ref{fig:ch2:ransac}所示，RANSAC 外点剔除前后，重投影误差分布与内点集合会发生明显变化。剔除前，受线缆遮挡或热力图漂移影响的关键点对应的 \(e_i\) 较大，若直接采用全部点做 EPnP 或最小二乘，这些外点会拉偏位姿估计。剔除后，仅保留 \(e_i<\tau\) 的内点参与最终位姿求解（或用于对最优假设的再估计），误差分布更集中、内点集合在图像上的空间分布与真实定位孔/线缆根部更一致，从而为后续手眼标定与抓取规划提供更可靠的位姿输入。该效果与算法\ref{alg:ch2:ransac}中“以内点数量最大为准则选取假设、再以内点集合重算位姿”的步骤相对应。实际系统中，最终位姿结果采用 RANSAC 剔除后多帧结果的平均值，以进一步抑制单帧观测噪声、提高位姿输出的稳定性。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-18\\（空白占位图）}}
+  \caption{RANSAC外点剔除效果图（剔除前后重投影误差分布与内点集合可视化）}
+  \label{fig:ch2:ransac}
+\end{figure}
+
+\subsection{手眼标定与坐标系转换}
+为将 2.5.1 与 2.5.2 节得到的相机系下连接器位姿转换为机器人可执行目标，本文采用 Eye-in-Hand 模式完成手眼标定。首先对涉及的各坐标系及变换符号做统一约定。
+
+\textbf{坐标系定义与符号约定。}记机器人基坐标系为 \(\{B\}\)，原点固连于基座，用于描述机械臂各连杆与末端在基座下的位姿；末端法兰坐标系为 \(\{E\}\)，原点位于法兰中心，随机械臂运动；相机坐标系为 \(\{C\}\)，原点为相机光心，\(z\) 轴指前、\(x,y\) 与像面轴一致；目标物体坐标系为 \(\{O\}\)，与连接器 CAD 或位姿解算所用物体系一致。变换矩阵采用左上标“目标系”、右下标“源系”的记法：\( {}^B\mathbf{T}_E \in SE(3)\) 表示将 \(\{E\}\) 下的点或位姿变换到 \(\{B\}\) 下，即 \( \mathbf{p}^B = {}^B\mathbf{T}_E \, \mathbf{p}^E \)。同理，\( {}^E\mathbf{T}_C \) 为相机在末端系下的外参（手眼矩阵），\( {}^C\mathbf{T}_O \) 为 2.5 节 PnP 输出的目标在相机系下的位姿。则目标在基座系下的位姿为
+\begin{equation}
+  \label{eq:ch2:handeye-chain}
+  {}^B\mathbf{T}_O = {}^B\mathbf{T}_E \, {}^E\mathbf{T}_C \, {}^C\mathbf{T}_O.
+\end{equation}
+其中，\( {}^B\mathbf{T}_E \) 由机械臂正运动学实时给出，\( {}^C\mathbf{T}_O \) 由本章级联感知与 EPnP/RANSAC 输出；\( {}^E\mathbf{T}_C \) 为标定未知量，不随机械臂运动改变。
+
+\textbf{手眼标定原理与 Tsai-Lenz 两步法。}在 Eye-in-Hand 下，相机固连于末端，故 \( {}^E\mathbf{T}_C \) 为常值。令机械臂依次运动到 \( i=1,\ldots,N \) 个不同姿态，在每一姿态下由正解得到 \( {}^B\mathbf{T}_E^{(i)} \)，由视觉得到 \( {}^C\mathbf{T}_O^{(i)} \)。记相邻两帧间末端在基座系下的相对运动为 \(\mathbf{A}_i = ({}^B\mathbf{T}_E^{(i)})^{-1} {}^B\mathbf{T}_E^{(i+1)}\)，目标在相机系下的相对运动（等价于相机相对目标的反向运动）为 \(\mathbf{B}_i = ({}^C\mathbf{T}_O^{(i)})^{-1} {}^C\mathbf{T}_O^{(i+1)}\)，则手眼约束可写为 \(\mathbf{A}_i \mathbf{X} = \mathbf{X} \mathbf{B}_i\)，其中 \(\mathbf{X} = {}^E\mathbf{T}_C\) 为待求手眼矩阵。将该式按旋转与平移拆开，记 \(\mathbf{A}_i = (\mathbf{R}_{A_i},\mathbf{t}_{A_i})\)、\(\mathbf{B}_i = (\mathbf{R}_{B_i},\mathbf{t}_{B_i})\)、\(\mathbf{X} = (\mathbf{R}_X,\mathbf{t}_X)\)，有
+
+$$
+\mathbf{R}_{A_i} \mathbf{R}_X = \mathbf{R}_X \mathbf{R}_{B_i}, \qquad
+\mathbf{R}_{A_i} \mathbf{t}_X + \mathbf{t}_{A_i} = \mathbf{R}_X \mathbf{t}_{B_i} + \mathbf{t}_X.
+$$
+
+Tsai-Lenz 两步法先由多组 \(\mathbf{R}_{A_i},\mathbf{R}_{B_i}\) 通过旋转方程求解 \(\mathbf{R}_X\)（可转化为线性方程组或 SVD），再代入平移方程求 \(\mathbf{t}_X\)。本文通过多姿态采样（如 20 组标定图像）构建多组 \((\mathbf{A}_i,\mathbf{B}_i)\)，求解 \(\mathbf{X}\) 并对残差进行评估；依据已有记录，标定后重投影误差可控制在约 0.42 pixels，对应空间位置误差约 0.35 mm，能够满足后续连接器抓取与装配的精度需求。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-19\\（空白占位图）}}
+  \caption{Eye-in-Hand手眼标定过程与坐标系关系图（\(\{B\},\{E\},\{C\},\{O\}\)及\({}^{B}\mathbf{T}_{O}\)链式变换）}
+  \label{fig:ch2:handeye}
+\end{figure}
+
+如图\ref{fig:ch2:handeye}所示，\(\{B\}\)、\(\{E\}\)、\(\{C\}\)、\(\{O\}\) 的几何关系与式~\eqref{eq:ch2:handeye-chain} 的链式相乘顺序一致：基座下的目标位姿由末端位姿、手眼矩阵与相机系下目标位姿依次右乘得到。在航空非结构化环境中，该位姿在基座系下可直接用于机器人执行。
+
+\section{算法验证实验}
+\label{sec:ch2:verify}
+本节面向航空制造场景中“多实例堆叠、金属反光/阴影、柔性线缆遮挡”三类典型干扰，对本章级联视觉感知与位姿解算流程进行端到端验证。流程由 YOLOv8-seg 在整图完成目标实例定位、TagID 识别与粗分割以生成可靠 ROI；在 ROI 内由改进 DeepLabV3+ 输出关键点热力图峰值与线缆精细掩膜；最后由 EPnP/RANSAC 结合 CAD 先验完成连接器 6D 位姿估计并剔除外点，并通过 2.5.3 节手眼矩阵将结果统一到机器人基座坐标系。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-20\\（空白占位图）}}
+  \caption{第二章端到端验证链路图（RGB输入→YOLOv8-seg检测/粗分割/TagID→动态ROI裁剪→改进DeepLabV3+关键点+线缆→EPnP/RANSAC位姿→手眼变换到\(\{B\}\)）}
+  \label{fig:ch2:eval-flow}
+\end{figure}
+
+图\ref{fig:ch2:eval-flow}给出了航空非结构化环境下的端到端验证链路。该链路体现“由粗到精”的信息流：整图尺度上需稳定获得目标实例位置与标签身份，否则局部网络易受背景与多实例混淆；ROI 内关键点与线缆为小尺度特征，整图直接回归易受反光与遮挡产生峰值漂移；位姿解算需显式引入 CAD 先验与投影一致性检验，方能得到可执行的 6D 位姿。检测—精细特征—几何解算—坐标统一由此形成闭环。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-21\\（空白占位图）}}
+  \caption{YOLOv8-seg阶段输出可视化图（多实例堆叠与线缆遮挡场景下的检测框、实例掩膜与TagID识别结果）}
+  \label{fig:ch2:yolo-verify}
+\end{figure}
+
+图\ref{fig:ch2:yolo-verify}展示了 YOLOv8-seg 在复杂背景与多实例堆叠条件下的阶段性输出。该阶段完成实例级分离、身份识别与位置约束：实例掩膜提供连接器粗轮廓，使 ROI 裁剪避开大面积背景与反光；TagID 区分同视野中的不同实例，避免多实例邻近时的 ROI 交叉与目标错配；检测框与置信度支撑 ROI 动态扩展。该阶段输出质量直接制约 ROI 内关键点与线缆分割的稳定性。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-22\\（空白占位图）}}
+  \caption{改进DeepLabV3+阶段输出可视化图（ROI内关键点热力图峰值定位与线缆精细分割结果叠加展示）}
+  \label{fig:ch2:deeplab-verify}
+\end{figure}
+
+图\ref{fig:ch2:deeplab-verify}给出了 ROI 尺度下改进 DeepLabV3+ 的双分支输出效果。与仅回归关键点坐标的方案相比，热力图监督能够在遮挡、反光导致局部纹理不连续时提供更稳定的峰值结构；线缆分割分支将柔性线缆干扰显式表征为像素级掩膜。该阶段的有效性体现在两点：其一，定位孔中心与线缆根部在热力图上呈现集中峰值，便于以 soft-argmax 或峰值搜索得到亚像素级二维观测 \(\mathbf{p}_i\)，从而降低 2.5 节投影误差的上界；其二，线缆掩膜边界在细尺度上与真实轮廓一致，减少“线缆覆盖定位孔边缘”导致的关键点偏移概率。由于本章位姿解算仅依赖四个关键点构成的 2D–3D 对应，该阶段对关键点峰值稳定性的提升将直接转化为 EPnP 初值与 RANSAC 内点一致性提升，从而增强在航空机舱遮挡工况下的解算鲁棒性。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图2-23\\（空白占位图）}}
+  \caption{EPnP/RANSAC位姿估计结果可视化图（模型坐标轴或CAD投影轮廓叠加到图像，显示外点剔除前后的一致性差异）}
+  \label{fig:ch2:pnp-verify}
+\end{figure}
+
+图\ref{fig:ch2:pnp-verify}用于验证“二维观测—三维先验—几何一致性检验”对位姿输出的约束作用。首先，EPnP 利用四个关键点的 2D–3D 对应在 \(SE(3)\) 上求得相机系下目标位姿 \({}^C\mathbf{T}_O\)，将 CAD 先验引入求解，使输出具备明确的物理含义；其次，RANSAC 通过重投影误差一致性对关键点外点进行剔除，避免单个遮挡点或峰值漂移点对位姿的拉偏。可视化叠加（如坐标轴或 CAD 轮廓投影）能够直观体现：当外点存在时，投影轮廓与图像边缘/孔位位置出现偏离；剔除外点并基于内点重估后，投影一致性显著增强，最终位姿满足后续机器人抓取与装配对方向/位置的约束需求。结合 2.5.2 节的多帧平均策略，位姿在时间维度上更平滑，有利于抑制观测抖动对执行稳定性的影响。
+
+\section{本章小结}
+本章围绕航空制造场景下电连接器视觉感知难题，构建了一套由粗到精的级联式识别与位姿估计方法。通过 YOLOv8-seg 在整图中完成目标实例定位、标签 ID 识别与粗分割；随后，在 ROI 区域内利用改进 DeepLabV3+ 实现关键特征提取与线缆精细分割；最后，结合 EPnP 与 RANSAC 完成连接器 6D 位姿解算，并通过手眼标定将结果转换到机器人可执行坐标系中。

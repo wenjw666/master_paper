@@ -1,0 +1,315 @@
+\begin{thebibliography}{10}
+\providecommand{\bibauthor}[1]{#1}
+\providecommand{\bibeditor}[1]{\bibauthor{#1}}
+\providecommand{\bibtranslator}[1]{#1}
+\providecommand{\bibtitle}[1]{#1}
+\providecommand{\bibbooktitle}[1]{#1}
+\providecommand{\bibjournal}[1]{#1}
+\providecommand{\bibmark}[1]{\mbox{#1}}
+\providecommand{\bibcountry}[1]{#1}
+\providecommand{\bibpatentid}[1]{#1}
+\providecommand{\bibedition}[1]{#1}
+\providecommand{\biborganization}[1]{#1}
+\providecommand{\bibaddress}[1]{#1}
+\providecommand{\bibpublisher}[1]{#1}
+\providecommand{\bibinstitution}[1]{#1}
+\providecommand{\bibschool}[1]{#1}
+\providecommand{\bibvolume}[1]{#1}
+\providecommand{\bibnumber}[1]{#1}
+\providecommand{\bibversion}[1]{#1}
+\providecommand{\bibpages}[1]{#1}
+\providecommand{\bibmodifydate}[1]{#1}
+\providecommand{\bibcitedate}[1]{#1}
+\providecommand{\bibyear}[1]{#1}
+\providecommand{\bibdate}[1]{#1}
+\providecommand{\biburl}[1]{\newline\url{#1}}
+
+\bibitem{Lepetit2009}
+\bibauthor{{, et~al}{Lepetit V}{, Moreno-Noguer F}{, Fua P}}\nolinebreak\@.
+  \bibtitle{{EP$n$P}: An Accurate {O($n$)} Solution to the {P$n$P}
+  Problem}\bibmark{[J]}\nolinebreak\@. \bibjournal{International Journal of
+  Computer Vision}, \bibyear{2009}, \bibvolume{81}\bibnumber{(2)}\textnormal{:
+  }\bibpages{155\textnormal{-}166}\nolinebreak\@.
+
+\bibitem{Fischler1981}
+\bibauthor{{, et~al}{Fischler M~A}{, Bolles R~C}}\nolinebreak\@.
+  \bibtitle{Random Sample Consensus: A Paradigm for Model Fitting with
+  Applications to Image Analysis and Automated
+  Cartography}\bibmark{[J]}\nolinebreak\@. \bibjournal{Communications of the
+  ACM}, \bibyear{1981}, \bibvolume{24}\bibnumber{(6)}\textnormal{:
+  }\bibpages{381\textnormal{-}395}\nolinebreak\@.
+
+\bibitem{Ren2015}
+\bibauthor{{, et~al}{Ren S}{, He K}{, Girshick R}{, Sun J}}\nolinebreak\@.
+  \bibtitle{Faster {R-CNN}: Towards Real-Time Object Detection with Region
+  Proposal Networks}\bibmark{[C]} //\thinspace{}\bibbooktitle{Advances in
+  Neural Information Processing Systems\textnormal{: }Vol~28}\nolinebreak\@.
+  \bibyear{2015}\nolinebreak\@.
+
+\bibitem{Redmon2016}
+\bibauthor{{, et~al}{Redmon J}{, Divvala S}{, Girshick R}{, Farhadi
+  A}}\nolinebreak\@. \bibtitle{You Only Look Once: Unified, Real-Time Object
+  Detection}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the IEEE
+  Conference on Computer Vision and Pattern Recognition}\nolinebreak\@.
+  \bibyear{2016}\textnormal{: }\bibpages{779\textnormal{-}788}\nolinebreak\@.
+
+\bibitem{Wang2023yolov7}
+\bibauthor{{, et~al}{Wang C-Y}{, Bochkovskiy A}{, Liao H-Y~M}}\nolinebreak\@.
+  \bibtitle{{YOLOv7}: Trainable Bag-of-Freebies Sets New State-of-the-Art for
+  Real-Time Object Detectors}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/CVF Conference on
+  Computer Vision and Pattern Recognition}\nolinebreak\@.
+  \bibyear{2023}\textnormal{: }\bibpages{7464\textnormal{-}7475}\nolinebreak\@.
+
+\bibitem{He2017maskrcnn}
+\bibauthor{{, et~al}{He K}{, Gkioxari G}{, Doll\'{a}r P}{, Girshick
+  R}}\nolinebreak\@. \bibtitle{Mask {R-CNN}}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE International Conference
+  on Computer Vision}\nolinebreak\@. \bibyear{2017}\textnormal{:
+  }\bibpages{2961\textnormal{-}2969}\nolinebreak\@.
+
+\bibitem{Chen2018deeplabv3plus}
+\bibauthor{{, et~al}{Chen L-C}{, Zhu Y}{, Papandreou G}{, Schroff F}{, Adam
+  H}}\nolinebreak\@. \bibtitle{Encoder-Decoder with Atrous Separable
+  Convolution for Semantic Image Segmentation}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the European Conference on
+  Computer Vision}\nolinebreak\@. \bibyear{2018}\textnormal{:
+  }\bibpages{801\textnormal{-}818}\nolinebreak\@.
+
+\bibitem{Xiang2018posecnn}
+\bibauthor{{, et~al}{Xiang Y}{, Schmidt T}{, Narayanan V}{, Fox
+  D}}\nolinebreak\@. \bibtitle{{PoseCNN}: A Convolutional Neural Network for
+  {6D} Object Pose Estimation in Cluttered Scenes}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Robotics: Science and Systems}\nolinebreak\@.
+  \bibyear{2018}\nolinebreak\@.
+
+\bibitem{Peng2019pvnet}
+\bibauthor{{, et~al}{Peng S}{, Liu Y}{, Huang Q}{, Zhou X}{, Bao
+  H}}\nolinebreak\@. \bibtitle{{PVNet}: Pixel-wise Voting Network for {6DoF}
+  Pose Estimation}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the
+  IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition}\nolinebreak\@. \bibyear{2019}\textnormal{:
+  }\bibpages{4561\textnormal{-}4570}\nolinebreak\@.
+
+\bibitem{Wang2019densefusion}
+\bibauthor{{, et~al}{Wang C}{, Xu D}{, Zhu Y}{, Mart\'{i}n-Mart\'{i}n R}{, Lu
+  C}{, Fei-Fei L}{, Savarese S}}\nolinebreak\@. \bibtitle{{DenseFusion}: {6D}
+  Object Pose Estimation by Iterative Dense Fusion}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/CVF Conference on
+  Computer Vision and Pattern Recognition}\nolinebreak\@.
+  \bibyear{2019}\textnormal{: }\bibpages{3343\textnormal{-}3352}\nolinebreak\@.
+
+\bibitem{He2020pvn3d}
+\bibauthor{{, et~al}{He Y}{, Sun W}{, Huang H}{, Liu J}{, Fan H}{, Sun
+  J}}\nolinebreak\@. \bibtitle{{PVN3D}: A Deep Point-wise {3D} Keypoints Voting
+  Network for {6DoF} Pose Estimation}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/CVF Conference on
+  Computer Vision and Pattern Recognition}\nolinebreak\@.
+  \bibyear{2020}\textnormal{:
+  }\bibpages{11632\textnormal{-}11641}\nolinebreak\@.
+
+\bibitem{Song2020hybridpose}
+\bibauthor{{, et~al}{Song C}{, Song J}{, Huang Q}}\nolinebreak\@.
+  \bibtitle{{HybridPose}: {6D} Object Pose Estimation under Hybrid
+  Representations}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the
+  IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition}\nolinebreak\@. \bibyear{2020}\textnormal{:
+  }\bibpages{431\textnormal{-}440}\nolinebreak\@.
+
+\bibitem{He2021ffb6d}
+\bibauthor{{, et~al}{He Y}{, Huang H}{, Fan H}{, Chen Q}{, Sun
+  J}}\nolinebreak\@. \bibtitle{{FFB6D}: A Full Flow Bidirectional Fusion
+  Network for {6D} Pose Estimation}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/CVF Conference on
+  Computer Vision and Pattern Recognition}\nolinebreak\@.
+  \bibyear{2021}\textnormal{: }\bibpages{3003\textnormal{-}3013}\nolinebreak\@.
+
+\bibitem{Labbe2020cosypose}
+\bibauthor{{, et~al}{Labb\'{e} Y}{, Carpentier J}{, Aubry M}{, Sivic
+  J}}\nolinebreak\@. \bibtitle{{CosyPose}: Consistent Multi-view Multi-object
+  {6D} Pose Estimation}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of
+  the European Conference on Computer Vision}\nolinebreak\@.
+  \bibyear{2020}\textnormal{: }\bibpages{574\textnormal{-}591}\nolinebreak\@.
+
+\bibitem{Su2022zebrapose}
+\bibauthor{{, et~al}{Su Y}{, Salber M}{, Gnanapragasam T}{, Wang Y}{, Harada
+  T}}\nolinebreak\@. \bibtitle{{ZebraPose}: Coarse to Fine Surface Encoding for
+  {6DoF} Object Pose Estimation}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/CVF Conference on
+  Computer Vision and Pattern Recognition}\nolinebreak\@.
+  \bibyear{2022}\textnormal{: }\bibpages{6738\textnormal{-}6748}\nolinebreak\@.
+
+\bibitem{Tang2018}
+\bibauthor{{, et~al}{Tang C}{, Lin H-C}{, Tomizuka M}}\nolinebreak\@.
+  \bibtitle{A Framework for Manipulating Deformable Linear Objects by Coherent
+  Point Drift}\bibmark{[J]}\nolinebreak\@. \bibjournal{IEEE Robotics and
+  Automation Letters}, \bibyear{2018},
+  \bibvolume{3}\bibnumber{(4)}\textnormal{:
+  }\bibpages{3426\textnormal{-}3433}\nolinebreak\@.
+
+\bibitem{Caporali2023}
+\bibauthor{{, et~al}{Caporali A}{, Galassi K}{, Zanella R}{, Palli
+  G}}\nolinebreak\@. \bibtitle{{DLO3DS}: Deformable Linear Objects {3D} Shape
+  Estimation in Cluttered Environments}\bibmark{[J]}\nolinebreak\@.
+  \bibjournal{IEEE Robotics and Automation Letters}, \bibyear{2023},
+  \bibvolume{8}\bibnumber{(6)}\textnormal{:
+  }\bibpages{3310\textnormal{-}3317}\nolinebreak\@.
+
+\bibitem{Mou2022}
+\bibauthor{{, et~al}{Mou F}{, Gao J}{, Chen W}{, Zhang J}{, Wu
+  X}}\nolinebreak\@. \bibtitle{A Learning-Based Cable Coupling Effect Modeling
+  for Robot Manipulation with Heavy Industrial
+  Cables}\bibmark{[J]}\nolinebreak\@. \bibjournal{IEEE Transactions on
+  Industrial Electronics}, \bibyear{2022},
+  \bibvolume{69}\bibnumber{(12)}\textnormal{:
+  }\bibpages{13363\textnormal{-}13373}\nolinebreak\@.
+
+\bibitem{Kuffner2000}
+\bibauthor{{, et~al}{Kuffner J~J}{, LaValle S~M}}\nolinebreak\@.
+  \bibtitle{{RRT-Connect}: An Efficient Approach to Single-Query Path
+  Planning}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the IEEE
+  International Conference on Robotics and Automation}\nolinebreak\@.
+  \bibyear{2000}\textnormal{: }\bibpages{995\textnormal{-}1001}\nolinebreak\@.
+
+\bibitem{Hsu2003}
+\bibauthor{{, et~al}{Hsu D}{, Jiang T}{, Reif J}{, Sun Z}}\nolinebreak\@.
+  \bibtitle{The Bridge Test for Sampling Narrow Passages with Probabilistic
+  Roadmap Planners}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the
+  IEEE International Conference on Robotics and Automation}\nolinebreak\@.
+  \bibyear{2003}\textnormal{: }\bibpages{4420\textnormal{-}4426}\nolinebreak\@.
+
+\bibitem{Karaman2011}
+\bibauthor{{, et~al}{Karaman S}{, Frazzoli E}}\nolinebreak\@.
+  \bibtitle{Sampling-based Algorithms for Optimal Motion
+  Planning}\bibmark{[J]}\nolinebreak\@. \bibjournal{International Journal of
+  Robotics Research}, \bibyear{2011},
+  \bibvolume{30}\bibnumber{(7)}\textnormal{:
+  }\bibpages{846\textnormal{-}894}\nolinebreak\@.
+
+\bibitem{Gammell2014}
+\bibauthor{{, et~al}{Gammell J~D}{, Srinivasa S~S}{, Barfoot
+  T~D}}\nolinebreak\@. \bibtitle{Informed {RRT*}: Optimal Sampling-based Path
+  Planning Focused via Direct Sampling of an Admissible Ellipsoidal
+  Heuristic}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the
+  IEEE/RSJ International Conference on Intelligent Robots and
+  Systems}\nolinebreak\@. \bibyear{2014}\textnormal{:
+  }\bibpages{2997\textnormal{-}3004}\nolinebreak\@.
+
+\bibitem{Gammell2015}
+\bibauthor{{, et~al}{Gammell J~D}{, Srinivasa S~S}{, Barfoot
+  T~D}}\nolinebreak\@. \bibtitle{Batch Informed Trees ({BIT*}): Sampling-based
+  Optimal Planning via the Heuristically Guided Search of Implicit Random
+  Geometric Graphs}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the
+  IEEE International Conference on Robotics and Automation}\nolinebreak\@.
+  \bibyear{2015}\textnormal{: }\bibpages{3067\textnormal{-}3074}\nolinebreak\@.
+
+\bibitem{Zucker2013}
+\bibauthor{{, et~al}{Zucker M}{, Ratliff N}{, Dragan A~D}{, Pivtoraiko M}{,
+  Klingensmith M}{, Dellin C~M}{, Bagnell J~A}{, Srinivasa S~S}}\nolinebreak\@.
+  \bibtitle{{CHOMP}: Covariant Hamiltonian Optimization for Motion
+  Planning}\bibmark{[J]}\nolinebreak\@. \bibjournal{International Journal of
+  Robotics Research}, \bibyear{2013},
+  \bibvolume{32}\bibnumber{(9-10)}\textnormal{:
+  }\bibpages{1164\textnormal{-}1193}\nolinebreak\@.
+
+\bibitem{Mousavian2019}
+\bibauthor{{, et~al}{Mousavian A}{, Eppner C}{, Fox D}}\nolinebreak\@.
+  \bibtitle{{6-DOF GraspNet}: Variational Grasp Generation for Object
+  Manipulation}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the
+  IEEE/CVF International Conference on Computer Vision}\nolinebreak\@.
+  \bibyear{2019}\textnormal{: }\bibpages{2901\textnormal{-}2910}\nolinebreak\@.
+
+\bibitem{Fang2020}
+\bibauthor{{, et~al}{Fang H-S}{, Wang C}{, Gou M}{, Lu C}}\nolinebreak\@.
+  \bibtitle{{GraspNet-1Billion}: A Large-Scale Benchmark for General Object
+  Grasping}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the
+  IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition}\nolinebreak\@. \bibyear{2020}\textnormal{:
+  }\bibpages{11444\textnormal{-}11453}\nolinebreak\@.
+
+\bibitem{Sundermeyer2021}
+\bibauthor{{, et~al}{Sundermeyer M}{, Mousavian A}{, Triebel R}{, Fox
+  D}}\nolinebreak\@. \bibtitle{{Contact-GraspNet}: Efficient {6-DoF} Grasp
+  Generation in Cluttered Scenes}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE International Conference
+  on Robotics and Automation}\nolinebreak\@. \bibyear{2021}\textnormal{:
+  }\bibpages{13438\textnormal{-}13444}\nolinebreak\@.
+
+\bibitem{Whitney1982}
+\bibauthor{{, et~al}{Whitney D~E}}\nolinebreak\@. \bibtitle{Quasi-Static
+  Assembly of Compliantly Supported Rigid Parts}\bibmark{[J]}\nolinebreak\@.
+  \bibjournal{ASME Journal of Dynamic Systems, Measurement, and Control},
+  \bibyear{1982}, \bibvolume{104}\bibnumber{(1)}\textnormal{:
+  }\bibpages{65\textnormal{-}77}\nolinebreak\@.
+
+\bibitem{Hogan1985}
+\bibauthor{{, et~al}{Hogan N}}\nolinebreak\@. \bibtitle{Impedance Control: An
+  Approach to Manipulation: {Part I}---Theory}\bibmark{[J]}\nolinebreak\@.
+  \bibjournal{ASME Journal of Dynamic Systems, Measurement, and Control},
+  \bibyear{1985}, \bibvolume{107}\bibnumber{(1)}\textnormal{:
+  }\bibpages{1\textnormal{-}7}\nolinebreak\@.
+
+\bibitem{Inoue2017}
+\bibauthor{{, et~al}{Inoue T}{, De~Magistris G}{, Munawar A}{, Yokoya T}{,
+  Tachibana R}}\nolinebreak\@. \bibtitle{Deep Reinforcement Learning for High
+  Precision Assembly Tasks}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/RSJ International
+  Conference on Intelligent Robots and Systems}\nolinebreak\@.
+  \bibyear{2017}\textnormal{: }\bibpages{819\textnormal{-}825}\nolinebreak\@.
+
+\bibitem{Vecerik2017}
+\bibauthor{{, et~al}{Vecerik M}{, Hester T}{, Scholz J}{, Wang F}{, Pietquin
+  O}{, Piot B}{, Heess N}{, Roth\"{o}rl T}{, Lampe T}{, Riedmiller
+  M}}\nolinebreak\@. \bibtitle{Leveraging Demonstrations for Deep Reinforcement
+  Learning on Robotics Problems with Sparse
+  Rewards}\bibmark{[J]}\nolinebreak\@. \bibjournal{arXiv preprint
+  arXiv:1707.08817}, \bibyear{2017}\nolinebreak\@.
+
+\bibitem{Beltran2020}
+\bibauthor{{, et~al}{Beltran-Hernandez C~C}{, Petit D}{, Ramirez-Alpizar I~G}{,
+  Harada K}}\nolinebreak\@. \bibtitle{Variable Compliance Control for Robotic
+  Peg-in-Hole Assembly: A Deep-Reinforcement-Learning
+  Approach}\bibmark{[J]}\nolinebreak\@. \bibjournal{Applied Sciences},
+  \bibyear{2020}, \bibvolume{10}\bibnumber{(19)}\textnormal{:
+  }\bibpages{6923}\nolinebreak\@.
+
+\bibitem{Tobin2017}
+\bibauthor{{, et~al}{Tobin J}{, Fong R}{, Ray A}{, Schneider J}{, Zaremba W}{,
+  Abbeel P}}\nolinebreak\@. \bibtitle{Domain Randomization for Transferring
+  Deep Neural Networks from Simulation to the Real World}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/RSJ International
+  Conference on Intelligent Robots and Systems}\nolinebreak\@.
+  \bibyear{2017}\textnormal{: }\bibpages{23\textnormal{-}30}\nolinebreak\@.
+
+\bibitem{Narang2022}
+\bibauthor{{, et~al}{Narang Y}{, Storey K}{, Akinola I}{, Macklin M}{, Reist
+  P}{, Wawrzyniak L}{, Handa A}{, Ratliff N}{, Fox D}}\nolinebreak\@.
+  \bibtitle{Factory: Fast Contact for Robotic Assembly}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Robotics: Science and Systems}\nolinebreak\@.
+  \bibyear{2022}\nolinebreak\@.
+
+\bibitem{Schoettler2020}
+\bibauthor{{, et~al}{Schoettler G}{, Nair A}{, Ojea J~A}{, Levine S}{, Solowjow
+  E}}\nolinebreak\@. \bibtitle{Meta-Reinforcement Learning for Robotic
+  Industrial Insertion Tasks}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/RSJ International
+  Conference on Intelligent Robots and Systems}\nolinebreak\@.
+  \bibyear{2020}\textnormal{: }\bibpages{9728\textnormal{-}9735}\nolinebreak\@.
+
+\bibitem{Luo2021}
+\bibauthor{{, et~al}{Luo J}{, Solowjow E}{, Wen C}{, Ojea J~A}{, Agogino A~M}{,
+  Tamar A}{, Abbeel P}}\nolinebreak\@. \bibtitle{Robust Multi-Modal Policies
+  for Industrial Assembly via Reinforcement Learning}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/RSJ International
+  Conference on Intelligent Robots and Systems}\nolinebreak\@.
+  \bibyear{2021}\textnormal{: }\bibpages{6380\textnormal{-}6387}\nolinebreak\@.
+
+\bibitem{Jiang2023}
+\bibauthor{{, et~al}{Jiang Z}{, Chen X}}\nolinebreak\@. \bibtitle{A Robotic
+  Assembly Strategy of Large-Diameter Peg-in-Hole Based on Deep Reinforcement
+  Learning with Fuzzy Action Generator}\bibmark{[J]}\nolinebreak\@.
+  \bibjournal{Assembly Automation}, \bibyear{2023},
+  \bibvolume{43}\bibnumber{(3)}\textnormal{:
+  }\bibpages{353\textnormal{-}365}\nolinebreak\@.
+
+\end{thebibliography}

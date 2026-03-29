@@ -1,0 +1,31 @@
+% !TeX program = xelatex
+\documentclass[fontset=windows,type=master,campus=harbin,library=true]{hithesisbook}
+\usepackage{hithesis}
+\graphicspath{{figures/}}
+
+\begin{document}
+\frontmatter
+\input{front/cover}
+\makecover
+\tableofcontents
+
+\mainmatter
+% 默认编译第1~5章；需要单章调试时，可临时注释其它章节
+\include{body/chapter01}
+\include{body/chapter02}
+\include{body/chapter03}
+\include{body/chapter04}
+\include{body/chapter05}
+
+\backmatter
+\include{back/conclusion}
+\bibliographystyle{hithesis}
+\bibliography{reference}
+% \authorization
+% 按当前阶段需要，暂不编译：致谢、攻读期间成果（第6章）、附录
+% \include{back/acknowledgements}
+% \include{back/publications}
+% \begin{appendix}
+% \input{back/appA}
+% \end{appendix}
+\end{document}

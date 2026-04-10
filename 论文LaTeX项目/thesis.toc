@@ -14,72 +14,76 @@
 \contentsline {section}{\numberline {2.1}引言}{12}{section.2.1}%
 \contentsline {section}{\numberline {2.2}标签识别数据集的制作与分析}{12}{section.2.2}%
 \contentsline {subsection}{\numberline {2.2.1}数据采集与标注方案}{13}{subsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.2.2}数据增强}{14}{subsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.2.3}数据集特征分析}{15}{subsection.2.2.3}%
-\contentsline {section}{\numberline {2.3}基于 YOLOv8-seg 的目标检测与实例分割}{17}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}算法选型与总体结构}{17}{subsection.2.3.1}%
-\contentsline {subsection}{\numberline {2.3.2}损失函数与训练参数设置}{19}{subsection.2.3.2}%
-\contentsline {subsection}{\numberline {2.3.3}动态 ROI 裁剪策略}{22}{subsection.2.3.3}%
-\contentsline {section}{\numberline {2.4}基于改进 DeepLabV3+的关键特征提取与线缆分割}{23}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}网络模型分析}{24}{subsection.2.4.1}%
-\contentsline {subsection}{\numberline {2.4.2}高斯热力图建模方法}{25}{subsection.2.4.2}%
-\contentsline {subsection}{\numberline {2.4.3}改进输出头与联合损失设计}{28}{subsection.2.4.3}%
-\contentsline {section}{\numberline {2.5}基于 EPnP 与 RANSAC 的电连接器位姿解算}{31}{section.2.5}%
-\contentsline {subsection}{\numberline {2.5.1}相机投影模型与 EPnP 求解}{32}{subsection.2.5.1}%
-\contentsline {subsection}{\numberline {2.5.2}基于 RANSAC 的外点剔除}{33}{subsection.2.5.2}%
-\contentsline {subsection}{\numberline {2.5.3}手眼标定与坐标系转换}{35}{subsection.2.5.3}%
-\contentsline {section}{\numberline {2.6}算法验证实验}{36}{section.2.6}%
-\contentsline {section}{\numberline {2.7}本章小结}{39}{section.2.7}%
-\contentsline {chapter}{\numberline {第3章}电连接器自主抓取方法研究}{40}{chapter.3}%
-\contentsline {section}{\numberline {3.1}引言}{40}{section.3.1}%
-\contentsline {section}{\numberline {3.2}端到端 6D 抓取生成网络}{40}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}抓取位姿参数化表示}{40}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}基于局部点云的网络输入构建}{41}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}改进的 Contact-GraspNet 网络结构}{44}{subsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.2.4}正负样本判定与损失函数设计}{46}{subsection.3.2.4}%
-\contentsline {section}{\numberline {3.3}抓取点选择策略研究}{48}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}基于逆运动学的可达性判别}{48}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}面向线缆障碍的安全间隙评价}{50}{subsection.3.3.2}%
-\contentsline {subsection}{\numberline {3.3.3}面向任务的姿态相容性评价}{52}{subsection.3.3.3}%
-\contentsline {subsection}{\numberline {3.3.4}综合评分函数与最优抓取确定}{52}{subsection.3.3.4}%
-\contentsline {section}{\numberline {3.4}GRRT-Connect 运动规划算法研究}{53}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}混合障碍物地图构建}{54}{subsection.3.4.1}%
-\contentsline {subsection}{\numberline {3.4.2}引导式采样与双树扩展策略}{56}{subsection.3.4.2}%
-\contentsline {subsection}{\numberline {3.4.3}路径生成与后处理优化}{60}{subsection.3.4.3}%
-\contentsline {section}{\numberline {3.5}实验与结果分析}{63}{section.3.5}%
-\contentsline {section}{\numberline {3.6}本章小结}{65}{section.3.6}%
-\contentsline {chapter}{\numberline {第4章}电连接器柔顺装配控制方法研究}{66}{chapter.4}%
-\contentsline {section}{\numberline {4.1}引言}{66}{section.4.1}%
-\contentsline {section}{\numberline {4.2}含线缆干扰的轴孔装配动力学建模与控制器设计}{66}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}轴孔装配误差描述}{66}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}含线缆干扰的装配动力学模型}{68}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}视觉前馈变刚度阻抗控制器设计}{71}{subsection.4.2.3}%
-\contentsline {section}{\numberline {4.3}面向轴孔对齐插接任务的强化学习环境构建}{74}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}任务形式化与状态空间设计}{75}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}动作空间与下位控制约束}{76}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}稀疏奖励与成功判定机制}{78}{subsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.3.4}人在回路交互与数据记录机制}{79}{subsection.4.3.4}%
-\contentsline {section}{\numberline {4.4}人在回路强化学习装配策略学习与虚实迁移方法}{81}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}人在回路装配策略学习框架}{81}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}装配策略网络结构与在线优化训练方法}{83}{subsection.4.4.2}%
-\contentsline {subsubsection}{\numberline {4.4.2.1}基于预训练视觉编码的策略与价值网络结构}{83}{subsubsection.4.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.4.2.2}基于异质回放均衡采样的联合优化模型}{84}{subsubsection.4.4.2.2}%
-\contentsline {subsubsection}{\numberline {4.4.2.3}执行-学习异步架构与人在回路训练流程}{85}{subsubsection.4.4.2.3}%
-\contentsline {subsection}{\numberline {4.4.3}基于 IsaacSim 的仿真预训练与虚实迁移方法}{86}{subsection.4.4.3}%
-\contentsline {section}{\numberline {4.5}装配实验与结果分析}{87}{section.4.5}%
-\contentsline {subsection}{\numberline {4.5.1}IsaacSim 仿真预训练验证}{88}{subsection.4.5.1}%
-\contentsline {subsection}{\numberline {4.5.2}真实平台人在回路训练与装配验证}{89}{subsection.4.5.2}%
-\contentsline {section}{\numberline {4.6}本章小结}{91}{section.4.6}%
-\contentsline {chapter}{\numberline {第5章}电连接器机器人自主装配系统集成与综合实验研究}{92}{chapter.5}%
-\contentsline {section}{\numberline {5.1}引言}{92}{section.5.1}%
-\contentsline {section}{\numberline {5.2}实验平台搭建与系统集成}{92}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}航空机舱模拟环境与硬件构成}{92}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}系统标定与精度分析}{94}{subsection.5.2.2}%
-\contentsline {subsection}{\numberline {5.2.3}软件体系与数据流闭环}{95}{subsection.5.2.3}%
-\contentsline {section}{\numberline {5.3}感知---规划子系统联合验证实验}{97}{section.5.3}%
-\contentsline {section}{\numberline {5.4}面向航空制造的全流程综合验证}{101}{section.5.4}%
-\contentsline {subsection}{\numberline {5.4.1}实验流程设计}{101}{subsection.5.4.1}%
-\contentsline {subsection}{\numberline {5.4.2}综合效能评估与结果分析}{102}{subsection.5.4.2}%
-\contentsline {section}{\numberline {5.5}本章小结}{105}{section.5.5}%
-\contentsline {chapter}{\heiti 结\hspace {\ccwd }论}{106}{section*.14}%
-\contentsline {chapter}{\heiti 参考文献}{107}{section*.17}%
+\contentsline {subsection}{\numberline {2.2.2}数据增强}{17}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}数据集特征分析}{18}{subsection.2.2.3}%
+\contentsline {section}{\numberline {2.3}基于 YOLOv8-seg 的目标检测与实例分割}{19}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}算法选型与总体结构}{19}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}损失函数与训练参数设置}{21}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}动态 ROI 裁剪策略}{23}{subsection.2.3.3}%
+\contentsline {section}{\numberline {2.4}基于改进 DeepLabV3+的关键特征提取与线缆分割}{25}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}网络模型分析}{25}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}高斯热力图建模方法}{26}{subsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.4.3}改进输出头与联合损失设计}{30}{subsection.2.4.3}%
+\contentsline {section}{\numberline {2.5}基于 EPnP 与 RANSAC 的电连接器位姿解算}{36}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}相机投影模型与 EPnP 求解}{36}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {2.5.2}基于 RANSAC 的外点剔除}{39}{subsection.2.5.2}%
+\contentsline {subsection}{\numberline {2.5.3}手眼标定与坐标系转换}{42}{subsection.2.5.3}%
+\contentsline {section}{\numberline {2.6}算法验证实验}{43}{section.2.6}%
+\contentsline {section}{\numberline {2.7}本章小结}{47}{section.2.7}%
+\contentsline {chapter}{\numberline {第3章}电连接器自主抓取方法研究}{48}{chapter.3}%
+\contentsline {section}{\numberline {3.1}引言}{48}{section.3.1}%
+\contentsline {section}{\numberline {3.2}端到端 6D 抓取生成网络}{48}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}抓取位姿参数化表示}{48}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}基于局部点云的网络输入构建}{49}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}基于 Contact-GraspNet 的抓取网络结构}{52}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}正负样本判定与损失函数设计}{55}{subsection.3.2.4}%
+\contentsline {section}{\numberline {3.3}抓取点选择策略研究}{58}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}专用指尖结构设计与力封闭性评估}{58}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}基于逆运动学的可达性判别}{61}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}面向线缆障碍的安全间隙评价}{63}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}面向任务的姿态相容性评价}{64}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.5}综合评分函数与最优抓取确定}{65}{subsection.3.3.5}%
+\contentsline {section}{\numberline {3.4}GRRT-Connect 运动规划算法研究}{67}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}混合障碍物地图构建}{67}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}引导式采样与双树扩展策略}{71}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}路径生成与后处理优化}{75}{subsection.3.4.3}%
+\contentsline {section}{\numberline {3.5}实验与结果分析}{79}{section.3.5}%
+\contentsline {section}{\numberline {3.6}本章小结}{81}{section.3.6}%
+\contentsline {chapter}{\numberline {第4章}电连接器柔顺装配控制方法研究}{83}{chapter.4}%
+\contentsline {section}{\numberline {4.1}引言}{83}{section.4.1}%
+\contentsline {section}{\numberline {4.2}含线缆干扰的轴孔装配动力学建模与控制器设计}{83}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}轴孔装配误差描述}{83}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}含线缆干扰的装配动力学模型}{85}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}视觉前馈变刚度阻抗控制器设计}{89}{subsection.4.2.3}%
+\contentsline {section}{\numberline {4.3}面向轴孔对齐插接任务的强化学习环境构建}{96}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}任务形式化与状态空间设计}{96}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}动作空间与下位控制约束}{98}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}稀疏奖励与成功判定机制}{99}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}人在回路交互与数据记录机制}{102}{subsection.4.3.4}%
+\contentsline {section}{\numberline {4.4}人在回路强化学习装配策略学习与虚实迁移方法}{103}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}人在回路装配策略学习框架}{104}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}装配策略网络结构与在线优化训练方法}{105}{subsection.4.4.2}%
+\contentsline {subsubsection}{\numberline {4.4.2.1}基于预训练视觉编码的策略与价值网络结构}{105}{subsubsection.4.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.4.2.2}基于异质回放均衡采样的联合优化模型}{107}{subsubsection.4.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.4.2.3}执行-学习异步架构与人在回路训练流程}{108}{subsubsection.4.4.2.3}%
+\contentsline {subsection}{\numberline {4.4.3}基于 IsaacSim 的仿真预训练与虚实迁移方法}{110}{subsection.4.4.3}%
+\contentsline {section}{\numberline {4.5}装配实验与结果分析}{113}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}变刚度阻抗控制器实机验证}{113}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}虚实迁移训练与实机装配实验}{114}{subsection.4.5.2}%
+\contentsline {section}{\numberline {4.6}本章小结}{117}{section.4.6}%
+\contentsline {chapter}{\numberline {第5章}电连接器机器人自主装配系统集成与综合实验研究}{119}{chapter.5}%
+\contentsline {section}{\numberline {5.1}引言}{119}{section.5.1}%
+\contentsline {section}{\numberline {5.2}实验平台搭建与系统集成}{119}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}航空机舱模拟环境与硬件构成}{119}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}系统标定与精度分析}{122}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}软件体系与数据流闭环}{125}{subsection.5.2.3}%
+\contentsline {section}{\numberline {5.3}感知---规划子系统联合验证实验}{127}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}三种典型工况设置}{127}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}感知识别与抓取验证}{128}{subsection.5.3.2}%
+\contentsline {subsection}{\numberline {5.3.3}规划消融对比实验}{130}{subsection.5.3.3}%
+\contentsline {section}{\numberline {5.4}面向航空制造的全流程综合验证}{133}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}实验流程设计}{133}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}三种场景下的全流程实验结果与典型失败分析}{134}{subsection.5.4.2}%
+\contentsline {section}{\numberline {5.5}本章小结}{138}{section.5.5}%
+\contentsline {chapter}{\heiti 结\hspace {\ccwd }论}{140}{section*.14}%
+\contentsline {chapter}{\heiti 参考文献}{141}{section*.17}%

@@ -31,14 +31,6 @@
   Computer Vision}, \bibyear{2009}, \bibvolume{81}\bibnumber{(2)}\textnormal{:
   }\bibpages{155\textnormal{-}166}\nolinebreak\@.
 
-\bibitem{Fischler1981}
-\bibauthor{{, et~al}{Fischler M~A}{, Bolles R~C}}\nolinebreak\@.
-  \bibtitle{Random Sample Consensus: A Paradigm for Model Fitting with
-  Applications to Image Analysis and Automated
-  Cartography}\bibmark{[J]}\nolinebreak\@. \bibjournal{Communications of the
-  ACM}, \bibyear{1981}, \bibvolume{24}\bibnumber{(6)}\textnormal{:
-  }\bibpages{381\textnormal{-}395}\nolinebreak\@.
-
 \bibitem{Ren2015}
 \bibauthor{{, et~al}{Ren S}{, He K}{, Girshick R}{, Sun J}}\nolinebreak\@.
   \bibtitle{Faster {R-CNN}: Towards Real-Time Object Detection with Region
@@ -164,19 +156,27 @@
   \bibvolume{69}\bibnumber{(12)}\textnormal{:
   }\bibpages{13363\textnormal{-}13373}\nolinebreak\@.
 
+\bibitem{Li2019cdpn}
+\bibauthor{{, et~al}{Li Z}{, Wang G}{, Ji X}}\nolinebreak\@. \bibtitle{{CDPN}:
+  Coordinates-Based Disentangled Pose Network for Real-Time {RGB}-Based {6-DoF}
+  Object Pose Estimation}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings
+  of the IEEE/CVF International Conference on Computer Vision}\nolinebreak\@.
+  \bibyear{2019}\textnormal{: }\bibpages{7678\textnormal{-}7687}\nolinebreak\@.
+
+\bibitem{Wu2020connector}
+\bibauthor{{, et~al}{Wu W}{, Li Q}}\nolinebreak\@. \bibtitle{Machine Vision
+  Inspection of Electrical Connectors Based on Improved
+  {YOLOv3}}\bibmark{[J/OL]}\nolinebreak\@. \bibjournal{IEEE Access},
+  \bibyear{2020}, \bibvolume{8}\textnormal{:
+  }\bibpages{166184\textnormal{-}166196}\nolinebreak\@.
+  \url{http://dx.doi.org/10.1109/ACCESS.2020.3022405}\nolinebreak\@.
+
 \bibitem{Kuffner2000}
 \bibauthor{{, et~al}{Kuffner J~J}{, LaValle S~M}}\nolinebreak\@.
   \bibtitle{{RRT-Connect}: An Efficient Approach to Single-Query Path
   Planning}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the IEEE
   International Conference on Robotics and Automation}\nolinebreak\@.
   \bibyear{2000}\textnormal{: }\bibpages{995\textnormal{-}1001}\nolinebreak\@.
-
-\bibitem{Hsu2003}
-\bibauthor{{, et~al}{Hsu D}{, Jiang T}{, Reif J}{, Sun Z}}\nolinebreak\@.
-  \bibtitle{The Bridge Test for Sampling Narrow Passages with Probabilistic
-  Roadmap Planners}\bibmark{[C]} //\thinspace{}\bibbooktitle{Proceedings of the
-  IEEE International Conference on Robotics and Automation}\nolinebreak\@.
-  \bibyear{2003}\textnormal{: }\bibpages{4420\textnormal{-}4426}\nolinebreak\@.
 
 \bibitem{Karaman2011}
 \bibauthor{{, et~al}{Karaman S}{, Frazzoli E}}\nolinebreak\@.
@@ -234,6 +234,22 @@
   //\thinspace{}\bibbooktitle{Proceedings of the IEEE International Conference
   on Robotics and Automation}\nolinebreak\@. \bibyear{2021}\textnormal{:
   }\bibpages{13438\textnormal{-}13444}\nolinebreak\@.
+
+\bibitem{Wang2021graspness}
+\bibauthor{{, et~al}{Wang C}{, Fang H-S}{, Gou M}{, Fang H}{, Gao J}{, Lu
+  C}}\nolinebreak\@. \bibtitle{Graspness Discovery in Clutters for Fast and
+  Accurate Grasp Detection}\bibmark{[C]}
+  //\thinspace{}\bibbooktitle{Proceedings of the IEEE/CVF International
+  Conference on Computer Vision}\nolinebreak\@. \bibyear{2021}\textnormal{:
+  }\bibpages{15964\textnormal{-}15973}\nolinebreak\@.
+
+\bibitem{Fang2023anygrasp}
+\bibauthor{{, et~al}{Fang H-S}{, Wang C}{, Fang H}{, Gou M}{, Liu J}{, Yan H}{,
+  Liu W}{, Xie Y}{, Lu C}}\nolinebreak\@. \bibtitle{{AnyGrasp}: Robust and
+  Efficient Grasp Perception in Spatial and Temporal
+  Domains}\bibmark{[J]}\nolinebreak\@. \bibjournal{IEEE Transactions on
+  Robotics}, \bibyear{2023}, \bibvolume{39}\bibnumber{(5)}\textnormal{:
+  }\bibpages{3929\textnormal{-}3945}\nolinebreak\@.
 
 \bibitem{Whitney1982}
 \bibauthor{{, et~al}{Whitney D~E}}\nolinebreak\@. \bibtitle{Quasi-Static
@@ -311,5 +327,14 @@
   \bibjournal{Assembly Automation}, \bibyear{2023},
   \bibvolume{43}\bibnumber{(3)}\textnormal{:
   }\bibpages{353\textnormal{-}365}\nolinebreak\@.
+
+\bibitem{Chen2023active}
+\bibauthor{{, et~al}{Chen C}{, Zhang C}{, Pan Y}}\nolinebreak\@.
+  \bibtitle{Active Compliance Control of Robot Peg-in-Hole Assembly Based on
+  Combined Reinforcement Learning}\bibmark{[J/OL]}\nolinebreak\@.
+  \bibjournal{Applied Intelligence}, \bibyear{2023},
+  \bibvolume{53}\textnormal{:
+  }\bibpages{30677\textnormal{-}30690}\nolinebreak\@.
+  \url{http://dx.doi.org/10.1007/s10489-023-05156-5}\nolinebreak\@.
 
 \end{thebibliography}

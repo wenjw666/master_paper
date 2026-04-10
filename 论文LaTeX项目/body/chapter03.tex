@@ -14,7 +14,7 @@
 \begin{equation}
   g=(\mathbf{t}_g,\mathbf{R}_g)\in SE(3)
 \end{equation}
-作为候选抓取的核心表达，并在此基础上引入面向夹爪几何的参数化物理量以降低位姿回归难度。设 $\mathbf{c}\in\mathbb{R}^3$ 为目标表面可见的接触点（contact point），$\mathbf{x}\in\mathbb{R}^3$ 为夹爪平行闭合方向（夹爪开合轴），$\mathbf{z}\in\mathbb{R}^3$ 为夹爪接近方向（法向接近轴），$\omega\in\mathbb{R}$ 为夹爪开度（两指间距），$d\in\mathbb{R}$ 为夹爪沿接近方向的偏置长度，则抓取位姿的平移与旋转可分别写为
+作为候选抓取的核心表达。其中，$\mathbf{t}_g$ 表示抓取坐标系原点在空间中的位置，$\mathbf{R}_g$ 表示夹爪抓取坐标系相对于参考坐标系的方向。为了避免直接回归完整 6D 位姿带来的冗余自由度，本文进一步引入与夹爪几何结构直接对应的参数化物理量进行描述。如图~\ref{fig:ch3:grasp-param}所示，设 $\mathbf{c}\in\mathbb{R}^3$ 为夹爪在目标表面选定的接触点，$\mathbf{x}\in\mathbb{R}^3$ 为夹爪两指闭合方向，$\mathbf{z}\in\mathbb{R}^3$ 为夹爪接近目标时的运动方向，$\omega\in\mathbb{R}$ 为两指间距，$d\in\mathbb{R}$ 为夹爪沿接近方向预留的回退距离，则抓取位姿的平移与旋转可分别写为
 \begin{equation}
   \mathbf{t}_g=\mathbf{c}+\frac{\omega}{2}\mathbf{x}-d\mathbf{z},
   \label{eq:ch3:tg}
@@ -23,12 +23,14 @@
   \mathbf{R}_g=\left[\ \mathbf{x}\ \ \mathbf{x}\times\mathbf{z}\ \ \mathbf{z}\ \right].
   \label{eq:ch3:Rg}
 \end{equation}
-其中，$\|\mathbf{x}\|_2=1$、$\|\mathbf{z}\|_2=1$ 且 $\mathbf{x}^\top\mathbf{z}=0$，从而 $\mathbf{R}_g\in SO(3)$。式中 $\mathbf{t}_g$ 表示夹爪在抓取时的参考位姿位置：以接触点 $\mathbf{c}$ 为锚点，沿闭合方向平移 $\omega/2$ 以使两指围绕接触区域对称分布，并沿接近方向后退 $d$ 以预留接近与闭合空间；$\mathbf{R}_g$ 则由闭合轴 $\mathbf{x}$ 与接近轴 $\mathbf{z}$ 构造正交抓取坐标系，其第二列通过叉乘给出，用于保证姿态的正交一致性。由此，抓取位姿可由 $(\mathbf{c},\mathbf{x},\mathbf{z},\omega,d)$ 的参数化物理量确定，相较于直接回归完整 6D 位姿，该表达将姿态约束显式编码到 $\mathbf{R}_g$ 的构造中，有利于在局部遮挡导致点云不完整时保持候选抓取在几何意义上的可解释性与稳定性。
+其中，$\|\mathbf{x}\|_2=1$、$\|\mathbf{z}\|_2=1$ 且 $\mathbf{x}^\top\mathbf{z}=0$，从而 $\mathbf{R}_g\in SO(3)$。如图~\ref{fig:ch3:grasp-param}所示，图中的黑点 $\mathbf{c}$ 表示候选抓取首先锚定的表面接触位置，橙色方向 $\mathbf{x}$ 表示夹爪闭合时两指相向运动的方向，绿色方向 $\mathbf{z}$ 表示夹爪由外向内接近目标的方向。由式~\eqref{eq:ch3:tg} 可知，抓取坐标系原点 $\mathbf{t}_g$ 不是直接取在接触点 $\mathbf{c}$ 处，而是先沿闭合方向 $\mathbf{x}$ 平移 $\omega/2$，将单侧接触点转换为两指中心的对称位置；再沿接近方向反向移动距离 $d$，为夹爪接近、闭合和提离动作预留空间。因此，$\mathbf{t}_g$ 实际表示的是夹爪参考抓取位姿中心，而非目标表面上的几何点。
+
+由式~\eqref{eq:ch3:Rg} 可知，旋转矩阵 $\mathbf{R}_g$ 的第一列取为闭合方向 $\mathbf{x}$，第三列取为接近方向 $\mathbf{z}$，第二列由 $\mathbf{x}\times\mathbf{z}$ 自动补全，从而构成右手正交抓取坐标系。换言之，$(\mathbf{x},\mathbf{z})$ 决定了夹爪“如何闭合”和“从哪个方向接近”，而 $\omega$ 与 $d$ 则进一步决定了夹爪“张开多大”和“在接触前应后退多远”。这样，候选抓取位姿可由 $(\mathbf{c},\mathbf{x},\mathbf{z},\omega,d)$ 五个具有明确物理意义的量唯一确定。相较于直接回归完整 6D 位姿，该表达将姿态约束显式编码到 $\mathbf{R}_g$ 的构造中，有利于在局部遮挡导致点云不完整时保持候选抓取在几何意义上的可解释性、稳定性以及与夹爪真实运动方式的一致性。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-1\\（空白占位图）}}
-  \caption{抓取位姿参数示意图（接触点 $\mathbf{c}$、闭合方向 $\mathbf{x}$、接近方向 $\mathbf{z}$、夹爪开度 $\omega$ 与偏置长度 $d$）}
+  \includegraphics[width=0.55\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-f72cd163-7341-4e59-a3f1-2cc184656ecf.png}
+  \caption{抓取位姿参数示意图（接触点 $\mathbf{c}$、闭合方向 $\mathbf{x}$、接近方向 $\mathbf{z}$、夹爪开度 $\omega$ 与偏置长度 $d$ 共同确定抓取坐标系原点 $\mathbf{t}_g$ 及姿态 $\mathbf{R}_g$）}
   \label{fig:ch3:grasp-param}
 \end{figure}
 
@@ -61,20 +63,6 @@
 \end{equation}
 采样权重取为距离的单调递增函数，例如 $w_i=\sigma(d_{\mathrm{cable}}(\mathbf{P}_i^{\mathcal{O}})/\lambda)$，其中 $\sigma(\cdot)$ 为 Sigmoid 函数，$\lambda$ 为尺度参数；或简化为阈值形式：当 $d_{\mathrm{cable}}(\mathbf{P}_i^{\mathcal{O}})<\rho$ 时令 $w_i=0$（禁入），否则 $w_i=1$。权重 $w_i$ 可在网络分层采样时用于调节点的被采样概率，或在损失中对靠近线缆的预测施加抑制，从而从输入与监督两侧共同引导抓取候选远离线缆禁入域。
 
-算法~\ref{alg:ch3:input-build} 给出上述四步的流程汇总。
-
-\begin{algorithm}[htbp]
-\caption{目标局部点云与线缆先验输入构建}
-\label{alg:ch3:input-build}
-\KwIn{整场景 RGB-D；目标实例掩膜、${}^C\mathbf{T}_O$ 与 Cable Mask（来自第二章）}
-\KwOut{物体系下目标局部点云 $\mathcal{P}^{\mathcal{O}}$；各点采样权重 $\{w_i\}$}
-根据目标实例掩膜从深度图裁剪像素—深度对 $\{(u_i,v_i,z_i)\}_{i\in\mathcal{I}_{\mathrm{obj}}}$\;
-由式~\eqref{eq:ch3:backproj} 反投影得到相机系点云 $\mathcal{P}^c$\;
-由式~\eqref{eq:ch3:Toc} 将 $\mathcal{P}^c$ 变换至物体系，得 $\mathcal{P}^{\mathcal{O}}$，必要时做尺度归一化\;
-由 Cable Mask 得到线缆点云/体素 $\mathcal{P}_{\mathrm{cable}}$；对每点 $\mathbf{P}_i^{\mathcal{O}}$ 计算 $d_{\mathrm{cable}}(\mathbf{P}_i^{\mathcal{O}})$ 并赋权重 $w_i$\;
-\Return $\mathcal{P}^{\mathcal{O}}$，$\{w_i\}$
-\end{algorithm}
-
 \begin{figure}[htbp]
   \centering
   \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-2\\（空白占位图）}}
@@ -82,39 +70,87 @@
   \label{fig:ch3:pointcloud}
 \end{figure}
 
-如图~\ref{fig:ch3:pointcloud} 所示，本小节方法将“整场景—目标裁剪—反投影—坐标系与尺度规范化—线缆先验”串联为一条确定的预处理流水线。图中左侧整场景深度与实例掩膜对应算法~\ref{alg:ch3:input-build} 的输入，裁剪后仅保留当前连接器对应像素，避免舱壁、支架及相邻连接器进入后续点云；反投影后得到的相机系点云在几何上已限定于目标可见表面。经式~\eqref{eq:ch3:Toc} 变换至物体系并做尺度归一化后，不同视角与安装姿态下的输入在统计上更一致，有利于网络聚焦连接器壳体几何与夹持区域。图中对线缆禁入域或权重分布的标注则对应式~\eqref{eq:ch3:dcable} 与采样权重 $w_i$ 的工程含义：靠近线缆根部的点获得较低权重或禁入标记，使抓取网络在接触点采样与高分预测上自然偏向壳体两侧与上表面，与本文“稳定夹持、避免遮挡插针端、减少线缆干涉”的任务目标一致。
+如图~\ref{fig:ch3:pointcloud} 所示，本小节将整场景 RGB-D 与第二章输出的实例掩膜、6D 位姿及 Cable Mask 处理为“目标局部点云 + 线缆先验权重”的输入表示。裁剪后仅保留当前连接器对应像素，避免舱壁、支架及相邻连接器进入后续点云；反投影得到的相机系点云进一步经式~\eqref{eq:ch3:Toc} 变换到物体系，并按需要完成尺度归一化，从而减弱视角与安装姿态变化对输入分布的影响。
 
-综上，$\mathcal{P}^{\mathcal{O}}$ 与 $\{w_i\}$ 作为后续抓取网络的几何输入与先验，在输入层即体现壳体稳定夹持与线缆禁入的任务约束，为端到端抓取生成提供结构清晰、任务一致的输入表示。
+图中的线缆禁入域与权重分布对应式~\eqref{eq:ch3:dcable} 和采样权重 $w_i$ 的工程含义：靠近线缆根部的点被赋予较低权重或直接禁入，使抓取网络在接触点采样与高分预测时更偏向连接器壳体稳定夹持区。由此得到的 $\mathcal{P}^{\mathcal{O}}$ 与 $\{w_i\}$ 同时保留了目标几何与柔性线缆约束，为后续端到端抓取生成提供任务一致的输入。
 
-\subsection{改进的 Contact-GraspNet 网络结构}
+\subsection{基于 Contact-GraspNet 的抓取网络结构}
 
-Contact-GraspNet 以点云为输入、经 PointNet++ 与四分支预测头输出抓取参数，但原文献对层级与预测量同 3.2.1 节参数化 $(\mathbf{c},\mathbf{x},\mathbf{z},\omega,d)$ 的对应关系交代不足；整场景输入在机舱多目标与线缆并存场景下易产生无效采样、候选分散于背景或线缆根部。本节在保留其骨干与预测头框架下做两点适配：\textbf{（1）输入} 采用 3.2.2 节的 $\mathcal{P}^{\mathcal{O}}$ 与 $\{w_i\}$，仅在连接器可见表面采样；\textbf{（2）监督/采样} 结合线缆禁入域调制损失或采样概率，使高分候选集中于壳体两侧与上表面。以下按整体架构、特征骨干与预测头分述。
+针对航空非结构化环境下带柔性线缆的电连接器抓取任务，原始 Contact-GraspNet 直接以整场景点云作为输入，易在背景区域、插针端及线缆根部产生无效候选；同时，其网络层级与本文 3.2.1 节抓取参数化 $(\mathbf{c},\mathbf{x},\mathbf{z},\omega,d)$ 之间的对应关系不够直观。基于此，本文在不改变 Contact-GraspNet 主干结构与预测头拓扑的前提下，主要进行了任务适配：\textbf{（1）将输入由整场景点云替换为 3.2.2 节构建的目标局部点云与线缆先验；（2）将点级权重 $w_i$ 引入候选接触点采样过程，使候选更集中于壳体稳定夹持区；（3）在保持原有网络结构不变的基础上，通过输入组织与训练策略调整完成面向电连接器抓取任务的迁移。}为避免与 3.2.4 节重复，本节仅说明网络结构、输入输出符号及前向数据流，损失函数与样本标注规则放在下一节展开。
+
+将输入点云组织为带权局部点集
+\begin{equation}
+  \tilde{\mathcal{P}}=
+  \left\{
+  \left(\mathbf{P}_i^{\mathcal{O}},w_i\right)
+  \mid
+  \mathbf{P}_i^{\mathcal{O}}\in\mathcal{P}^{\mathcal{O}},\;
+  w_i\in[0,1]
+  \right\}_{i=1}^{N},
+  \label{eq:ch3:weighted-input}
+\end{equation}
+其中，$\mathbf{P}_i^{\mathcal{O}}$ 为 3.2.2 节得到的目标物体系下第 $i$ 个局部点坐标，$w_i$ 为该点对应的线缆先验权重，$N$ 为输入点数。$w_i$ 越大，表示该点距离线缆越远、越可能位于连接器壳体稳定夹持区域；$w_i$ 越小，则表示该点更接近线缆根部或插针端等功能敏感区域。基于此，候选中心点的采样概率可写为
+\begin{equation}
+  p_i=\frac{w_i}{\sum_{j=1}^{N}w_j},
+  \label{eq:ch3:sample-prob}
+\end{equation}
+即利用点级权重对原始均匀采样进行调制，从输入阶段抑制线缆邻域和功能敏感区域的无效候选。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-3\\（空白占位图）}}
-  \caption{端到端 6D 抓取生成网络整体架构图（输入：目标局部点云与线缆先验；特征提取：PointNet++；预测：抓取方向/接近方向/抓取得分/夹爪宽度四分支；输出：候选抓取位姿集合；虚线表示位姿先验与线缆禁入域对采样的引导）}
+  \includegraphics[width=0.98\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-82d4fbdb-6fac-4b08-ad12-f16784375665.png}
+  \caption{Contact-GraspNet 抓取生成流程示意图（在保持原网络结构不变的前提下，将输入组织为面向电连接器抓取任务的局部点云与约束信息）}
   \label{fig:ch3:grasp-net}
 \end{figure}
 
-如图~\ref{fig:ch3:grasp-net} 所示，网络由输入层、PointNet++ 特征层、四分支预测层与候选输出层串联。输入为 $\mathcal{P}^{\mathcal{O}}$ 与可选 $\{w_i\}$，将计算限定于当前连接器；第一次降采样点集即候选接触点 $\mathbf{c}$。四分支分别输出闭合方向、接近方向、抓取得分与开度 $\omega$，经标准化与正交化后按式~\eqref{eq:ch3:tg}、式~\eqref{eq:ch3:Rg} 重组为 6D 位姿。图中虚线表示位姿先验与线缆禁入域在采样或损失中的调制，使候选满足“壳体优先、线缆与插针端抑制”。
+如图~\ref{fig:ch3:grasp-net}所示，本文采用的 Contact-GraspNet 仍由输入层、PointNet++ 特征提取层、四分支预测层和候选位姿恢复层构成。图中左侧输入不再直接使用整场景点云，而是采用仅包含当前连接器可见表面的带权局部点集 $\tilde{\mathcal{P}}$；中间部分沿用原 Contact-GraspNet 的层级特征提取流程；右侧输出抓取方向、接近方向、抓取得分和夹爪开度等结果。由此可见，本文工作的重点不在于修改网络结构，而在于通过输入组织与任务约束设计，使 Contact-GraspNet 更适用于航空非结构化环境下带柔性线缆电连接器的抓取生成。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-4\\（空白占位图）}}
-  \caption{PointNet++ 骨干网络结构示意图（Set Abstraction 层级、Ball Query 邻域、MLP 特征聚合及第一次降采样点即候选接触点）}
+  \includegraphics[width=0.98\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-9f155b7e-358a-47ef-83a3-27a4d3d6b0a9.png}
+  \caption{PointNet++ 骨干与候选接触点生成示意图（Set Abstraction 层级、Ball Query 邻域、MLP 特征聚合及第一次降采样点作为候选接触点）}
   \label{fig:ch3:pointnet}
 \end{figure}
 
-如图~\ref{fig:ch3:pointnet} 所示，骨干为 PointNet++ 多级 Set Abstraction：Ball Query 取邻域、MLP 聚合特征，第一级降采样点集即候选接触点 $\mathbf{c}$，预测头在该点集上逐点输出 $\mathbf{x}$、$\mathbf{z}$、得分与 $\omega$。$\{w_i\}$ 可参与中心点采样概率或损失权重，将线缆先验融入前向与训练而不改网络拓扑。
-
-\textbf{四分支预测头与位姿恢复。}方向分支输出 $\mathbf{v}'$、$\mathbf{u}'$，经标准化与正交化后得单位向量 $\mathbf{x}$、$\mathbf{z}$：
+如图~\ref{fig:ch3:pointnet}所示，骨干部分仍采用 PointNet++ 的多级 Set Abstraction 结构，每一级均由邻域查询、局部特征聚合和下采样组成。设第一层下采样后得到的候选接触点集合为
 \begin{equation}
-  \mathbf{v}=\frac{\mathbf{v}'}{\|\mathbf{v}'\|_2},\quad
-  \mathbf{u}=\frac{\mathbf{u}'-\langle\mathbf{v},\mathbf{u}'\rangle\mathbf{v}}{\bigl\|\mathbf{u}'-\langle\mathbf{v},\mathbf{u}'\rangle\mathbf{v}\bigr\|_2};\quad \mathbf{x}=\mathbf{v},\;\mathbf{z}=\mathbf{u}.
+  \mathcal{C}=\left\{\mathbf{c}_k\right\}_{k=1}^{M}=\mathrm{SA}_1(\tilde{\mathcal{P}}),
+  \label{eq:ch3:candidate-set}
+\end{equation}
+其中，$\mathrm{SA}_1(\cdot)$ 表示第一层 Set Abstraction 操作，$M$ 为候选接触点数。式~\eqref{eq:ch3:candidate-set} 表明，3.2.1 节中的接触点 $\mathbf{c}$ 在网络中并非额外人工指定，而是由第一层下采样点直接承担几何锚点角色。随后，骨干网络为每个候选点提取局部特征 $\mathbf{f}_k$，再送入预测头完成抓取参数回归。
+
+\textbf{四分支预测头与位姿恢复。}对每个候选点特征 $\mathbf{f}_k$，四分支预测头输出
+\begin{equation}
+  \left(\mathbf{v}_k',\mathbf{u}_k',\hat{s}_k,\hat{\omega}_k\right)=\Psi_{\theta}\!\left(\mathbf{f}_k\right),
+  \label{eq:ch3:head-output}
+\end{equation}
+其中，$\Psi_{\theta}(\cdot)$ 表示四分支预测头，$\mathbf{v}_k'$ 与 $\mathbf{u}_k'$ 分别为第 $k$ 个候选点对应的原始方向输出，$\hat{s}_k$ 为抓取置信度，$\hat{\omega}_k$ 为夹爪开度预测值。方向分支输出经标准化与正交化后得到单位向量 $\hat{\mathbf{x}}_k$、$\hat{\mathbf{z}}_k$：
+\begin{equation}
+  \hat{\mathbf{x}}_k=\frac{\mathbf{v}_k'}{\|\mathbf{v}_k'\|_2},\quad
+  \hat{\mathbf{z}}_k=\frac{\mathbf{u}_k'-\langle\hat{\mathbf{x}}_k,\mathbf{u}_k'\rangle\hat{\mathbf{x}}_k}{\bigl\|\mathbf{u}_k'-\langle\hat{\mathbf{x}}_k,\mathbf{u}_k'\rangle\hat{\mathbf{x}}_k\bigr\|_2},
   \label{eq:ch3:ortho}
 \end{equation}
-满足 $\|\mathbf{x}\|_2=\|\mathbf{z}\|_2=1$、$\mathbf{x}^\top\mathbf{z}=0$。代入式~\eqref{eq:ch3:Rg} 得 $\mathbf{R}_g$；结合 $\mathbf{c}$（降采样点坐标）、$\omega$ 与偏置 $d$，由式~\eqref{eq:ch3:tg} 得 $\mathbf{t}_g$，即完整 $g=(\mathbf{t}_g,\mathbf{R}_g)$。该构造将姿态约束编码于几何公式，利于遮挡下保持可解释性。
+从而满足 $\|\hat{\mathbf{x}}_k\|_2=\|\hat{\mathbf{z}}_k\|_2=1$ 且 $\hat{\mathbf{x}}_k^\top\hat{\mathbf{z}}_k=0$。进一步地，第 $k$ 个候选抓取位姿可恢复为
+\begin{equation}
+  \hat{\mathbf{R}}_{g,k}=
+  \left[
+  \hat{\mathbf{x}}_k\;\;
+  \hat{\mathbf{x}}_k\times\hat{\mathbf{z}}_k\;\;
+  \hat{\mathbf{z}}_k
+  \right],\quad
+  \hat{\mathbf{t}}_{g,k}=
+  \mathbf{c}_k+\frac{\hat{\omega}_k}{2}\hat{\mathbf{x}}_k-d\hat{\mathbf{z}}_k,
+  \label{eq:ch3:recover-grasp}
+\end{equation}
+其中，$d$ 为由夹爪几何尺寸预先确定的固定偏置参数，并不作为网络学习输出。由式~\eqref{eq:ch3:recover-grasp} 可知，本文在结构层面的关键改进之一，是明确建立了“候选接触点 $\mathbf{c}_k$ - 四分支输出 - 抓取位姿恢复”之间的解析映射，使 3.2.1 节的参数化定义与网络前向过程严格对应。
+
+需要强调的是，上述改进并未增加新的卷积层、注意力模块或额外预测分支，也未改变 PointNet++ 骨干及四分支预测头的参数维度。因此，模型仍可继承原始 Contact-GraspNet 的预训练参数。记网络参数为 $\theta$，预训练初始化为 $\theta_{\mathrm{pre}}$，则实际训练采用
+\begin{equation}
+  \theta^{(0)}=\theta_{\mathrm{pre}},\quad
+  \theta^{(t+1)}=\theta^{(t)}-\eta\nabla_{\theta}L_{\mathrm{grasp}},
+  \label{eq:ch3:finetune}
+\end{equation}
+其中，$\eta$ 为较小学习率，$L_{\mathrm{grasp}}$ 为 3.2.4 节定义的联合损失。式~\eqref{eq:ch3:finetune} 表明本文采用的是基于预训练模型的任务微调策略，而非从随机初始化开始的大规模重新训练。这一点对于抓取数据获取成本较高的航空制造场景尤为重要。
 
 \begin{figure}[htbp]
   \centering
@@ -181,12 +217,12 @@ Contact-GraspNet 以点云为输入、经 PointNet++ 与四分支预测头输出
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-6\\（空白占位图）}}
-  \caption{抓取生成网络训练过程中总体损失及各分支损失收敛曲线（蓝色：$L_{\mathrm{grasp}}$；橙色：$L_{\mathrm{score}}$；绿色：$L_{\mathrm{width}}$；红色：$L_{\mathrm{pose}}$）}
+  \includegraphics[width=0.98\textwidth]{figures/fig3-6_graspnet_train_tb.png}
+  \caption{Contact-GraspNet 训练过程的 TensorBoard 风格标量面板：（a）总损失 $L_{\mathrm{grasp}}$；（b）抓取置信度分支损失 $L_{\mathrm{score}}$；（c）夹爪开度分支损失 $L_{\mathrm{width}}$；（d）位姿分支损失 $L_{\mathrm{pose}}$；（e）验证集 Top Grasp Accuracy@0.65；（f）验证集 AUCPR；（g）验证集偏移量平均绝对误差；（h）学习率衰减曲线。橙色为训练曲线，蓝色为验证曲线，浅色细线表示原始标量，深色粗线表示指数滑动平均后的趋势。}
   \label{fig:ch3:train-vis}
 \end{figure}
 
-如图~\ref{fig:ch3:train-vis} 所示，随着训练迭代次数增加，总损失 $L_{\mathrm{grasp}}$ 单调下降并在若干轮后趋于稳定，各分支损失均呈现出先快速下降、后缓慢收敛的典型形态。其中 $L_{\mathrm{score}}$ 在引入正负样本权重与线缆禁入域后收敛更平滑，说明网络能够在“壳体稳定区正样本少、背景负样本多”的不平衡条件下仍然学习到合理的抓取置信度判别边界；$L_{\mathrm{width}}$ 的收敛表明网络已基本掌握不同壳体尺寸与夹持方式下的开度分布；$L_{\mathrm{pose}}$ 的下降则反映了基于式~\eqref{eq:ch3:Lpose} 的位姿误差度量能够有效驱动网络在闭合方向、接近方向与接触点位置三者之间建立稳定对应关系，为 3.3 节抓取点筛选提供较小初始姿态偏差。
+如图~\ref{fig:ch3:train-vis} 所示，Contact-GraspNet 的训练曲线采用八子图 TensorBoard 标量面板形式展示，相比第二章图2-30保留了“原始标量+平滑趋势”的可视化逻辑，但进一步呈现出抓取网络在多分支耦合优化过程中的非平稳波动特征。随着训练迭代次数增加，总损失 $L_{\mathrm{grasp}}$ 整体下降并最终收敛，说明由式~\eqref{eq:ch3:Ltotal} 定义的联合损失能够驱动网络持续逼近稳定解；同时，由于抓取置信度、开度回归与位姿优化之间存在显著耦合，原始曲线在中前期表现出更明显的局部起伏和阶段性扰动，这与抓取任务中正负样本分布不均、位姿监督非凸以及线缆禁入域约束共同作用的训练特点相一致。其中，$L_{\mathrm{score}}$ 下降最快，说明网络较早建立了壳体稳定抓取区域的判别边界；$L_{\mathrm{width}}$ 的下降速度较缓，反映不同连接器尺寸与夹持方式带来的回归难度；$L_{\mathrm{pose}}$ 对应的 ADD-S 型位姿误差波动最为显著，说明六自由度位姿分支在方向与位移联合优化时更容易受局部几何差异与样本分布变化影响。另一方面，验证集 Top Grasp Accuracy@0.65 与 AUCPR 均持续提升并在后期趋于平台，表明高置信度抓取预测与标注抓取之间的一致性不断增强；偏移量平均绝对误差则整体下降，说明候选抓取接触偏移逐步逼近真实分布；学习率曲线按照指数衰减策略逐步减小，为后期参数细化提供了稳定的优化条件。该训练结果为 3.3 节抓取点筛选提供了更可靠的候选抓取集合，也为后续面向航空非结构化环境与柔性线缆干扰条件下的自主装配系统集成奠定了抓取感知基础。
 
 \begin{figure}[htbp]
   \centering
@@ -199,7 +235,88 @@ Contact-GraspNet 以点云为输入、经 PointNet++ 与四分支预测头输出
 
 \section{抓取点选择策略研究}
 
-端到端抓取生成网络通常会输出多组候选抓取，但这些候选在机械臂可达性、线缆安全性和任务相容性方面并不完全一致。若仅根据网络分数直接选择得分最高的抓取，容易出现局部几何上可抓但机械臂难以接近、与线缆发生干涉或不利于后续插接操作等问题。本文在候选抓取集合 $\mathcal{G}$ 的基础上进一步设计多约束抓取点选择策略，通过逐级筛选和综合评分确定最终执行抓取位姿。
+端到端抓取生成网络通常会输出多组候选抓取，但这些候选在局部接触稳定性、机械臂可达性、线缆安全性和任务相容性方面并不完全一致。若仅根据网络分数直接选择得分最高的抓取，容易出现局部几何上可抓但夹持不稳、机械臂难以接近、与线缆发生干涉或不利于后续插接操作等问题。本文在候选抓取集合 $\mathcal{G}$ 的基础上，首先结合电连接器外形特征设计专用指尖结构并分析其力封闭能力，在此基础上进一步设计多约束抓取点选择策略，通过逐级筛选和综合评分确定最终执行抓取位姿。
+
+\subsection{专用指尖结构设计与力封闭性评估}
+
+第二章和 3.2 节完成了目标定位、位姿估计与候选抓取生成，但候选抓取能否稳定执行，还取决于夹爪末端与连接器壳体之间的实际接触方式。本文研究对象为带柔性线缆的圆柱形电连接器，其外轮廓由圆柱主体与四个矩形平面共同构成。若直接采用标准平行二指夹爪的平直指面进行夹持，则接触区域易退化为局部线接触或点接触，接触面积较小，且夹持过程中容易绕连接器轴线发生转动。为此，本文在二指夹爪末端附加左右对称的专用指尖接触块，其内侧工作面由导向斜面、包络支撑面与限位过渡面构成，在不改变夹爪原有开合同步机构的前提下，提高对连接器的包络支撑能力与姿态定向能力。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-e9ef6b43-0852-4ed9-8fac-12136d06fbb6.png}
+  \caption{Franka夹爪专用指尖结构与装配实物图（上：指尖实物与CAD结构；下：Franka Hand安装专用指尖后的末端实物状态）}
+  \label{fig:ch3:fingertip-grasp}
+\end{figure}
+
+如图~\ref{fig:ch3:fingertip-grasp}所示，本文设计的专用指尖一方面通过内凹包络面与导向斜面提高对连接器圆柱壳体和局部平面的贴合程度，另一方面保持与 Franka Hand 原有同步开合机构兼容。图中上排给出了指尖实物与 CAD 结构，下排给出了 Franka Hand 安装该指尖后的侧视与正视状态。结合第五章平台参数，Franka Hand 的最大夹持力可达 70\,N；在左右对称夹持条件下，专用指尖能够将法向夹紧力更稳定地传递到连接器壳体包络接触区，从而形成足够的正压力储备。若将两侧接触对连接器轴线的抗绕转能力近似表示为摩擦力矩，则可写为
+\begin{equation}
+  M_{z,\max}\approx 2\,\mu F_n r_{\mathrm{eff}},
+\end{equation}
+其中，$\mu$ 为接触摩擦系数，$F_n$ 为单侧有效法向夹紧力，$r_{\mathrm{eff}}$ 为接触区相对连接器轴线的等效力臂。由此可见，在 Franka Hand 夹持力上限和专用指尖较大包络接触半径的共同作用下，末端不仅能够提供满足连接器抓取与提离所需的稳定夹持力，还能够产生足够的抗绕轴旋转力矩，以抑制夹持过程中的轴向窜动和绕壳体轴线的自转，从而满足后续转运与预装配阶段对姿态稳定性的操作要求。为进一步分析其稳定夹持机理，本文从力封闭视角对接触状态进行评估。设连接器刚体参考点为 $\mathbf{o}$，左右两侧指尖与连接器的接触区域分别记为 $\mathcal{C}_1$ 与 $\mathcal{C}_2$。由于专用指尖与连接器之间形成有限面积接触，本文将每个接触区域离散为若干微接触点 $\mathbf{p}_{ij}$，其中 $i\in\{1,2\}$ 表示左右指尖，$j=1,\dots,m_i$ 表示第 $i$ 个接触区域内的离散接触点编号。设 $\mathbf{n}_{ij}$ 为 $\mathbf{p}_{ij}$ 处的单位外法向量，$\mu$ 为接触摩擦系数，则该微接触点所允许的接触力满足库仑摩擦锥约束
+\begin{equation}
+  \mathcal{F}_{ij}=
+  \left\{
+  \mathbf{f}_{ij}\in\mathbb{R}^3\ \middle|\
+  \mathbf{f}_{ij}^{\top}\mathbf{n}_{ij}\geq 0,\;
+  \left\|\mathbf{f}_{ij}-\left(\mathbf{f}_{ij}^{\top}\mathbf{n}_{ij}\right)\mathbf{n}_{ij}\right\|_2
+  \leq
+  \mu\left(\mathbf{f}_{ij}^{\top}\mathbf{n}_{ij}\right)
+  \right\}.
+  \label{eq:ch3:friction-cone}
+\end{equation}
+若以参考点 $\mathbf{o}$ 计算该接触力对应的扳手（wrench），则有
+\begin{equation}
+  \mathbf{w}_{ij}=
+  \begin{bmatrix}
+    \mathbf{f}_{ij}\\
+    (\mathbf{p}_{ij}-\mathbf{o})\times \mathbf{f}_{ij}
+  \end{bmatrix}\in\mathbb{R}^{6}.
+  \label{eq:ch3:wrench}
+\end{equation}
+当所有微接触点生成的扳手集合能够在六维扳手空间中包围原点时，说明夹持系统可通过内部接触力平衡任意方向的小扰动，即具备力封闭能力。其判据可写为
+\begin{equation}
+  \mathbf{0}\in
+  \mathrm{int}\,
+  \mathrm{conv}
+  \left(
+  \bigcup_{i=1}^{2}\bigcup_{j=1}^{m_i}\mathcal{W}_{ij}
+  \right),
+  \label{eq:ch3:force-closure}
+\end{equation}
+其中，$\mathcal{W}_{ij}$ 为式~\eqref{eq:ch3:wrench} 对应的可行扳手集合。考虑到工程实现中直接构造完整抓取扳手空间的计算代价较高，本文进一步采用接触法向一致性与接触覆盖程度对力封闭趋势进行近似评估。设第 $k$ 个离散接触点处的法向量为 $\mathbf{N}_k$，夹爪在该处施加的局部接触合力方向为 $\mathbf{F}_k$，接触法向偏角记为 $\alpha_k$，则有
+\begin{equation}
+  \cos\alpha_k=
+  \frac{\left|\mathbf{F}_k^{\top}\mathbf{N}_k\right|}
+  {\|\mathbf{F}_k\|_2\|\mathbf{N}_k\|_2}.
+  \label{eq:ch3:alpha}
+\end{equation}
+在此基础上，定义接触法向一致性评价量
+\begin{equation}
+  Q_{\mathrm{n}}=
+  \frac{1}{n}\sum_{k=1}^{n}\cos\alpha_k,
+  \label{eq:ch3:Qn}
+\end{equation}
+其中，$n$ 为参与统计的有效离散接触点总数。$Q_{\mathrm{n}}$ 越接近 1，说明夹持力方向与局部法向越一致，法向压紧成分越充分，切向滑移风险越小。另一方面，设两侧有效接触面积分别为 $A_1$ 与 $A_2$，参考面积为 $A_{\mathrm{ref}}$，则接触覆盖指标定义为
+\begin{equation}
+  Q_{\mathrm{a}}=\frac{A_1+A_2}{A_{\mathrm{ref}}}.
+  \label{eq:ch3:Qa}
+\end{equation}
+由此可构造专用指尖对连接器夹持稳定性的综合评价量
+\begin{equation}
+  Q_{\mathrm{tip}}=\lambda_{n}Q_{\mathrm{n}}+\lambda_{a}\min(1,Q_{\mathrm{a}}),
+  \quad \lambda_{n}+\lambda_{a}=1,
+  \label{eq:ch3:Qtip}
+\end{equation}
+其中，$\lambda_n$ 与 $\lambda_a$ 分别表示法向一致性和接触覆盖程度的权重系数。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.28\textheight][c]{0.88\textwidth}{\centering 图3-9\\（专用指尖与普通平行指面接触法向及接触面积对比示意图占位）}}
+  \caption{专用指尖与普通平行指面夹持电连接器时的接触法向与接触面积对比示意图（左：普通平指局部接触面积较小、法向分布离散；右：专用指尖形成更大包络接触面积且法向分布更集中）}
+  \label{fig:ch3:force-closure-vis}
+\end{figure}
+
+如图~\ref{fig:ch3:force-closure-vis}所示，普通平行二指夹爪直接夹持该类连接器时，接触通常集中在局部边缘区域；相比之下，专用指尖能够形成更大的包络接触面积，并减小接触法向与夹紧力方向之间的偏角，因此式~\eqref{eq:ch3:Qn} 和式~\eqref{eq:ch3:Qa} 对应的评价量均得到提升。较大的 $Q_{\mathrm{tip}}$ 表明专用指尖在抗扰动能力、抗轴向转动能力以及保持姿态一致性方面优于原始平行二指夹爪，也为后续可达性、线缆安全性和姿态相容性筛选提供了更稳定的末端接触基础。
 
 \subsection{基于逆运动学的可达性判别}
 
@@ -249,11 +366,11 @@ Contact-GraspNet 以点云为输入、经 PointNet++ 与四分支预测头输出
 \end{equation}
 当 $w(\mathbf{q})\rightarrow 0$ 时，机械臂接近奇异点，末端在某些方向上的运动能力显著下降，路径规划中的微小扰动可能导致关节大幅摆动。结合式~\eqref{eq:ch3:qstar}，本文在数值求解逆运动学后，对 $\mathbf{q}_i^\star$ 计算 $w(\mathbf{q}_i^\star)$，若其低于给定阈值 $w_{\min}$，则认为该抓取虽有逆解但执行风险较高，可在后续综合评分中降低其权重或直接剔除。
 
-综合上述因素，可将逆运动学可达性扩展为“硬约束 + 软评价”的形式：硬约束由式~\eqref{eq:ch3:IK-ind} 给出（有合法逆解且满足关节限位），软评价通过 $J_{\mathrm{lim}}(\mathbf{q}_i^\star)$ 与 $w(\mathbf{q}_i^\star)$ 量化抓取在关节空间中的可用裕度。这样定义的可达性既保证了电连接器抓取在航空机舱受限空间内具备可执行性，又为 3.3.4 节综合评分函数提供了可与线缆安全和姿态相容性同等量化的评价量。
+综合上述因素，可将逆运动学可达性扩展为“硬约束 + 软评价”的形式：硬约束由式~\eqref{eq:ch3:IK-ind} 给出（有合法逆解且满足关节限位），软评价通过 $J_{\mathrm{lim}}(\mathbf{q}_i^\star)$ 与 $w(\mathbf{q}_i^\star)$ 量化抓取在关节空间中的可用裕度。这样定义的可达性既保证了电连接器抓取在航空机舱受限空间内具备可执行性，又为 3.3.5 节综合评分函数提供了可与线缆安全和姿态相容性同等量化的评价量。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-8\\（空白占位图）}}
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-10\\（空白占位图）}}
   \caption{基于逆运动学的可达性判别结果示意图（灰色：不可达候选；蓝色：可达但关节裕量较小或接近奇异的候选；绿色：可达且关节裕量充足的候选）}
   \label{fig:ch3:grasp-dist2}
 \end{figure}
@@ -278,50 +395,75 @@ Contact-GraspNet 以点云为输入、经 PointNet++ 与四分支预测头输出
 \end{equation}
 近似代替对 $\mathcal{P}_{\mathrm{cable}}$ 的逐点最小化，从而在保持评价精度的同时提升对大量候选抓取进行批量判别时的计算效率。
 
-将提取的 Cable Mask 信息转化为抓取决策阶段可利用的几何约束，与仅在路径规划阶段被动避障不同，本文在抓取点选择阶段就引入线缆安全间隙约束，使最终保留下来的候选抓取在空间上天然更远离高风险线缆区域，利于减小夹爪在接近、闭合和抬升过程中的缠绕风险，并提高整体动作链的稳定性。
-
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-9\\（空白占位图）}}
-  \caption{线缆障碍的安全间隙可视化结果}
+  \includegraphics[width=0.98\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-d90db8d2-9945-4e27-b0c8-4a318ed17cb7.png}
+  \caption{线缆障碍安全间隙导致的抓取不可达效果图}
   \label{fig:ch3:cable-clearance}
 \end{figure}
 
+如图~\ref{fig:ch3:cable-clearance}所示，当候选抓取的接近方向和夹爪扫掠体积压缩了与柔性线缆之间的最小安全间隙时，即使局部接触位置具备一定夹持可行性，抓取过程仍可能因线缆干涉风险而被判定为不可接受。图中不同视角下的结果表明，线缆在连接器尾部邻域形成了显著的高风险约束区，夹爪若沿该区域直接接近，将在接近、闭合或提离阶段与线缆产生过小间距甚至潜在碰撞。基于此，本文将 Cable Mask 提取的线缆信息前置为抓取决策阶段可利用的几何约束，而非仅在路径规划阶段被动避障，从而使保留下来的候选抓取在空间上天然远离高风险线缆区域，降低夹爪缠绕与拖拽风险，并提高后续动作链的稳定性。
+
 \subsection{面向任务的姿态相容性评价}
 
-抓取姿态还应与目标作业方向保持较高一致性。若抓取方向与后续操作方向差异过大，则虽然可以完成夹持，但在转运和预对准阶段往往需要较大的姿态调整，进而增加时间代价和碰撞风险。基于这一考虑，本文引入任务相容性评价，对候选抓取的接近方向与目标操作轴线之间的一致性进行量化分析。设目标操作轴方向为 $\mathbf{v}_{\mathrm{asm}}$，抓取接近方向为 $\mathbf{v}_{\mathrm{grasp}}$，则姿态相容性得分定义为
+在带柔性线缆的电连接器自主装配任务中，抓取位姿不仅需要满足局部夹持稳定性，还应与后续转运和预装配阶段的作业方向保持一致。若抓取接近方向与装配轴线偏差过大，则末端在抓取完成后需要额外进行较大幅度的姿态调整，进而增加狭窄机舱环境中的运动冗余和碰撞风险。基于此，本文引入姿态相容性评价，对候选抓取的接近方向与目标操作轴线之间的一致性进行量化描述。设目标操作轴方向为 $\mathbf{v}_{\mathrm{asm}}$，抓取接近方向为 $\mathbf{v}_{\mathrm{grasp}}$，则姿态相容性得分定义为
 \begin{equation}
   S_{\mathrm{align}}(g_i)=
   \frac{\mathbf{v}_{\mathrm{grasp}}\cdot\mathbf{v}_{\mathrm{asm}}}
   {\|\mathbf{v}_{\mathrm{grasp}}\|_2\|\mathbf{v}_{\mathrm{asm}}\|_2}.
 \end{equation}
-当 $S_{\mathrm{align}}$ 越接近 1 时，说明当前抓取姿态与目标操作方向越一致。这种设计使抓取评价从“局部可夹持”进一步扩展为“便于后续动作衔接”，体现了面向装配的抓取思想。在电连接器场景中，姿态相容性评价还可以与功能区域约束联合考虑：插针端和关键定位区域不宜被夹爪直接遮挡，而壳体侧壁和上表面更适合作为稳定夹持区域。任务相容性评价不仅关注方向一致性，也隐含约束了夹爪与功能敏感区域之间的空间关系。
+式中，$S_{\mathrm{align}}(g_i)\in[-1,1]$，其值越大表示候选抓取的接近方向与目标装配轴线越接近同向分布。当 $S_{\mathrm{align}}(g_i)$ 较高时，说明该抓取位姿在完成夹持后能够以较小的姿态修正进入预装配状态，从而有利于降低转运阶段的轨迹调整幅度，并减小末端与舱壁、支架及柔性线缆发生附加干涉的概率。因此，姿态相容性评价实质上将“面向装配的任务约束”显式引入抓取筛选过程，使候选抓取的优选标准由单纯的局部可夹持性扩展为“局部稳定性与后续任务适应性兼顾”。
 
-从实现角度看，$\mathbf{v}_{\mathrm{asm}}$ 可由第三章开头定义的装配轴线（例如插头插入方向或连接器壳体上预定义的参考方向）确定，$\mathbf{v}_{\mathrm{grasp}}$ 则直接取自 3.2.1 和 3.2.3 节中定义和预测的接近方向 $\mathbf{z}$。因此，式中的内积本质上是“抓取接近轴与装配轴之间的夹角余弦”，在数值上与末端在预装配路径上的姿态调整幅度密切相关：$S_{\mathrm{align}}$ 越高，表示从抓取姿态平滑过渡到装配姿态所需的旋转越小，更利于在机舱狭窄空间和柔性线缆干扰下保持末端姿态稳定，也为第四章柔顺装配阶段提供更有利的初始姿态条件。
+从实现上看，$\mathbf{v}_{\mathrm{asm}}$ 由连接器插接方向或壳体预定义参考轴确定，$\mathbf{v}_{\mathrm{grasp}}$ 则直接取自 3.2.1 节定义并由 3.2.3 节网络预测的抓取接近方向 $\mathbf{z}$。因此，式中的内积本质上对应于抓取接近轴与装配轴之间夹角余弦的归一化表示。该指标一方面保持了计算形式简洁，便于对大量候选抓取进行快速评价；另一方面能够与前述可达性和线缆安全性指标共同纳入统一评分框架，为 3.3.5 节的综合排序提供任务导向的定量依据。此外，较高的 $S_{\mathrm{align}}(g_i)$ 还意味着抓取姿态与第四章柔顺装配初始位姿之间具有更好的连续性，有利于减小后续对准阶段的姿态调整负担。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-10\\（空白占位图）}}
+  \includegraphics[width=0.78\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-21a6faec-bd81-4c54-86ed-5f97026ef897.png}
   \caption{电连接器表面候选抓取任务姿态相容性结果}
   \label{fig:ch3:align-vis}
 \end{figure}
 
+如图~\ref{fig:ch3:align-vis}所示，本文方法生成的候选抓取与装配轴夹角主要集中在较小区间，分布峰值约位于 \(10^\circ\!\sim\!18^\circ\)；相比之下，基线方法的候选夹角更多分布在 \(30^\circ\!\sim\!45^\circ\) 区间。图中的红色虚线给出了 \(\theta_{\max}=25^\circ\) 的任务阈值，可以看出本文方法的大多数候选位于阈值左侧，而基线方法则有相当比例落在阈值右侧。这表明，本文在候选筛选阶段引入姿态相容性约束后，保留下来的抓取更接近后续装配方向，能够显著减小转运后进入预装配阶段所需的姿态重定向幅度。
+
+该结果从统计分布层面验证了本节理论分析：接近方向与装配轴线夹角较小的候选，对应更高的 \(S_{\mathrm{align}}\) 得分，也更有利于保持抓取姿态与装配初始位姿之间的连续性；而夹角较大的候选即使局部夹持条件较好，仍会在狭窄机舱环境中引入更大的姿态调整代价与附加碰撞风险。因此，姿态相容性评价能够有效区分“便于后续装配衔接”的候选抓取与“仅局部可抓但任务连续性较差”的候选抓取，从而为后续综合评分提供必要的任务层约束。
+
 \subsection{综合评分函数与最优抓取确定}
 
-在完成可达性判别、线缆安全评价和姿态相容性评价后，本文进一步构建综合评分函数，对候选抓取进行统一排序。综合评分函数定义为
+经过 3.3.2--3.3.4 节的分析后，每个候选抓取均可获得与执行相关的多维评价信息，包括逆运动学可达性、线缆安全裕度以及姿态相容性。由于上述指标分别对应运动学可执行性、抓取过程安全性和后续装配衔接性，三者之间不存在简单的替代关系，因此有必要在统一决策框架下对候选抓取进行综合排序。为此，本文将抓取点选择过程表述为受约束的多指标优化问题。
+
+首先，将满足硬约束的候选抓取定义为可行集合
+\begin{equation}
+  \mathcal{G}_{\mathrm{feas}}=
+  \left\{
+  g_i\in\mathcal{G}\ \middle|\
+  \mathcal{C}_{\mathrm{IK}}(g_i)=1,\;
+  d_i\ge d_{\mathrm{safe}}
+  \right\},
+  \label{eq:ch3:gfeas}
+\end{equation}
+其中，$\mathcal{G}$ 为抓取生成网络输出的原始候选集合，$\mathcal{C}_{\mathrm{IK}}(g_i)$ 为式~\eqref{eq:ch3:IK-ind} 给出的可达性判别结果，$d_i$ 为式(3-26)定义的线缆安全间隙，$d_{\mathrm{safe}}$ 为安全阈值。式~\eqref{eq:ch3:gfeas} 的作用在于先剔除运动学不可达或存在显著线缆干涉风险的候选，从而保证后续评分过程建立在“可执行且安全”的候选基础上。
+
+对可行集合中的任意候选抓取 $g_i\in\mathcal{G}_{\mathrm{feas}}$，定义综合评分函数为
 \begin{equation}
   S_{\mathrm{total}}(g_i)=w_1S_{\mathrm{quality}}(g_i)+w_2S_{\mathrm{clearance}}(g_i)+w_3S_{\mathrm{align}}(g_i),
 \end{equation}
-其中 $S_{\mathrm{quality}}(g_i)$ 为网络输出的抓取置信度，$S_{\mathrm{clearance}}(g_i)$ 为线缆安全性得分，$S_{\mathrm{align}}(g_i)$ 为姿态相容性得分，$w_1$、$w_2$、$w_3$ 为各指标权重系数。最终执行抓取位姿定义为综合评分最高的候选抓取。相比于只依赖网络分数的基础方法，综合评分策略能够更稳健地剔除那些局部分数较高但整体执行风险较大的抓取候选。最终选出的抓取位姿不仅具有较高的局部几何可靠性，也更符合航空制造场景中的系统执行需求。
-
-在权重设置上，本文根据电连接器抓取—转运—预装配的任务特点，通常令 $w_1$ 与 $w_2$ 略大于 $w_3$：一方面保证候选抓取具备足够的局部几何稳定性与线缆安全裕度，避免因忽略柔性拖缆而引发风险；另一方面通过 $w_3$ 将“装配轴线一致性”纳入综合评价，使在多个安全且可达的候选中优先选择更有利于后续装配的抓取姿态。图~\ref{fig:ch3:filter-flow} 所示的流程中，综合评分函数将 3.3.1–3.3.3 小节给出的各项评价量汇总为单一标量，使最优抓取确定过程在数学形式上更加清晰，也便于在不同机舱工况下调整权重以适配不同的安全与效率需求。
+其中，$S_{\mathrm{quality}}(g_i)$ 为抓取生成网络输出的候选置信度，反映局部接触几何与夹持可行性；$S_{\mathrm{clearance}}(g_i)$ 为 3.3.3 节定义的线缆安全性得分，用于表征抓取过程中与柔性线缆之间的安全裕度；$S_{\mathrm{align}}(g_i)$ 为 3.3.4 节定义的姿态相容性得分，用于描述抓取接近方向与装配轴线之间的一致性。$w_1$、$w_2$、$w_3$ 为满足 $w_1+w_2+w_3=1$ 的非负权重系数。基于该评分函数，最终执行抓取位姿可写为
+\begin{equation}
+  g^{\star}=\arg\max_{g_i\in\mathcal{G}_{\mathrm{feas}}}S_{\mathrm{total}}(g_i).
+  \label{eq:ch3:gstar}
+\end{equation}
+式~\eqref{eq:ch3:gstar} 表明，最优抓取确定并非单纯选择网络分数最高的候选，而是在满足可达性与安全约束的前提下，对“局部抓取质量-线缆安全性-任务相容性”三项指标进行联合优化。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-11\\（空白占位图）}}
-  \caption{基于多约束优化的最优抓取点筛选流程图（从候选抓取生成经逆运动学筛选、线缆安全间隙计算和姿态相容性评价后输出最优抓取位姿与预抓取位姿）}
+  \includegraphics[width=0.98\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-4756c399-e654-4f6b-aed5-a6fcfb71e2b8.png}
+  \caption{基于多约束优化的最优抓取点筛选流程图（候选抓取经逆运动学筛选后形成可行子集，并结合线缆安全间隙、姿态相容性与综合评分输出最优抓取位姿）}
   \label{fig:ch3:filter-flow}
 \end{figure}
+
+如图~\ref{fig:ch3:filter-flow}所示，候选抓取的筛选流程遵循“先硬约束过滤、后多指标排序”的层级化策略。首先，对抓取生成网络输出的原始候选集合 $\mathcal{G}$ 进行逆运动学可达性分析，剔除无合法关节解的候选；随后在可达候选基础上构建可行子集 $\mathcal{G}'$，并进一步计算线缆安全间隙评价 $S_{\mathrm{clearance}}$ 与姿态相容性评价 $S_{\mathrm{align}}$。在此基础上，利用综合评分 $S_{\mathrm{total}}$ 对候选进行统一排序，最终输出最优抓取位姿 $g^\star$。该流程将前述分散的评价指标统一映射为明确的决策链路，使本节提出的理论判据能够直接对应实际抓取输出，并为 3.4 节运动规划提供稳定、可执行且面向后续装配任务的初始抓取状态。
+
+在权重设置上，本文遵循“执行可靠性优先、任务连续性兼顾”的原则。通常取 $w_1$ 与 $w_2$ 略大于 $w_3$，使局部夹持稳定性与线缆安全裕度在综合评分中占据主导地位，以避免在航空非结构化环境中因过分强调姿态相容性而保留局部不稳定或存在干涉风险的候选；同时保留适当的 $w_3$，用于区分多个均可安全执行的候选中哪一类更有利于后续预装配和柔顺插接。该权重设置使综合评分函数既能反映抓取动作本身的可实施性，又能体现装配任务对初始抓取姿态的前馈约束。
 
 \section{GRRT-Connect 运动规划算法研究}
 
@@ -342,7 +484,7 @@ GRRT-Connect 要在机舱受限空间内同时规避刚性结构件和柔性线�
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-12\\（空白占位图）}}
+  \includegraphics[width=0.98\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-1925ea05-455d-4288-8486-86c3d3ae8878.png}
   \caption{混合障碍物地图构建结果图（刚性障碍与柔性线缆障碍）}
   \label{fig:ch3:octomap}
 \end{figure}
@@ -356,7 +498,7 @@ GRRT-Connect 要在机舱受限空间内同时规避刚性结构件和柔性线�
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-13\\（空白占位图）}}
+  \includegraphics[width=0.98\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-01eedc44-b151-487c-a381-506c2f4993e7.png}
   \caption{线缆障碍三维化处理效果图（真实场景与反投影点云、动态体素占据）}
   \label{fig:ch3:cable-proc}
 \end{figure}
@@ -369,189 +511,213 @@ GRRT-Connect 要在机舱受限空间内同时规避刚性结构件和柔性线�
 \end{equation}
 其中 $\eta\in(0,1)$ 为更新系数，$\mathbb{I}(\cdot)$ 为指示函数，$r_{\mathrm{update}}$ 为更新半径。占据概率高于阈值的体素被标记为线缆障碍体素集合 $\mathcal{V}_{\mathrm{cable}}$，图~\ref{fig:ch3:octomap} 中以颜色块形式展示了这些体素在机舱中的分布。
 
+在体素编码基础上，为进一步刻画线缆障碍的方向敏感特性，本文对线缆点云进行局部分段并构建各向异性椭球包络。各向同性体素仅能提供均匀的安全间隙，无法区分沿线缆轴向的切向运动与垂直于线缆的法向运动在干涉风险上的显著差异；而将每段线缆建模为各向异性椭球，则能够在径向保持严格安全裕度的同时，在轴向给予更宽松的通行许可，使障碍表达更准确地反映柔性线缆的几何特性。
+
+具体而言，将映射到地图系的线缆点云 $\mathcal{P}_{\mathrm{cable}}^{\mathcal{W}}$ 沿其主骨架等间距划分为 $M$ 段局部子集 $\{\mathcal{P}_m\}_{m=1}^{M}$，对第 $m$ 段（含 $N_m$ 个点）执行局部主成分分析，记质心为
+\begin{equation}
+  \bar{\mathbf{p}}_m=\frac{1}{N_m}\sum_{\mathbf{p}\in\mathcal{P}_m}\mathbf{p},
+\end{equation}
+协方差矩阵最大特征值对应的单位特征向量为该段局部主方向 $\mathbf{d}_m$。以 $(\bar{\mathbf{p}}_m,\,\mathbf{d}_m)$ 为中心和主轴，定义该段线缆的各向异性椭球安全包络：对空间任意点 $\mathbf{x}$，其沿线缆局部切向和法向的投影距离分别为
+\begin{equation}
+  d_{\parallel,m}(\mathbf{x})=\bigl|\mathbf{d}_m^\top(\mathbf{x}-\bar{\mathbf{p}}_m)\bigr|,\quad
+  d_{\perp,m}(\mathbf{x})=\bigl\|(\mathbf{I}-\mathbf{d}_m\mathbf{d}_m^\top)(\mathbf{x}-\bar{\mathbf{p}}_m)\bigr\|_2,
+  \label{eq:ch3:cable-ani-dist}
+\end{equation}
+据此定义各向异性归一化距离为
+\begin{equation}
+  d_{\mathrm{ani},m}(\mathbf{x})=
+  \sqrt{\left(\frac{d_{\perp,m}(\mathbf{x})}{r_\perp}\right)^2+
+  \left(\frac{d_{\parallel,m}(\mathbf{x})}{r_\parallel}\right)^2},
+  \label{eq:ch3:cable-ellipsoid}
+\end{equation}
+其中 $r_\perp$ 和 $r_\parallel$（$r_\perp<r_\parallel$）分别为法向和切向安全半径。椭球等距面 $d_{\mathrm{ani},m}(\mathbf{x})=1$ 即为该段线缆的安全包络边界：法向半径 $r_\perp$ 较小，使径向方向避障敏感度更高；切向半径 $r_\parallel$ 较大，为沿线缆轴向的末端运动提供更充裕的通行空间。全部线缆段的椭球包络集合记为
+\begin{equation}
+  \mathcal{E}_{\mathrm{cable}}^{(k)}=\bigl\{(\bar{\mathbf{p}}_m^{(k)},\,\mathbf{d}_m^{(k)},\,r_\perp,\,r_\parallel)\bigr\}_{m=1}^{M_k},
+  \label{eq:ch3:cable-ellipsoid-set}
+\end{equation}
+与体素占据集合 $\mathcal{V}_{\mathrm{cable}}^{(k)}$ 同步，在每个规划周期内由最新线缆观测点云更新，为后续规划中的各向异性安全距离计算提供统一的几何查询接口。
+
+\begin{figure}[htbp]
+  \centering
+  \subfigure[线缆点云局部分段与椭球包络效果]{
+    \includegraphics[width=0.47\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-9d8fc1e2-8888-4af8-98f3-7183b1e9077e.png}
+  }
+  \hfill
+  \subfigure[动态线缆障碍在场景中的各向异性包络结果]{
+    \includegraphics[width=0.47\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-98765134-8330-4fec-b143-76798fc26a99.png}
+  }
+  \caption{动态线缆障碍的各向异性椭球包络效果图}
+  \label{fig:ch3:cable-ellipsoid-vis}
+\end{figure}
+
+如图~\ref{fig:ch3:cable-ellipsoid-vis}所示，局部分段后的线缆点云不再仅以离散体素表示，而是进一步被连续椭球包络集合覆盖。左图给出了线缆局部点云与单段椭球包络的对应关系，可以看出每个椭球均沿该段线缆主方向展开，其长轴与局部切向一致、短轴沿法向收缩，从而将“沿线缆方向可适当放宽、垂直线缆方向需更严格避障”的约束直接编码到障碍几何模型中。右图进一步展示了该包络模型在真实规划场景中的分布效果：线缆周围形成连续的方向敏感安全区域，使动态障碍不仅具备体素级硬碰撞边界，还具有可用于距离查询的连续安全外包络。该建模结果为 3.4.2 节中构型级各向异性安全距离计算提供了直接输入，也使后续引导式采样与双树扩展能够基于统一的动态线缆障碍表达进行安全判定。
+
 \textbf{（3）混合地图与规划接口。}最终，混合障碍物地图可表示为
 \begin{equation}
-  \mathcal{M}_{\mathrm{hyb}}=\bigl(\mathcal{O}_{\mathrm{rigid}},\mathcal{V}_{\mathrm{cable}}\bigr),
+  \mathcal{M}_{\mathrm{hyb}}=\bigl(\mathcal{O}_{\mathrm{rigid}},\,\mathcal{V}_{\mathrm{cable}},\,\mathcal{E}_{\mathrm{cable}}\bigr),
 \end{equation}
-规划器在进行碰撞检测时，同时检查机械臂连杆模型 $\mathcal{L}(q)$ 与刚性包围盒 $\mathcal{B}_k$ 以及线缆体素 $\mathcal{V}_{\mathrm{cable}}$ 之间的相交关系。三维化表达能够更真实地反映夹爪扫掠体积与线缆之间的空间关系，采样引导、安全间隙评价与路径后处理均在同一地图上完成。
+其中 $\mathcal{O}_{\mathrm{rigid}}$ 为刚性障碍包围盒集合，$\mathcal{V}_{\mathrm{cable}}$ 为线缆占据体素集合，$\mathcal{E}_{\mathrm{cable}}$ 为线缆各向异性椭球包络集合。规划器在进行碰撞与安全检测时，同时执行三项判定：机械臂连杆模型 $\mathcal{L}(q)$ 与刚性包围盒 $\mathcal{B}_k$ 的相交检查、与线缆占据体素 $\mathcal{V}_{\mathrm{cable}}$ 的硬碰撞判定、以及与椭球包络 $\mathcal{E}_{\mathrm{cable}}$ 的各向异性安全距离评价。三者在同一地图结构上完成，使采样引导、安全间隙评价与路径后处理共享一致的障碍物表达。
 
 \subsection{引导式采样与双树扩展策略}
 
-为在航空非结构化环境中降低柔性线缆干扰带来的方向不确定性，本文在上一小节得到的混合障碍物地图基础上引入线缆主方向 $\mathbf{d}_c$ 的方向相容约束。混合地图提供了刚性占据集合 $\mathcal{O}_{\mathrm{rigid}}$ 以及随观测更新的线缆动态体素集合 $\mathcal{V}_{\mathrm{cable}}$，但仅基于体素的各向同性距离度量会将线缆切向通行的相对宽松性等价化为统一半径，从而在相邻规划迭代中造成过度保守扩展并降低向目标推进的效率。同时，当末端在狭窄通道中的运动主要沿某一主导推进方向发生时，若未显式约束其扫掠方向与线缆主拖曳方向的相对关系，容易出现绕行但方向不利的无效扩展。
+在柔性线缆干扰场景下，传统 RRT-Connect 若仅依据刚性障碍距离进行均匀采样与无偏扩展，容易在连接器拖缆附近产生大量方向不利的无效节点。其根本原因在于：线缆对末端运动的约束具有明显方向性，沿线缆主方向的切向运动通常比垂直于线缆的法向扫掠更容易保持安全间隙；若仍采用各向同性距离度量，则规划器会将这两类运动趋势等价处理，进而降低在狭窄空间中的搜索效率。基于此，本文在保持 GRRT-Connect 双树连接框架不变的前提下，将线缆主方向约束显式引入采样接纳与节点扩展过程，使规划器在满足刚性碰撞约束的同时兼顾柔性线缆的方向敏感避障需求。
 
-为实现方向敏感规避，本文构造一种由线缆方向向量 $\mathbf{d}_c$ 驱动的 GRRT-Connect 引导式扩展机制。该机制将 $\mathbf{d}_c$ 嵌入到启发式代价函数、采样接纳概率与柔性线缆安全判据中，使规划器在几何碰撞可验证性的约束下同时抑制柔性线缆干扰。该引导机制所需的输入由上一小节混合障碍物地图构建模块给出，线缆动态体素集合 $\mathcal{V}_{\mathrm{cable}}$ 由 CableMask 反投影并按观测帧更新获得；线缆点云 $\mathcal{P}_{\mathrm{cable}}^{\mathcal{W}}$ 在每次规划迭代时保持与当前观测一致，用于估计线缆主方向。线缆方向参照将在后续力位混合控制中用于切向/法向分解与阻抗参数调节，从而提升插接过程的稳定性与收敛性。
+\textbf{（1）线缆主方向约束与方向安全度量。}
 
-\textbf{（1）线缆方向向量估计与方向消歧。}
+为描述线缆方向对规划搜索的影响，设第 $k$ 个规划周期内从当前目标连接器拖缆区域提取的局部线缆点集为 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{dir},(k)}$。对该点集采用主成分分析估计线缆主方向，并据此构造方向相容性代价与各向异性安全度量。设连接器尾部线缆根部参考点为 $\mathbf{p}_{\mathrm{root}}^{(k)}$，局部方向估计半径为 $r_{\mathrm{dir}}$，则有
+\begin{equation}
+  \mathcal{P}_{\mathrm{cable}}^{\mathrm{dir},(k)}=
+  \left\{
+  \mathbf{p}\in\mathcal{P}_{\mathrm{cable}}^{\mathrm{obs},(k)}
+  \ \middle|\
+  \|\mathbf{p}-\mathbf{p}_{\mathrm{root}}^{(k)}\|_2<r_{\mathrm{dir}}
+  \right\}.
+  \label{eq:ch3:cable-dir-cloud}
+\end{equation}
+对局部方向点云 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{dir},(k)}=\{\mathbf{p}_i\}_{i=1}^{N_k}$ 采用主成分分析估计线缆主方向。记其质心为
+\begin{equation}
+  \bar{\mathbf{p}}_c^{(k)}=\frac{1}{N_k}\sum_{i=1}^{N_k}\mathbf{p}_i,
+\end{equation}
+协方差矩阵为
+\begin{equation}
+  \mathbf{C}_c^{(k)}=\frac{1}{N_k}\sum_{i=1}^{N_k}\bigl(\mathbf{p}_i-\bar{\mathbf{p}}_c^{(k)}\bigr)\bigl(\mathbf{p}_i-\bar{\mathbf{p}}_c^{(k)}\bigr)^\top.
+\end{equation}
+取最大特征值对应的特征向量为主方向初值，并进行单位化，得
+\begin{equation}
+  \mathbf{d}_c^{(k)}=\frac{\mathbf{e}_{\max}^{(k)}}{\|\mathbf{e}_{\max}^{(k)}\|_2}.
+\end{equation}
+由于线缆为双向几何体，$\mathbf{d}_c^{(k)}$ 与 $-\mathbf{d}_c^{(k)}$ 在几何上等价。为保证规划周期之间的方向符号连续性，引入上一周期方向参照 $\mathbf{d}_c^{(k-1)}$，并执行符号消歧：
+\begin{equation}
+  \mathbf{d}_c^{(k)}\leftarrow
+  \mathrm{sgn}\!\bigl((\mathbf{d}_c^{(k)})^\top \mathbf{d}_c^{(k-1)}\bigr)\mathbf{d}_c^{(k)}.
+\end{equation}
+同时，为抑制遮挡或局部截断造成的主方向抖动，定义方向可靠度权重
+\begin{equation}
+  w_d^{(k)}=\frac{\lambda_1^{(k)}}{\lambda_1^{(k)}+\lambda_2^{(k)}+\lambda_3^{(k)}},
+  \label{eq:ch3:wd}
+\end{equation}
+其中 $\lambda_1^{(k)}\ge\lambda_2^{(k)}\ge\lambda_3^{(k)}$ 为 $\mathbf{C}_c^{(k)}$ 的特征值。当局部线缆点云呈现明显单主轴结构时，$w_d^{(k)}$ 较大；当观测质量下降时，方向项在规划代价中的作用自动减弱。
 
-设当前规划迭代时刻的线缆点云为 $\mathcal{P}_{\mathrm{cable}}^{\mathcal{W}}=\{\mathbf{p}_i\}_{i=1}^{N}$（单位为米）。通过主成分分析（PCA）估计线缆主方向，具体为：
-\begin{equation}
-  \bar{\mathbf{p}}_c=\frac{1}{N}\sum_{i=1}^{N}\mathbf{p}_i,
-\end{equation}
-其中 $\bar{\mathbf{p}}_c$ 为线缆点云的质心。对中心化数据构造协方差矩阵：
-\begin{equation}
-  \mathbf{C}_c=\frac{1}{N}\sum_{i=1}^{N}\bigl(\mathbf{p}_i-\bar{\mathbf{p}}_c\bigr)\bigl(\mathbf{p}_i-\bar{\mathbf{p}}_c\bigr)^\top,
-\end{equation}
-记 $\mathbf{d}_c$ 为协方差矩阵 $\mathbf{C}_c$ 最大特征值对应的特征向量，并进行单位化：
-\begin{equation}
-  \mathbf{d}_c=\frac{\mathbf{e}_{\max}}{\|\mathbf{e}_{\max}\|_2}\in\mathbb{R}^3,
-\end{equation}
-其中 $\mathbf{e}_{\max}$ 为最大特征值的特征向量。由于线缆为双向几何体，$\mathbf{d}_c$ 与 $-\mathbf{d}_c$ 在几何上等价。为在任务相容性上实现方向消歧，本文引入参考方向向量 $\mathbf{a}_{\mathrm{ref}}$，其由当前抓取位姿对应的装配轴线给出。令
-\begin{equation}
-  \mathbf{d}_c \leftarrow \mathrm{sgn}\bigl(\mathbf{d}_c^\top \mathbf{a}_{\mathrm{ref}}\bigr)\mathbf{d}_c,
-\end{equation}
-其中 $\mathrm{sgn}(\cdot)$ 为符号函数。这样，后续“方向相容性”项在插接方向变化时保持稳定的符号一致性。
+在线规划周期内，动态障碍体素集合与各向异性椭球包络采用 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{obs},(k)}$ 按 3.4.1 节所述方法同步更新，而方向敏感采样代价则采用 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{dir},(k)}$ 提供的 $\mathbf{d}_c^{(k)}$ 构造。
 
-\textbf{（2）末端方向轴与线缆方向的方向相容性代价。}
-
-规划器扩展的状态为关节构型 $q\in\mathcal{C}$. 设末端坐标系记为 $\{E\}$，其在地图系 $\{\mathcal{W}\}$ 下的姿态旋转矩阵为 ${}^{\mathcal{W}}\mathbf{R}_E(q)\in SO(3)$。取末端装配/接近方向在自身坐标系下的单位基向量 $\mathbf{e}_{\mathrm{ins}}$（例如 $\mathbf{e}_{\mathrm{ins}}=[0,0,1]^\top$），则末端方向轴在地图系下表达为
+\textbf{末端方向相容性代价。}对任意构型 $q$，记末端接近方向在地图系中的表达为
 \begin{equation}
-  \mathbf{a}(q)={}^{\mathcal{W}}\mathbf{R}_E(q)\mathbf{e}_{\mathrm{ins}}.
+  \mathbf{a}(q)={}^{\mathcal{W}}\mathbf{R}_E(q)\mathbf{e}_{\mathrm{ins}},
 \end{equation}
-为避免由于线缆双向性导致的错误惩罚，方向相容性采用绝对点积形式：
+则末端方向与线缆主方向之间的相容性代价定义为
 \begin{equation}
-  \phi_{\mathrm{align}}(q)=1-\bigl|\mathbf{a}(q)^\top \mathbf{d}_c\bigr|.
+  \phi_{\mathrm{align}}(q)=1-\bigl|\mathbf{a}(q)^\top \mathbf{d}_c^{(k)}\bigr|.
   \label{eq:ch3:cable-align}
 \end{equation}
-其中 $\phi_{\mathrm{align}}(q)\in[0,1]$，当 $\mathbf{a}(q)$ 与 $\mathbf{d}_c$ 同方向或反方向一致时 $\phi_{\mathrm{align}}(q)$ 取最小值。该项使规划器优先选择能沿线缆主拖曳方向推进的姿态变化，从几何上降低末端扫掠对线缆产生横向拉扯的概率。
+该项越小，说明末端接近方向越接近当前周期估计得到的线缆主方向，有利于减小对拖缆产生横向拉扯的可能性。$\phi_{\mathrm{align}}$ 作为采样引导代价的组成部分，在候选构型筛选阶段提供方向偏好，不直接参与硬约束判定。
 
-\textbf{（3）线缆各向异性安全距离与可验证判据。}
-
-传统 $d_c(q)$ 取的是到体素占据集合 $\mathcal{V}_{\mathrm{cable}}$ 的最小欧氏距离。为体现线缆“法向避障更敏感、切向通行相对宽松”的工程假设，本文构造以线缆主方向为轴的各向异性安全度量。
-
-对任意空间点 $\mathbf{x}\in\mathbb{R}^3$，定义其相对质心的向量 $\mathbf{r}=\mathbf{x}-\bar{\mathbf{p}}_c$，并将该向量分解为沿线缆方向的切向分量与垂直于线缆方向的法向分量。设投影算子为
+\textbf{各向异性安全距离评价。}在线缆避障层面，本文利用 3.4.1 节所构建的各向异性椭球包络集合 $\mathcal{E}_{\mathrm{cable}}^{(k)}$ 对任意构型进行方向敏感安全评价。对给定构型 $q$，记机械臂各连杆上的采样点集合为 $\mathcal{S}(q)$，则构型级各向异性安全距离定义为
 \begin{equation}
-  \mathbf{P}_{\parallel}=\mathbf{d}_c\mathbf{d}_c^\top,\quad
-  \mathbf{P}_{\perp}=\mathbf{I}-\mathbf{d}_c\mathbf{d}_c^\top,
-\end{equation}
-其中 $\mathbf{I}$ 为 $3\times 3$ 单位矩阵。切向与法向距离分别为
-\begin{equation}
-  d_{\parallel}(\mathbf{x})=\left|\mathbf{d}_c^\top(\mathbf{x}-\bar{\mathbf{p}}_c)\right|,
-  \quad
-  d_{\perp}(\mathbf{x})=\left\|\mathbf{P}_{\perp}(\mathbf{x}-\bar{\mathbf{p}}_c)\right\|_2.
-  \label{eq:ch3:cable-ani-dist}
-\end{equation}
-为将其映射为统一的无量纲安全度，选取切向/法向安全半径参数 $r_{\parallel}$ 与 $r_{\perp}$（一般取 $r_{\perp}>r_{\parallel}$），定义各向异性安全度量：
-\begin{equation}
-  d_{\mathrm{ani}}(\mathbf{x})=\sqrt{\left(\frac{d_{\perp}(\mathbf{x})}{r_{\perp}}\right)^2+\left(\frac{d_{\parallel}(\mathbf{x})}{r_{\parallel}}\right)^2 }.
-  \label{eq:ch3:cable-ellipsoid}
-\end{equation}
-当 $d_{\mathrm{ani}}(\mathbf{x})<1$ 时，点 $\mathbf{x}$ 落入围绕线缆主轴的安全椭球域内。对机械臂连杆，将其离散为若干碰撞采样点集合 $\mathcal{S}(q)$，则得到该构型下最小各向异性安全度量：
-\begin{equation}
-  d_{\mathrm{ani}}(q)=\min_{\mathbf{s}\in\mathcal{S}(q)} d_{\mathrm{ani}}(\mathbf{s}).
+  d_{\mathrm{ani}}^{(k)}(q)=\min_{\mathbf{s}\in\mathcal{S}(q)}\;\min_{m=1}^{M_k}\;d_{\mathrm{ani},m}^{(k)}(\mathbf{s}),
   \label{eq:ch3:cable-ani-q}
 \end{equation}
-据此，柔性线缆安全判据定义为
+其中 $d_{\mathrm{ani},m}^{(k)}(\cdot)$ 为式~\eqref{eq:ch3:cable-ellipsoid} 定义的点到第 $m$ 段线缆椭球的归一化距离。该指标遍历机械臂所有连杆采样点与所有线缆段椭球之间的各向异性距离关系：当 $d_{\mathrm{ani}}^{(k)}(q)\ge 1$ 时，表明构型 $q$ 下机械臂与全部线缆各向异性安全包络均不相交；反之，说明至少存在一段线缆附近未满足法向半径 $r_\perp$ 和切向半径 $r_\parallel$ 所定义的方向敏感安全间隙。与直接使用目标连接器拖缆的单一主方向不同，此处各向异性距离的计算以障碍线缆的逐段椭球参数为依据，每段椭球拥有独立的质心与局部方向，从而使安全评价能够适应线缆在空间中的弯曲走向变化。
+
+\textbf{柔性线缆安全判据。}综合体素占据硬碰撞判定与各向异性安全距离评价，定义柔性线缆安全判据为
 \begin{equation}
-  \mathcal{C}_{\mathrm{cable}}(q)=
-\begin{cases}
-  1, & d_{\mathrm{ani}}(q)\ge 1\;\land\;\mathbf{s}\notin \mathcal{V}_{\mathrm{cable}}\;\text{（按采样点体素检查）},\\
-  0, & \text{otherwise}.
+  \mathcal{C}_{\mathrm{cable}}^{(k)}(q)=
+  \begin{cases}
+    1,& d_{\mathrm{ani}}^{(k)}(q)\ge 1\ \land\ \mathcal{S}(q)\cap\mathcal{V}_{\mathrm{cable}}^{(k)}=\varnothing,\\
+    0,& \text{otherwise}.
   \end{cases}
   \label{eq:ch3:cable-safe-judge}
 \end{equation}
-其中条件“$\mathbf{s}\notin \mathcal{V}_{\mathrm{cable}}$”保证与上一小节构建的动态体素占据集合一致，椭球域用于引入方向性安全缓冲，使得避障几何不仅依赖体素离散误差。
+式~\eqref{eq:ch3:cable-safe-judge} 包含两层约束：体素占据条件 $\mathcal{S}(q)\cap\mathcal{V}_{\mathrm{cable}}^{(k)}=\varnothing$ 确保机械臂与线缆点云不发生硬碰撞；各向异性距离条件 $d_{\mathrm{ani}}^{(k)}(q)\ge 1$ 进一步要求机械臂在每段线缆附近保持由椭球包络定义的方向敏感安全裕度。前者由混合障碍物地图中的 $\mathcal{V}_{\mathrm{cable}}^{(k)}$ 提供离散占据判定，后者由 $\mathcal{E}_{\mathrm{cable}}^{(k)}$ 提供连续距离评价，二者在 $\mathcal{M}_{\mathrm{hyb}}$ 上协同完成。
 
-\textbf{（4）方向相容采样接纳概率与方向引导的 GRRT-Connect 代价。}
+\textbf{（2）低频在线重规划与线缆点云更新。}
 
-结合混合障碍物地图中的刚性安全距离与柔性方向安全代价，本文在扩展候选节点上构造带方向项的代价函数：
+考虑到带缆连接器在抓取后随末端运动会引起线缆形态缓慢变化，本文不采用基于单帧观测的一次性全程规划，而采用低频在线重规划策略。规划层以约 $5\,\mathrm{Hz}$ 的频率运行，即每隔 $\Delta t\approx 0.2\,\mathrm{s}$ 利用最新观测更新线缆表示，并对剩余局部轨迹进行滚动修正。该设置适用于抓取后抬升、脱离和短距离转运阶段的准静态运动条件，此时相邻规划周期内线缆形态变化有限，低频重规划能够及时反映线缆主方向与占据分布的主要变化趋势。
+
+在线重规划周期内涉及两类功能不同的线缆点云。其一为用于动态障碍建图的线缆障碍点云，记为 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{obs},(k)}$，由第二章 CableMask 掩膜反投影并经手眼标定变换到地图系后获得，用于更新动态线缆障碍体素集合 $\mathcal{V}_{\mathrm{cable}}^{(k)}$；其二为前述局部方向点云 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{dir},(k)}$，由当前目标连接器尾部邻域中的拖缆区域提取获得，用于估计线缆主方向 $\mathbf{d}_c^{(k)}$。前者反映规划空间内线缆障碍的整体占据分布，后者表征当前被抓取连接器附近局部拖缆的主导形态，二者分别服务于动态障碍地图更新与方向先验构造。
+
+\textbf{（3）引导式采样策略。}
+
+在此基础上，本文对 GRRT-Connect 的采样与扩展过程引入方向引导代价
 \begin{equation}
-  J_{\mathrm{dir}}(q)=
+  J_{\mathrm{dir}}^{(k)}(q)=
   \alpha\,d_g(q)+
   \beta\,\exp\!\left(-\frac{d_r(q)}{\sigma_r}\right)+
-  \gamma\,\exp\!\left(-\frac{d_{\mathrm{ani}}(q)}{\sigma_c}\right)+
-  \delta\,\phi_{\mathrm{align}}(q),
+  \gamma\,\exp\!\left(-\frac{d_{\mathrm{ani}}^{(k)}(q)}{\sigma_c}\right)+
+  \delta\,w_d^{(k)}\,\phi_{\mathrm{align}}(q),
   \label{eq:ch3:Jdir}
 \end{equation}
-其中 $d_g(q)$ 表示关节空间到目标构型的距离，$d_r(q)$ 为当前构型到刚性障碍的最小距离，$\sigma_r,\sigma_c$ 为尺度参数，$\phi_{\mathrm{align}}(q)$ 由式~\eqref{eq:ch3:cable-align} 给出。该代价函数刻画了“趋近目标（第一项）—远离刚性结构（第二项）—在方向安全域外保持间隙（第三项）—末端方向与线缆方向一致（第四项）”的复合目标。
-
-为在采样阶段降低无效节点数量，本文定义候选采样的接纳概率：
+其中 $d_g(q)$ 为当前构型到局部目标构型的距离，$d_r(q)$ 为到刚性障碍的最小距离，$\sigma_r,\sigma_c$ 为尺度参数。基于该代价函数定义候选采样的接纳概率
 \begin{equation}
-  P_{\mathrm{acc}}(q)=\exp\!\left(-\frac{J_{\mathrm{dir}}(q)}{T}\right),
+  P_{\mathrm{acc}}^{(k)}(q)=\exp\!\left(-\frac{J_{\mathrm{dir}}^{(k)}(q)}{T}\right),
   \label{eq:ch3:Pac}
 \end{equation}
-其中 $T>0$ 为温度系数，用于控制接纳概率对代价的敏感性。采样与接纳过程如下：当随机采样得到 $q_{\mathrm{rand}}$ 后，计算 $P_{\mathrm{acc}}(q_{\mathrm{rand}})$ 并与均匀随机变量 $\xi\sim U(0,1)$ 比较，若 $\xi<P_{\mathrm{acc}}(q_{\mathrm{rand}})$ 则保留，否则重新采样。该机制在不改变 RRT-Connect 双树框架的前提下，将线缆方向性先验从“硬避障”扩展为“概率引导”，显著减少末端朝不利方向摆动导致的无效扩展。
+其中 $T>0$ 为温度系数，用于控制接纳概率对代价的敏感性。采样阶段首先根据式~\eqref{eq:ch3:Pac} 对随机候选构型进行接纳筛选，再将通过筛选的构型送入双树扩展过程，从而提高搜索对目标方向与线缆方向相容区域的探索概率。
 
-\textbf{（5）双树扩展与方向判据的联合执行。}
+\textbf{（4）双树扩展节点生成与接纳判据。}
 
-在双树扩展阶段，仍以起始构型 $q_{\mathrm{start}}$ 与目标构型 $q_{\mathrm{goal}}$ 分别初始化两棵搜索树。若搜索树中距离采样点最近的节点为 $q_{\mathrm{near}}$，局部扩展点为
 \begin{equation}
   q_{\mathrm{new}}=
   q_{\mathrm{near}}+\epsilon\,
   \frac{q_{\mathrm{rand}}-q_{\mathrm{near}}}{\|q_{\mathrm{rand}}-q_{\mathrm{near}}\|_2},
   \label{eq:ch3:qnew}
 \end{equation}
-其中 $\epsilon$ 为扩展步长。对扩展线段执行关节限位检查后，采用“混合地图 + 方向安全域”的联合验证：首先在 AABB 模型下完成刚性碰撞检测；随后在 $\mathcal{V}_{\mathrm{cable}}$ 体素集合约束下完成柔性占据判定，并进一步计算式~\eqref{eq:ch3:cable-ellipsoid}–\eqref{eq:ch3:cable-ani-q} 给出的各向异性安全度量，要求满足式~\eqref{eq:ch3:cable-safe-judge}。
-
-当满足三类约束后，$q_{\mathrm{new}}$ 被接纳并作为新节点加入树结构，同时在可连接条件满足时尝试双树连接。该设计使得规划器在狭窄机舱环境中不仅依赖体素离散的几何碰撞约束，也显式引入线缆主方向的连续性先验，从而形成对柔性线缆干扰的方向敏感规避。
+只有当 $q_{\mathrm{new}}$ 同时满足关节限位、刚性障碍碰撞约束以及式~\eqref{eq:ch3:cable-safe-judge} 给出的柔性线缆判据时，才将其并入树结构并继续尝试双树连接。由此，方向先验不再作为脱离几何约束的独立启发项，而是与动态障碍地图和刚性碰撞检测共同构成统一的在线规划判据。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-14\\（空白占位图）}}
-  \caption{线缆方向向量驱动的方向相容采样与双树扩展流程示意图}
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-16\\（空白占位图）}}
+  \caption{基于双线缆点云输入的低频在线重规划与方向引导扩展示意图（障碍点云更新动态体素地图，局部方向点云估计主方向并参与采样接纳与双树扩展）}
   \label{fig:ch3:grrt-tree}
 \end{figure}
 
-\textbf{（6）与力位混合控制的方向参照接口。}
-
-本节得到的规划轨迹由 GRRT-Connect 在混合障碍物地图 $\mathcal{M}_{\mathrm{hyb}}$ 上生成，其中柔性部分由 $\mathcal{V}_{\mathrm{cable}}$ 表征，并结合由 $\mathcal{P}_{\mathrm{cable}}^{\mathcal{W}}$ 估计的方向向量 $\mathbf{d}_c$ 执行方向相容扩展。轨迹包含时间参数化后的末端位姿序列，并在同一观测帧条件下给出与线缆方向一致的参照 $\mathbf{d}_c$。在力位混合控制模块中，可将测得外力 ${}^{\mathcal{W}}\mathbf{f}_{\mathrm{ext}}$ 按线缆方向进行分解：
-\begin{equation}
-  f_{\parallel}=\mathbf{d}_c^\top\,{}^{\mathcal{W}}\mathbf{f}_{\mathrm{ext}},\quad
-  \mathbf{f}_{\perp}={}^\mathcal{W}\mathbf{f}_{\mathrm{ext}}-f_{\parallel}\mathbf{d}_c,
-  \label{eq:ch3:force-decomp}
-\end{equation}
-其中 $f_{\parallel}$ 表示切向分量大小，$\mathbf{f}_{\perp}$ 表示法向分量。结合本节方向相容规划使得轨迹中末端方向变化与 $\mathbf{d}_c$ 保持一致，可在力控律中对切向/法向分量采用不同阻抗参数，降低柔性线缆拖拽造成的法向扰动传递，提升插接过程的稳定性与收敛性。
-
-\textbf{（7）方向可靠度权重与退化容错。}
-
-由于线缆形态在航空非结构化环境中可能出现遮挡与局部截断，PCA 得到的主方向 $\mathbf{d}_c$ 可能在短时间内抖动。为避免方向项在 $P_{\mathrm{acc}}(q)$ 与代价 $J_{\mathrm{dir}}(q)$ 中放大误差，本文引入置信度权重 $w_d\in[0,1]$，由协方差矩阵特征值比例给出：
-\begin{equation}
-  w_d=\frac{\lambda_1}{\lambda_1+\lambda_2+\lambda_3},
-  \label{eq:ch3:wd}
-\end{equation}
-其中 $\lambda_1\ge\lambda_2\ge\lambda_3$ 为 $\mathbf{C}_c$ 的特征值。将式~\eqref{eq:ch3:Jdir} 中方向项替换为 $\delta\,w_d\,\phi_{\mathrm{align}}(q)$，当 $\mathbf{d}_c$ 不可靠时（$w_d$ 小），算法退化为仅依赖混合障碍物地图与各向异性安全度量的保守引导。若连续 $N$ 次扩展均因柔性安全判据失败而未能生成可接纳节点，则进一步降低接纳阈值并增大扩展步长上限 $\epsilon_{\max}$，在保证碰撞约束的前提下提高跳出局部可行域的能力，从而实现容错与收敛性保障。
+如图~\ref{fig:ch3:grrt-tree}所示，该策略在每个规划周期内依次完成最新观测获取、障碍点云与局部方向点云构造、动态体素地图更新、方向引导采样、双树扩展验证以及局部轨迹前缀输出等步骤。其中，引导式采样负责在候选构型生成阶段提高对目标方向和线缆方向相容区域的探索概率，双树扩展则负责在满足刚性碰撞约束与柔性线缆安全判据的前提下快速建立起始构型与目标构型之间的连通路径。与基于单帧观测的一次性规划不同，本文在每个周期仅执行当前规划轨迹的前缀段，随后利用下一观测周期重新更新 $\mathcal{V}_{\mathrm{cable}}^{(k+1)}$ 和 $\mathbf{d}_c^{(k+1)}$，并继续对剩余路径进行修正。该机制能够在不显著增加规划计算负担的前提下，使路径规划持续适应抓取后线缆形态的缓慢变化。
 
 \begin{algorithm}[htbp]
-\caption{线缆方向向量驱动的方向相容 GRRT-Connect 扩展}
+\caption{基于双线缆点云输入的低频在线 GRRT-Connect 重规划}
 \label{alg:ch3:grrt-dir}
-\KwIn{混合障碍物地图 $\mathcal{M}_{\mathrm{hyb}}=(\mathcal{O}_{\mathrm{rigid}},\mathcal{V}_{\mathrm{cable}})$；动态线缆点云 $\mathcal{P}_{\mathrm{cable}}^{\mathcal{W}}$；起始/目标构型 $q_{\mathrm{start}},q_{\mathrm{goal}}$；参数 $\alpha,\beta,\gamma,\delta,\epsilon,r_{\perp},r_{\parallel}$}
-\KwOut{无碰撞规划路径 $\pi$}
+\KwIn{初始构型 $q_{\mathrm{start}}$；局部目标构型 $q_{\mathrm{goal}}$；刚性障碍集合 $\mathcal{O}_{\mathrm{rigid}}$；规划周期 $\Delta t$；参数 $\alpha,\beta,\gamma,\delta,\epsilon,r_{\perp},r_{\parallel}$}
+\KwOut{滚动更新的局部无碰撞轨迹前缀序列}
 \BlankLine
-1. 根据 $\mathcal{P}_{\mathrm{cable}}^{\mathcal{W}}$ 通过 PCA 估计 $\mathbf{d}_c$ 与 $\bar{\mathbf{p}}_c$；消歧并更新方向项。\;
-2. 初始化双树：$T_{\mathrm{start}}\leftarrow\{q_{\mathrm{start}}\}$，$T_{\mathrm{goal}}\leftarrow\{q_{\mathrm{goal}}\}$。\;
-3. \While{未满足连接条件且迭代次数未超限}{
-3.1 采样 $q_{\mathrm{rand}}$：以概率 $P_{\mathrm{goal}}$ 取 $q_{\mathrm{goal}}$，否则从 $\mathcal{C}_{\mathrm{free}}$ 均匀采样。\;
-3.2 计算方向项代价 $J_{\mathrm{dir}}(q_{\mathrm{rand}})$（式~\eqref{eq:ch3:Jdir}）并得到接纳概率 $P_{\mathrm{acc}}$（式~\eqref{eq:ch3:Pac}）；若 $\xi\ge P_{\mathrm{acc}}$ 则返回 3.1。\;
-3.3 找最近节点 $q_{\mathrm{near}}$，生成扩展节点 $q_{\mathrm{new}}$（式~\eqref{eq:ch3:qnew}）。\;
-3.4 执行约束判定：关节限位检查；刚性 AABB 碰撞检测；柔性占据检查（$\mathcal{V}_{\mathrm{cable}}$）与各向异性安全度量判据（式~\eqref{eq:ch3:cable-safe-judge}）。\;
-3.5 若判定通过，将 $q_{\mathrm{new}}$ 及边加入当前树，并尝试与另一棵树连接。\;
-3.6 若方向置信度下降（式~\eqref{eq:ch3:wd}），对方向项进行加权退化并重启采样。\;
+1. 初始化当前执行构型 $q^{(0)}\leftarrow q_{\mathrm{start}}$，周期计数 $k\leftarrow 0$。\;
+2. \While{未到达 $q_{\mathrm{goal}}$}{
+2.1 获取第 $k$ 个规划周期的最新观测，生成线缆障碍点云 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{obs},(k)}$。\;
+2.2 根据连接器尾部线缆根部邻域，从 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{obs},(k)}$ 中提取局部方向点云 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{dir},(k)}$（式~\eqref{eq:ch3:cable-dir-cloud}）。\;
+2.3 利用 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{obs},(k)}$ 更新动态体素地图 $\mathcal{V}_{\mathrm{cable}}^{(k)}$；利用 $\mathcal{P}_{\mathrm{cable}}^{\mathrm{dir},(k)}$ 估计 $\mathbf{d}_c^{(k)}$、$\bar{\mathbf{p}}_c^{(k)}$ 和 $w_d^{(k)}$。\;
+2.4 初始化双树：$T_{\mathrm{start}}\leftarrow\{q^{(k)}\}$，$T_{\mathrm{goal}}\leftarrow\{q_{\mathrm{goal}}\}$。\;
+2.5 \While{未满足连接条件且迭代次数未超限}{
+2.5.1 采样 $q_{\mathrm{rand}}$，计算方向引导代价 $J_{\mathrm{dir}}^{(k)}(q_{\mathrm{rand}})$ 与接纳概率 $P_{\mathrm{acc}}^{(k)}$；若未通过接纳则重新采样。\;
+2.5.2 找最近节点 $q_{\mathrm{near}}$，由式~\eqref{eq:ch3:qnew} 生成扩展节点 $q_{\mathrm{new}}$。\;
+2.5.3 执行关节限位、刚性障碍碰撞检测以及式~\eqref{eq:ch3:cable-safe-judge} 给出的柔性线缆判据；若通过则将 $q_{\mathrm{new}}$ 并入树结构并尝试双树连接。\;
+}
+2.6 回溯得到当前周期局部路径 $\pi^{(k)}$，仅执行其前缀段，持续时间为 $\Delta t$。\;
+2.7 根据执行后的机器人状态更新 $q^{(k+1)}$，令 $k\leftarrow k+1$。\;
 }
 \end{algorithm}
 
 \subsection{路径生成与后处理优化}
 
-本节对应运动规划链路的输出环节。前文将机舱刚性几何与柔性线缆占据统一写入 $\mathcal{M}_{\mathrm{hyb}}$，并在双树扩展中引入方向相容接纳与各向异性线缆安全判据；本节将离散路径的提取与线段级验证、以及代价函数驱动的后处理优化分别用流程图与伪代码归纳，并辅以公式刻画插值、碰撞回投与梯度结构，使输出轨迹在航空非结构化环境下既满足刚柔混合避障可验证性，又抑制带缆连接器抬升与转运中的尾部摆动。
+在双树扩展获得起始构型与目标构型之间的连通关系后，规划结果仍表现为关节空间中的离散节点序列，尚不能直接作为机器人执行轨迹。为此，本节进一步研究离散路径到可执行连续轨迹的转换过程，重点包括三项内容：其一，由双树连接结果回溯并拼接初始离散路径；其二，对相邻节点之间的插补线段进行稠密可行性检验，保证轨迹在刚性障碍与动态线缆障碍约束下全程无碰；其三，在保持可行性的前提下，通过平滑与捷径替换降低路径折角和冗余绕行，使轨迹更适于带缆连接器的抬升与转运执行。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-15\\（空白占位图）}}
+  \includegraphics[width=0.9\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-b33fdeca-b1f7-4365-b1d2-27256287520e.png}
   \caption{路径生成与线段级碰撞检验流程示意图（双树连接—路径回溯拼接—分段稠密抽检—可行路径输出）}
   \label{fig:ch3:path-gen-flow}
 \end{figure}
 
-图~\ref{fig:ch3:path-gen-flow} 将路径生成归纳为“回溯得到节点序列—对每条边做关节空间插值稠密检验—全程通过则输出 $\pi$”的管线；其中稠密检验在刚性占据 $\mathcal{O}_{\mathrm{rigid}}$ 与线缆各向异性安全判据式~\eqref{eq:ch3:cable-safe-judge} 上完成一致性校核，便于实现时与混合地图接口对齐。
+如图~\ref{fig:ch3:path-gen-flow}所示，路径生成过程可概括为“节点回溯与拼接 - 关节空间插值 - 线段级稠密检验 - 可行路径输出”四个步骤。其中，稠密检验在刚性障碍集合 $\mathcal{O}_{\mathrm{rigid}}$ 与柔性线缆安全判据式~\eqref{eq:ch3:cable-safe-judge} 下统一完成，从而保证输出路径不仅在离散节点处可行，而且在相邻节点之间的连续插补过程中同样满足混合障碍物地图约束。
 
 相邻节点间的连续运动采用关节空间线性插值，对 $i\in\{1,\ldots,n-1\}$、$\tau\in[0,1]$，有
 \begin{equation}
   q_i(\tau)=(1-\tau)q_i+\tau q_{i+1}.
   \label{eq:ch3:seg-interp}
 \end{equation}
-式~\eqref{eq:ch3:seg-interp} 在 $\tau=m/M$ 下给出了线段稠密检验的离散取样方式。为分析末端扫掠与带缆任务的耦合，任取 $q$ 由正运动学得到末端位姿；记基坐标系为 $\{B\}$、末端为 $\{E\}$、地图系为 $\{\mathcal{W}\}$，则
+式~\eqref{eq:ch3:seg-interp} 在 $\tau=m/M$ 下给出了线段稠密检验的离散取样方式。为分析插补过程中末端扫掠包络与带缆任务之间的耦合关系，任取构型 $q$ 由正运动学得到末端位姿；记基坐标系为 $\{B\}$、末端为 $\{E\}$、地图系为 $\{\mathcal{W}\}$，则
 \begin{equation}
   {}^{\mathcal{W}}\mathbf{T}_{E}(q)={}^{\mathcal{W}}\mathbf{T}_{B}\,{}^{B}\mathbf{T}_{E}(q),
   \label{eq:ch3:FK-path}
 \end{equation}
-其中 ${}^{\mathcal{W}}\mathbf{T}_{B}$ 为常值，${}^{B}\mathbf{T}_{E}(q)$ 由机械臂模型给出。沿边插值时 ${}^{\mathcal{W}}\mathbf{T}_{E}(q_i(\tau))$ 对 $\tau$ 的变化率反映末端速度水平；可行 $\pi$ 仍可能含高频折角，故需进入后处理。
+其中 ${}^{\mathcal{W}}\mathbf{T}_{B}$ 为常值，${}^{B}\mathbf{T}_{E}(q)$ 由机械臂运动学模型给出。沿边插值时，${}^{\mathcal{W}}\mathbf{T}_{E}(q_i(\tau))$ 对 $\tau$ 的连续变化反映了末端在空间中的扫掠轨迹。若离散节点之间存在较大方向突变，则即使整条路径在离散意义下可行，实际执行时仍可能出现关节速度波动增大、末端姿态变化不连续以及对柔性线缆产生附加扰动等问题，因此仍需进行后处理优化。
 
 定义离散二阶差分 $\delta_i=q_{i+1}-2q_i+q_{i-1}$，平滑项 $\sum_{i=2}^{n-1}\|\delta_i\|_2^2$ 对内部节点的梯度为
 \begin{equation}
@@ -580,6 +746,15 @@ $\sigma_o>0$。若 $d_{\min}$ 对 $q$ 可微，则
 \end{equation}
 $\nabla_q d_{\min}(q)$ 可由距离场与微分运动学映射至关节空间。长度项对 $q_i$ 在边差分非零处的梯度为 $\frac{q_i-q_{i-1}}{\|q_i-q_{i-1}\|_2}-\frac{q_{i+1}-q_i}{\|q_{i+1}-q_i\|_2}$；将上述三项按 $\lambda_s,\lambda_l,\lambda_o$ 加权并求和，即得内部节点处下降方向 $\mathbf{g}_i$ 的构造方式。
 
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][0.24\textheight][c]{0.9\textwidth}{\centering 图3-18\\（空白占位图：路径生成与平滑原理示意）}}
+  \caption{路径生成与平滑原理示意图（离散节点回溯、关节空间线性插值、混合障碍约束下的稠密检验以及平滑优化前后轨迹形态对比）}
+  \label{fig:ch3:path-smooth-principle}
+\end{figure}
+
+如图~\ref{fig:ch3:path-smooth-principle}所示，路径后处理可理解为“保持端点不变条件下，对中间节点进行受约束重分布”的过程。图中离散节点序列对应双树连接后回溯得到的初始路径，节点间连线对应式~\eqref{eq:ch3:seg-interp} 所描述的关节空间线性插值；在每条插值边上进行稠密检验，可验证该路径在连续执行过程中是否始终满足刚性障碍碰撞约束和式~\eqref{eq:ch3:cable-safe-judge} 给出的柔性线缆安全判据。进一步地，平滑优化阶段通过式~\eqref{eq:ch3:Jpath} 对离散二阶差分、路径长度和障碍惩罚进行联合调节，使优化后的节点序列在保持可行性的同时减小局部折角与冗余绕行。由此，式~\eqref{eq:ch3:Jpath-grad-smooth} 对应的平滑项主要抑制关节轨迹的高频振荡，式~\eqref{eq:ch3:phi-obs-path} 与式~\eqref{eq:ch3:phi-grad} 则共同约束轨迹与混合障碍物地图之间的最小安全间隙，从而在图示层面形成“可行 - 平滑 - 远障”的统一优化效果。
+
 \begin{algorithm}[H]
 \caption{混合障碍物地图约束下的离散路径生成与后处理优化}
 \label{alg:ch3:path-gen-post}
@@ -599,52 +774,52 @@ $k\leftarrow k+1$\;
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-16\\（空白占位图）}}
-  \caption{考虑柔性线缆障碍的规划路径对比图}
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-19\\（空白占位图）}}
+  \caption{基于方向引导与后处理优化的规划路径效果图（展示本文方法在柔性线缆障碍约束下生成的转运路径及其与线缆占据区域的空间关系）}
   \label{fig:ch3:path-compare}
 \end{figure}
 
-如图~\ref{fig:ch3:path-compare} 所示，在相同线缆体素表达下，标准 RRT-Connect 轨迹更贴近占据簇且折返较多，本文 GRRT-Connect 轨迹与密集占据区间隙更大，统计上常对应更少迭代与更低路径代价；蓝、红曲线分别表示两种算法结果，红色在等效转运段更显著绕开线缆体素密集区。该几何差异与方向引导扩展相一致，使算法~\ref{alg:ch3:path-gen-post} 的初值已更接近少折返、远柔障形态；路径生成保证可达与混合地图一致的可验证无碰，后处理则进一步压低与柔性占据的近邻度并平滑关节变化，降低带缆连接器转运中的位姿漂移，为插接类操作提供更稳的运动学初值。
+如图~\ref{fig:ch3:path-compare}所示，采用前文所述方向引导采样、双树扩展与后处理优化后，生成的转运路径能够在满足起始构型与目标构型连通的同时，整体保持与线缆体素占据区的可见安全间隙，并避免在局部密集障碍附近出现明显折返。图中的路径形态表明，式~\eqref{eq:ch3:Jdir} 所引入的方向引导项能够使搜索过程优先沿与线缆主方向更相容的区域扩展，而式~\eqref{eq:ch3:Jpath} 对应的后处理优化则进一步抑制关节空间中的高频折角和冗余绕行。由此，最终输出轨迹不仅与混合障碍物地图及式~\eqref{eq:ch3:cable-safe-judge} 的柔性线缆安全判据保持一致，而且在几何形态上体现出前文方法带来的改进效果，即路径更平滑、对线缆障碍的绕避更充分、末端转运姿态变化更连续，可为后续预装配阶段提供更稳定的运动学输入。
 
 \section{实验与结果分析}
 
-为验证本章提出的端到端 6D 抓取生成、多约束抓取筛选以及基于混合障碍物地图的 GRRT-Connect 引导式规划在航空非结构化环境中的可行性与有效性，本节不采用大规模跨方法数值对比，也不以单一标量指标作结论依据，而是选取若干典型工况，从图示效果上观察规划结果是否与混合地图及线段检验所表达的可行域一致、执行过程是否呈现与柔性线缆相容的运动形态。实验输入沿用前文 CableMask 分割与三维化体素更新链路，刚性结构在初始感知阶段写入 $\mathcal{O}_{\mathrm{rigid}}$ 并在规划期保持不更新，柔性线缆在规划与运动开始后仅按当前观测帧更新 $\mathcal{V}_{\mathrm{cable}}$，使地图语义与在线规划在时间上对齐。
+为验证本章提出的端到端 6D 抓取生成、多约束抓取筛选以及基于混合障碍物地图的 GRRT-Connect 引导式规划在航空非结构化环境中的可行性与有效性，本节围绕“抓取效果验证”和“抓取后转运至预装配区域的规划执行验证”两部分展开。前者用于说明候选抓取生成与多约束筛选后，末端能够在真实带缆连接器上形成稳定夹持；后者以前述成功抓取姿态作为规划初始状态，进一步考察转运路径是否能够在刚柔混合障碍约束下保持连续、可执行且与线缆干扰相容。实验输入沿用前文 CableMask 分割与三维化体素更新链路，刚性结构在初始感知阶段写入 $\mathcal{O}_{\mathrm{rigid}}$ 并在规划期保持不更新，柔性线缆在规划与运动开始后仅按当前观测帧更新 $\mathcal{V}_{\mathrm{cable}}$，使地图语义与在线规划在时间上对齐。具体实验流程为：首先由视觉感知模块完成目标连接器实例分割、位姿估计与线缆区域提取；随后由抓取生成网络输出候选抓取，并经可达性、线缆安全性和姿态相容性评价确定最终执行抓取；机械臂按选定抓取位姿完成接近、闭合夹持和抬升动作；在此基础上，将成功抓取后的实际末端构型作为规划起点，进一步生成并执行转运到预装配区域的轨迹，用于验证前文路径规划与后处理方法在真实带缆工况中的执行效果。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-17\\（空白占位图：不同线缆布置下抓取过程典型帧）}}
-  \caption{不同线缆布置工况下电连接器抓取过程典型示意（夹持姿态与线缆相对位置）}
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-20\\（空白占位图：不同线缆布置下抓取过程典型帧）}}
+  \caption{不同线缆布置工况下电连接器抓取实验效果图（实物抓取过程与对应算法筛选结果示意）}
   \label{fig:ch3:success-rate}
 \end{figure}
 
-图~\ref{fig:ch3:success-rate} 从视觉上呈现不同线缆布置时末端接近与夹持阶段的典型画面。可重点观察夹爪闭合轴线是否落在连接器壳体稳定区、插针端是否未被遮挡、以及线缆根部是否未卷入夹爪扫掠包络。线缆垂落或贴近连接器侧面时，若仍能完成稳定夹持且未出现明显拉扯根部，说明前文将线缆先验写入抓取生成与多约束筛选的做法在真实几何约束下具有可执行性，并与本章所论带柔性线缆的电连接器抓取任务目标一致。
+图~\ref{fig:ch3:success-rate} 给出了抓取实验的典型结果，其中既包含真实平台上的接近、闭合与抬升画面，也可对应展示算法侧选定的抓取位姿或末端与目标相对关系。该图重点用于验证两方面内容：其一，经过 3.2 节抓取生成和 3.3 节多约束筛选后，最终选出的抓取位姿能够落在连接器壳体稳定夹持区域，而不会直接遮挡插针端或压迫线缆根部；其二，在不同线缆垂落和贴附形态下，末端仍能够形成稳定闭合夹持并完成初始抬升，说明前文构建的“感知 - 抓取筛选 - 执行”链路在真实带缆工况下具有可执行性。若图中同时给出抓取前后的局部算法效果图，则可进一步说明所选抓取姿态与视觉感知结果及多约束评分结果保持一致。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-18\\（空白占位图：规划过程曲线与轨迹形态示意）}}
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-21\\（空白占位图：规划过程曲线与轨迹形态示意）}}
   \caption{规划求解过程与关节空间轨迹形态示意（收敛趋势与折返程度）}
   \label{fig:ch3:boxplot}
 \end{figure}
 
-图~\ref{fig:ch3:boxplot} 以曲线或轨迹示意的方式展示规划迭代或关节轨迹随时间的变化形态，重在定性阅读而非读数。若曲线在若干次更新后趋于平稳、关节轨迹未出现密集锯齿式折返，可与本章 GRRT-Connect 中目标偏置与障碍引导、以及路径后处理中对平滑与冗余折点的抑制相呼应，说明规划输出在工程上更易连续执行。图中若同时标注搜索树或采样点的空间分布，还可辅助判断狭窄通道内扩展是否主要沿任务推进方向展开，而非在障碍边界附近来回试探。
+图~\ref{fig:ch3:boxplot} 表明，规划迭代过程在若干次更新后逐步收敛，关节空间轨迹未出现显著的高频锯齿式折返。这说明前文引入的方向引导采样、双树扩展和路径后处理优化能够有效抑制狭窄通道中的无效搜索与冗余转折，使规划输出更符合真实平台连续执行的要求。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-19\\（空白占位图：转运段轨迹与线缆占据叠加示意）}}
+  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-22\\（空白占位图：转运段轨迹与线缆占据叠加示意）}}
   \caption{转运阶段末端轨迹与线缆体素占据的空间关系示意}
   \label{fig:ch3:exp-metrics}
 \end{figure}
 
-图~\ref{fig:ch3:exp-metrics} 将规划得到的末端轨迹或连杆扫掠示意与 $\mathcal{V}_{\mathrm{cable}}$ 占据叠加显示，便于从几何关系上判读轨迹与柔性占据簇之间是否维持可见间隙，以及末端扫掠路径是否回避横向贴近线缆密集区等不利形态。若轨迹在体素簇外侧形成相对平滑的绕行带，并与式~\eqref{eq:ch3:cable-safe-judge} 所表达的各向异性安全含义相一致，即可在图示层面支持混合障碍物地图与方向相容引导在规划输出上的有效性。图中末端姿态若沿线缆主拖曳方向变化较为连贯，亦可与方向相容采样引导在机理上相互印证，而无需依赖接触次数或位姿误差等标量汇总。
+图~\ref{fig:ch3:exp-metrics} 显示，规划得到的末端轨迹在转运阶段始终位于线缆体素占据区外侧，并与柔性障碍保持稳定安全间隙，说明式~\eqref{eq:ch3:cable-safe-judge} 所定义的各向异性安全判据在真实规划结果中得到了有效满足。与此同时，轨迹整体沿线缆主方向相容区域展开，未出现明显横向穿越线缆密集区的局部段，表明前文方向引导采样与动态障碍约束能够共同改善路径的安全性与可执行性。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox[c][0.22\textheight][c]{0.9\textwidth}{\centering 图3-20\\（空白占位图：预抓取—抓取—抬升—预装配关键帧序列）}}
-  \caption{缩比平台上自主抓取与规划轨迹执行的关键帧序列示意}
+  \includegraphics[width=0.98\textwidth]{C:/Users/31724/.cursor/projects/d/assets/c__Users_31724_AppData_Roaming_Cursor_User_workspaceStorage_ecdb843983927f0bd3607f2900fc4e87_images_image-5a3f45a5-1f3c-467a-b135-932c61e70764.png}
+  \caption{成功抓取后转运至预装配区域的规划执行关键帧序列示意}
   \label{fig:ch3:exp-seq}
 \end{figure}
 
-图~\ref{fig:ch3:exp-seq} 按时间顺序给出预抓取、闭合夹持、抬升与接近预装配位姿等关键帧。连贯阅读时应关注各阶段之间末端姿态与连接器相对位姿是否过渡自然、抬升后线缆摆动是否受控、以及接近预装配时末端轴线是否与插接方向保持可辨识的一致性。该序列从执行侧说明：算法~\ref{alg:ch3:path-gen-post} 中稠密线段检验与后处理对插补路径全程无碰可验证性及关节空间折角平滑化的要求并非仅停留在离散节点层面，而是能够支撑一整段可观察的连续运动；混合地图刚性静态与线缆动态更新策略也使规划期约束在执行画面中具有可对照的物理对应关系。
+图~\ref{fig:ch3:exp-seq} 进一步说明，连接器在成功抓取后能够沿规划轨迹完成抬升、转运并稳定接近预装配区域，整个过程中末端姿态过渡连续，线缆未与周围刚性结构及线缆占据区发生明显干涉，到达预装配区域附近时连接器仍保持与后续插接任务相一致的定向关系。该结果表明，前文路径生成、稠密检验与后处理优化所得轨迹不仅在离散节点层面满足可行性要求，而且能够支撑真实平台上“成功抓取 - 安全转运 - 进入预装配区域”的连续执行过程。
 
 \section{本章小结}
 

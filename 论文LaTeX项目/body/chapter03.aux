@@ -1,160 +1,202 @@
 \relax 
 \providecommand\hyper@newdestlabel[2]{}
-\pp@pagectr{footnote}{3}{48}{40}
-\@writefile{toc}{\contentsline {chapter}{\numberline {第3章}电连接器自主抓取方法研究}{40}{chapter.3}\protected@file@percent }
+\pp@pagectr{footnote}{3}{56}{48}
+\@writefile{toc}{\contentsline {chapter}{\numberline {第3章}电连接器自主抓取方法研究}{48}{chapter.3}\protected@file@percent }
 \@writefile{lof}{\addvspace {10.0pt}}
 \@writefile{lot}{\addvspace {10.0pt}}
 \@writefile{loa}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {3.1}引言}{40}{section.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.2}端到端 6D 抓取生成网络}{40}{section.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}抓取位姿参数化表示}{40}{subsection.3.2.1}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-1}}{40}{equation.3.1}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-2}}{41}{equation.3.2}\protected@file@percent }
-\newlabel{eq:ch3:tg}{{3-2}{41}{抓取位姿参数化表示}{equation.3.2}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-3}}{41}{equation.3.3}\protected@file@percent }
-\newlabel{eq:ch3:Rg}{{3-3}{41}{抓取位姿参数化表示}{equation.3.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-1}{\ignorespaces 抓取位姿参数示意图（接触点 $\mathbf  {c}$、闭合方向 $\mathbf  {x}$、接近方向 $\mathbf  {z}$、夹爪开度 $\omega $ 与偏置长度 $d$）}}{41}{figure.3.1}\protected@file@percent }
-\newlabel{fig:ch3:grasp-param}{{3-1}{41}{抓取位姿参数示意图（接触点 $\mathbf {c}$、闭合方向 $\mathbf {x}$、接近方向 $\mathbf {z}$、夹爪开度 $\omega $ 与偏置长度 $d$）}{figure.3.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}基于局部点云的网络输入构建}{41}{subsection.3.2.2}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-4}}{42}{equation.3.4}\protected@file@percent }
-\newlabel{eq:ch3:backproj}{{3-4}{42}{基于局部点云的网络输入构建}{equation.3.4}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-5}}{42}{equation.3.5}\protected@file@percent }
-\newlabel{eq:ch3:Toc}{{3-5}{42}{基于局部点云的网络输入构建}{equation.3.5}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-6}}{43}{equation.3.6}\protected@file@percent }
-\newlabel{eq:ch3:dcable}{{3-6}{43}{基于局部点云的网络输入构建}{equation.3.6}{}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {3-1}{\ignorespaces 目标局部点云与线缆先验输入构建}}{43}{algocf.3-1}\protected@file@percent }
-\newlabel{alg:ch3:input-build}{{3-1}{43}{基于局部点云的网络输入构建}{algocf.3-1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-2}{\ignorespaces 目标局部点云裁剪与坐标系规范化示意图（自左至右：整场景深度与实例掩膜、裁剪后目标像素—深度、相机系局部点云、物体系规范化点云及线缆禁入域权重示意）}}{43}{figure.3.2}\protected@file@percent }
-\newlabel{fig:ch3:pointcloud}{{3-2}{43}{目标局部点云裁剪与坐标系规范化示意图（自左至右：整场景深度与实例掩膜、裁剪后目标像素—深度、相机系局部点云、物体系规范化点云及线缆禁入域权重示意）}{figure.3.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}改进的 Contact-GraspNet 网络结构}{44}{subsection.3.2.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3-3}{\ignorespaces 端到端 6D 抓取生成网络整体架构图（输入：目标局部点云与线缆先验；特征提取：PointNet++；预测：抓取方向/接近方向/抓取得分/夹爪宽度四分支；输出：候选抓取位姿集合；虚线表示位姿先验与线缆禁入域对采样的引导）}}{44}{figure.3.3}\protected@file@percent }
-\newlabel{fig:ch3:grasp-net}{{3-3}{44}{端到端 6D 抓取生成网络整体架构图（输入：目标局部点云与线缆先验；特征提取：PointNet++；预测：抓取方向/接近方向/抓取得分/夹爪宽度四分支；输出：候选抓取位姿集合；虚线表示位姿先验与线缆禁入域对采样的引导）}{figure.3.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-4}{\ignorespaces PointNet++ 骨干网络结构示意图（Set Abstraction 层级、Ball Query 邻域、MLP 特征聚合及第一次降采样点即候选接触点）}}{45}{figure.3.4}\protected@file@percent }
-\newlabel{fig:ch3:pointnet}{{3-4}{45}{PointNet++ 骨干网络结构示意图（Set Abstraction 层级、Ball Query 邻域、MLP 特征聚合及第一次降采样点即候选接触点）}{figure.3.4}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-7}}{45}{equation.3.7}\protected@file@percent }
-\newlabel{eq:ch3:ortho}{{3-7}{45}{改进的 Contact-GraspNet 网络结构}{equation.3.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-5}{\ignorespaces 抓取候选分布对比示意图（左：整场景输入时候选分散于背景与线缆；右：目标局部点云与线缆先验下候选集中于连接器壳体稳定夹持区）}}{45}{figure.3.5}\protected@file@percent }
-\newlabel{fig:ch3:graspnet-vis}{{3-5}{45}{抓取候选分布对比示意图（左：整场景输入时候选分散于背景与线缆；右：目标局部点云与线缆先验下候选集中于连接器壳体稳定夹持区）}{figure.3.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}正负样本判定与损失函数设计}{46}{subsection.3.2.4}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-8}}{46}{equation.3.8}\protected@file@percent }
-\newlabel{eq:ch3:pos-neg}{{3-8}{46}{正负样本判定与损失函数设计}{equation.3.8}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-9}}{46}{equation.3.9}\protected@file@percent }
-\newlabel{eq:ch3:Lscore}{{3-9}{46}{正负样本判定与损失函数设计}{equation.3.9}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-10}}{46}{equation.3.10}\protected@file@percent }
-\newlabel{eq:ch3:Lwidth}{{3-10}{46}{正负样本判定与损失函数设计}{equation.3.10}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-11}}{47}{equation.3.11}\protected@file@percent }
-\newlabel{eq:ch3:Lpose}{{3-11}{47}{正负样本判定与损失函数设计}{equation.3.11}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-12}}{47}{equation.3.12}\protected@file@percent }
-\newlabel{eq:ch3:RotErr}{{3-12}{47}{正负样本判定与损失函数设计}{equation.3.12}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-13}}{47}{equation.3.13}\protected@file@percent }
-\newlabel{eq:ch3:Ltotal}{{3-13}{47}{正负样本判定与损失函数设计}{equation.3.13}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-6}{\ignorespaces 抓取生成网络训练过程中总体损失及各分支损失收敛曲线（蓝色：$L_{\mathrm  {grasp}}$；橙色：$L_{\mathrm  {score}}$；绿色：$L_{\mathrm  {width}}$；红色：$L_{\mathrm  {pose}}$）}}{47}{figure.3.6}\protected@file@percent }
-\newlabel{fig:ch3:train-vis}{{3-6}{47}{抓取生成网络训练过程中总体损失及各分支损失收敛曲线（蓝色：$L_{\mathrm {grasp}}$；橙色：$L_{\mathrm {score}}$；绿色：$L_{\mathrm {width}}$；红色：$L_{\mathrm {pose}}$）}{figure.3.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-7}{\ignorespaces 电连接器表面候选抓取位姿分布可视化结果（绿色：壳体稳定夹持区；黄色：插针端功能区；红色：线缆根部及禁入域；颜色越深表示抓取置信度越高）}}{48}{figure.3.7}\protected@file@percent }
-\newlabel{fig:ch3:grasp-dist}{{3-7}{48}{电连接器表面候选抓取位姿分布可视化结果（绿色：壳体稳定夹持区；黄色：插针端功能区；红色：线缆根部及禁入域；颜色越深表示抓取置信度越高）}{figure.3.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}抓取点选择策略研究}{48}{section.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}基于逆运动学的可达性判别}{48}{subsection.3.3.1}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-14}}{49}{equation.3.14}\protected@file@percent }
-\newlabel{eq:ch3:fwd-kin}{{3-14}{49}{基于逆运动学的可达性判别}{equation.3.14}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-15}}{49}{equation.3.15}\protected@file@percent }
-\newlabel{eq:ch3:ik-eq}{{3-15}{49}{基于逆运动学的可达性判别}{equation.3.15}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-16}}{49}{equation.3.16}\protected@file@percent }
-\newlabel{eq:ch3:IK-ind}{{3-16}{49}{基于逆运动学的可达性判别}{equation.3.16}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-17}}{49}{equation.3.17}\protected@file@percent }
-\newlabel{eq:ch3:Jlim}{{3-17}{49}{基于逆运动学的可达性判别}{equation.3.17}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-18}}{49}{equation.3.18}\protected@file@percent }
-\newlabel{eq:ch3:qstar}{{3-18}{49}{基于逆运动学的可达性判别}{equation.3.18}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-19}}{50}{equation.3.19}\protected@file@percent }
-\newlabel{eq:ch3:mani}{{3-19}{50}{基于逆运动学的可达性判别}{equation.3.19}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-8}{\ignorespaces 基于逆运动学的可达性判别结果示意图（灰色：不可达候选；蓝色：可达但关节裕量较小或接近奇异的候选；绿色：可达且关节裕量充足的候选）}}{50}{figure.3.8}\protected@file@percent }
-\newlabel{fig:ch3:grasp-dist2}{{3-8}{50}{基于逆运动学的可达性判别结果示意图（灰色：不可达候选；蓝色：可达但关节裕量较小或接近奇异的候选；绿色：可达且关节裕量充足的候选）}{figure.3.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}面向线缆障碍的安全间隙评价}{50}{subsection.3.3.2}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-20}}{51}{equation.3.20}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-21}}{51}{equation.3.21}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-22}}{51}{equation.3.22}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3-9}{\ignorespaces 线缆障碍的安全间隙可视化结果}}{51}{figure.3.9}\protected@file@percent }
-\newlabel{fig:ch3:cable-clearance}{{3-9}{51}{线缆障碍的安全间隙可视化结果}{figure.3.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}面向任务的姿态相容性评价}{52}{subsection.3.3.3}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-23}}{52}{equation.3.23}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3-10}{\ignorespaces 电连接器表面候选抓取任务姿态相容性结果}}{52}{figure.3.10}\protected@file@percent }
-\newlabel{fig:ch3:align-vis}{{3-10}{52}{电连接器表面候选抓取任务姿态相容性结果}{figure.3.10}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}综合评分函数与最优抓取确定}{52}{subsection.3.3.4}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-24}}{53}{equation.3.24}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3-11}{\ignorespaces 基于多约束优化的最优抓取点筛选流程图（从候选抓取生成经逆运动学筛选、线缆安全间隙计算和姿态相容性评价后输出最优抓取位姿与预抓取位姿）}}{53}{figure.3.11}\protected@file@percent }
-\newlabel{fig:ch3:filter-flow}{{3-11}{53}{基于多约束优化的最优抓取点筛选流程图（从候选抓取生成经逆运动学筛选、线缆安全间隙计算和姿态相容性评价后输出最优抓取位姿与预抓取位姿）}{figure.3.11}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.4}GRRT-Connect 运动规划算法研究}{53}{section.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}混合障碍物地图构建}{54}{subsection.3.4.1}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-25}}{54}{equation.3.25}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3-12}{\ignorespaces 混合障碍物地图构建结果图（刚性障碍与柔性线缆障碍）}}{54}{figure.3.12}\protected@file@percent }
-\newlabel{fig:ch3:octomap}{{3-12}{54}{混合障碍物地图构建结果图（刚性障碍与柔性线缆障碍）}{figure.3.12}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-26}}{55}{equation.3.26}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3-13}{\ignorespaces 线缆障碍三维化处理效果图（真实场景与反投影点云、动态体素占据）}}{55}{figure.3.13}\protected@file@percent }
-\newlabel{fig:ch3:cable-proc}{{3-13}{55}{线缆障碍三维化处理效果图（真实场景与反投影点云、动态体素占据）}{figure.3.13}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-27}}{55}{equation.3.27}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-28}}{55}{equation.3.28}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.2}引导式采样与双树扩展策略}{56}{subsection.3.4.2}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-29}}{56}{equation.3.29}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-30}}{56}{equation.3.30}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-31}}{56}{equation.3.31}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-32}}{57}{equation.3.32}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-33}}{57}{equation.3.33}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-34}}{57}{equation.3.34}\protected@file@percent }
-\newlabel{eq:ch3:cable-align}{{3-34}{57}{引导式采样与双树扩展策略}{equation.3.34}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-35}}{57}{equation.3.35}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {3-36}}{57}{equation.3.36}\protected@file@percent }
-\newlabel{eq:ch3:cable-ani-dist}{{3-36}{57}{引导式采样与双树扩展策略}{equation.3.36}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-37}}{57}{equation.3.37}\protected@file@percent }
-\newlabel{eq:ch3:cable-ellipsoid}{{3-37}{57}{引导式采样与双树扩展策略}{equation.3.37}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-38}}{58}{equation.3.38}\protected@file@percent }
-\newlabel{eq:ch3:cable-ani-q}{{3-38}{58}{引导式采样与双树扩展策略}{equation.3.38}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-39}}{58}{equation.3.39}\protected@file@percent }
-\newlabel{eq:ch3:cable-safe-judge}{{3-39}{58}{引导式采样与双树扩展策略}{equation.3.39}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-40}}{58}{equation.3.40}\protected@file@percent }
-\newlabel{eq:ch3:Jdir}{{3-40}{58}{引导式采样与双树扩展策略}{equation.3.40}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-41}}{58}{equation.3.41}\protected@file@percent }
-\newlabel{eq:ch3:Pac}{{3-41}{58}{引导式采样与双树扩展策略}{equation.3.41}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-42}}{58}{equation.3.42}\protected@file@percent }
-\newlabel{eq:ch3:qnew}{{3-42}{58}{引导式采样与双树扩展策略}{equation.3.42}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-14}{\ignorespaces 线缆方向向量驱动的方向相容采样与双树扩展流程示意图}}{59}{figure.3.14}\protected@file@percent }
-\newlabel{fig:ch3:grrt-tree}{{3-14}{59}{线缆方向向量驱动的方向相容采样与双树扩展流程示意图}{figure.3.14}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-43}}{59}{equation.3.43}\protected@file@percent }
-\newlabel{eq:ch3:force-decomp}{{3-43}{59}{引导式采样与双树扩展策略}{equation.3.43}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-44}}{60}{equation.3.44}\protected@file@percent }
-\newlabel{eq:ch3:wd}{{3-44}{60}{引导式采样与双树扩展策略}{equation.3.44}{}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {3-2}{\ignorespaces 线缆方向向量驱动的方向相容 GRRT-Connect 扩展}}{60}{algocf.3-2}\protected@file@percent }
-\newlabel{alg:ch3:grrt-dir}{{3-2}{60}{引导式采样与双树扩展策略}{algocf.3-2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.3}路径生成与后处理优化}{60}{subsection.3.4.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3-15}{\ignorespaces 路径生成与线段级碰撞检验流程示意图（双树连接—路径回溯拼接—分段稠密抽检—可行路径输出）}}{61}{figure.3.15}\protected@file@percent }
-\newlabel{fig:ch3:path-gen-flow}{{3-15}{61}{路径生成与线段级碰撞检验流程示意图（双树连接—路径回溯拼接—分段稠密抽检—可行路径输出）}{figure.3.15}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-45}}{61}{equation.3.45}\protected@file@percent }
-\newlabel{eq:ch3:seg-interp}{{3-45}{61}{路径生成与后处理优化}{equation.3.45}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-46}}{61}{equation.3.46}\protected@file@percent }
-\newlabel{eq:ch3:FK-path}{{3-46}{61}{路径生成与后处理优化}{equation.3.46}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-47}}{61}{equation.3.47}\protected@file@percent }
-\newlabel{eq:ch3:Jpath-grad-smooth}{{3-47}{61}{路径生成与后处理优化}{equation.3.47}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-48}}{61}{equation.3.48}\protected@file@percent }
-\newlabel{eq:ch3:Jpath}{{3-48}{61}{路径生成与后处理优化}{equation.3.48}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-49}}{62}{equation.3.49}\protected@file@percent }
-\newlabel{eq:ch3:phi-obs-path}{{3-49}{62}{路径生成与后处理优化}{equation.3.49}{}}
-\@writefile{loe}{\contentsline {equation}{\numberline {3-50}}{62}{equation.3.50}\protected@file@percent }
-\newlabel{eq:ch3:phi-grad}{{3-50}{62}{路径生成与后处理优化}{equation.3.50}{}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {3-3}{\ignorespaces 混合障碍物地图约束下的离散路径生成与后处理优化}}{62}{algocf.3-3}\protected@file@percent }
-\newlabel{alg:ch3:path-gen-post}{{3-3}{62}{路径生成与后处理优化}{algocf.3-3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-16}{\ignorespaces 考虑柔性线缆障碍的规划路径对比图}}{63}{figure.3.16}\protected@file@percent }
-\newlabel{fig:ch3:path-compare}{{3-16}{63}{考虑柔性线缆障碍的规划路径对比图}{figure.3.16}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.5}实验与结果分析}{63}{section.3.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3-17}{\ignorespaces 不同线缆布置工况下电连接器抓取过程典型示意（夹持姿态与线缆相对位置）}}{63}{figure.3.17}\protected@file@percent }
-\newlabel{fig:ch3:success-rate}{{3-17}{63}{不同线缆布置工况下电连接器抓取过程典型示意（夹持姿态与线缆相对位置）}{figure.3.17}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-18}{\ignorespaces 规划求解过程与关节空间轨迹形态示意（收敛趋势与折返程度）}}{64}{figure.3.18}\protected@file@percent }
-\newlabel{fig:ch3:boxplot}{{3-18}{64}{规划求解过程与关节空间轨迹形态示意（收敛趋势与折返程度）}{figure.3.18}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-19}{\ignorespaces 转运阶段末端轨迹与线缆体素占据的空间关系示意}}{64}{figure.3.19}\protected@file@percent }
-\newlabel{fig:ch3:exp-metrics}{{3-19}{64}{转运阶段末端轨迹与线缆体素占据的空间关系示意}{figure.3.19}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3-20}{\ignorespaces 缩比平台上自主抓取与规划轨迹执行的关键帧序列示意}}{65}{figure.3.20}\protected@file@percent }
-\newlabel{fig:ch3:exp-seq}{{3-20}{65}{缩比平台上自主抓取与规划轨迹执行的关键帧序列示意}{figure.3.20}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.6}本章小结}{65}{section.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}引言}{48}{section.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}端到端 6D 抓取生成网络}{48}{section.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}抓取位姿参数化表示}{48}{subsection.3.2.1}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-1}}{48}{equation.3.1}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-2}}{49}{equation.3.2}\protected@file@percent }
+\newlabel{eq:ch3:tg}{{3-2}{49}{抓取位姿参数化表示}{equation.3.2}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-3}}{49}{equation.3.3}\protected@file@percent }
+\newlabel{eq:ch3:Rg}{{3-3}{49}{抓取位姿参数化表示}{equation.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}基于局部点云的网络输入构建}{49}{subsection.3.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3-1}{\ignorespaces 抓取位姿参数示意图（接触点 $\mathbf  {c}$、闭合方向 $\mathbf  {x}$、接近方向 $\mathbf  {z}$、夹爪开度 $\omega $ 与偏置长度 $d$ 共同确定抓取坐标系原点 $\mathbf  {t}_g$ 及姿态 $\mathbf  {R}_g$）}}{50}{figure.3.1}\protected@file@percent }
+\newlabel{fig:ch3:grasp-param}{{3-1}{50}{抓取位姿参数示意图（接触点 $\mathbf {c}$、闭合方向 $\mathbf {x}$、接近方向 $\mathbf {z}$、夹爪开度 $\omega $ 与偏置长度 $d$ 共同确定抓取坐标系原点 $\mathbf {t}_g$ 及姿态 $\mathbf {R}_g$）}{figure.3.1}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-4}}{50}{equation.3.4}\protected@file@percent }
+\newlabel{eq:ch3:backproj}{{3-4}{50}{基于局部点云的网络输入构建}{equation.3.4}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-5}}{51}{equation.3.5}\protected@file@percent }
+\newlabel{eq:ch3:Toc}{{3-5}{51}{基于局部点云的网络输入构建}{equation.3.5}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-6}}{51}{equation.3.6}\protected@file@percent }
+\newlabel{eq:ch3:dcable}{{3-6}{51}{基于局部点云的网络输入构建}{equation.3.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-2}{\ignorespaces 目标局部点云裁剪与坐标系规范化示意图（自左至右：整场景深度与实例掩膜、裁剪后目标像素—深度、相机系局部点云、物体系规范化点云及线缆禁入域权重示意）}}{51}{figure.3.2}\protected@file@percent }
+\newlabel{fig:ch3:pointcloud}{{3-2}{51}{目标局部点云裁剪与坐标系规范化示意图（自左至右：整场景深度与实例掩膜、裁剪后目标像素—深度、相机系局部点云、物体系规范化点云及线缆禁入域权重示意）}{figure.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}基于 Contact-GraspNet 的抓取网络结构}{52}{subsection.3.2.3}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-7}}{52}{equation.3.7}\protected@file@percent }
+\newlabel{eq:ch3:weighted-input}{{3-7}{52}{基于 Contact-GraspNet 的抓取网络结构}{equation.3.7}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-8}}{52}{equation.3.8}\protected@file@percent }
+\newlabel{eq:ch3:sample-prob}{{3-8}{52}{基于 Contact-GraspNet 的抓取网络结构}{equation.3.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-3}{\ignorespaces Contact-GraspNet 抓取生成流程示意图（在保持原网络结构不变的前提下，将输入组织为面向电连接器抓取任务的局部点云与约束信息）}}{53}{figure.3.3}\protected@file@percent }
+\newlabel{fig:ch3:grasp-net}{{3-3}{53}{Contact-GraspNet 抓取生成流程示意图（在保持原网络结构不变的前提下，将输入组织为面向电连接器抓取任务的局部点云与约束信息）}{figure.3.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-4}{\ignorespaces PointNet++ 骨干与候选接触点生成示意图（Set Abstraction 层级、Ball Query 邻域、MLP 特征聚合及第一次降采样点作为候选接触点）}}{53}{figure.3.4}\protected@file@percent }
+\newlabel{fig:ch3:pointnet}{{3-4}{53}{PointNet++ 骨干与候选接触点生成示意图（Set Abstraction 层级、Ball Query 邻域、MLP 特征聚合及第一次降采样点作为候选接触点）}{figure.3.4}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-9}}{53}{equation.3.9}\protected@file@percent }
+\newlabel{eq:ch3:candidate-set}{{3-9}{53}{基于 Contact-GraspNet 的抓取网络结构}{equation.3.9}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-10}}{53}{equation.3.10}\protected@file@percent }
+\newlabel{eq:ch3:head-output}{{3-10}{53}{基于 Contact-GraspNet 的抓取网络结构}{equation.3.10}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-11}}{54}{equation.3.11}\protected@file@percent }
+\newlabel{eq:ch3:ortho}{{3-11}{54}{基于 Contact-GraspNet 的抓取网络结构}{equation.3.11}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-12}}{54}{equation.3.12}\protected@file@percent }
+\newlabel{eq:ch3:recover-grasp}{{3-12}{54}{基于 Contact-GraspNet 的抓取网络结构}{equation.3.12}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-13}}{54}{equation.3.13}\protected@file@percent }
+\newlabel{eq:ch3:finetune}{{3-13}{54}{基于 Contact-GraspNet 的抓取网络结构}{equation.3.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-5}{\ignorespaces 抓取候选分布对比示意图（左：整场景输入时候选分散于背景与线缆；右：目标局部点云与线缆先验下候选集中于连接器壳体稳定夹持区）}}{54}{figure.3.5}\protected@file@percent }
+\newlabel{fig:ch3:graspnet-vis}{{3-5}{54}{抓取候选分布对比示意图（左：整场景输入时候选分散于背景与线缆；右：目标局部点云与线缆先验下候选集中于连接器壳体稳定夹持区）}{figure.3.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}正负样本判定与损失函数设计}{55}{subsection.3.2.4}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-14}}{55}{equation.3.14}\protected@file@percent }
+\newlabel{eq:ch3:pos-neg}{{3-14}{55}{正负样本判定与损失函数设计}{equation.3.14}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-15}}{55}{equation.3.15}\protected@file@percent }
+\newlabel{eq:ch3:Lscore}{{3-15}{55}{正负样本判定与损失函数设计}{equation.3.15}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-16}}{55}{equation.3.16}\protected@file@percent }
+\newlabel{eq:ch3:Lwidth}{{3-16}{55}{正负样本判定与损失函数设计}{equation.3.16}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-17}}{56}{equation.3.17}\protected@file@percent }
+\newlabel{eq:ch3:Lpose}{{3-17}{56}{正负样本判定与损失函数设计}{equation.3.17}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-18}}{56}{equation.3.18}\protected@file@percent }
+\newlabel{eq:ch3:RotErr}{{3-18}{56}{正负样本判定与损失函数设计}{equation.3.18}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-19}}{56}{equation.3.19}\protected@file@percent }
+\newlabel{eq:ch3:Ltotal}{{3-19}{56}{正负样本判定与损失函数设计}{equation.3.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-6}{\ignorespaces Contact-GraspNet 训练过程的 TensorBoard 风格标量面板：（a）总损失 $L_{\mathrm  {grasp}}$；（b）抓取置信度分支损失 $L_{\mathrm  {score}}$；（c）夹爪开度分支损失 $L_{\mathrm  {width}}$；（d）位姿分支损失 $L_{\mathrm  {pose}}$；（e）验证集 Top Grasp Accuracy@0.65；（f）验证集 AUCPR；（g）验证集偏移量平均绝对误差；（h）学习率衰减曲线。橙色为训练曲线，蓝色为验证曲线，浅色细线表示原始标量，深色粗线表示指数滑动平均后的趋势。}}{57}{figure.3.6}\protected@file@percent }
+\newlabel{fig:ch3:train-vis}{{3-6}{57}{Contact-GraspNet 训练过程的 TensorBoard 风格标量面板：（a）总损失 $L_{\mathrm {grasp}}$；（b）抓取置信度分支损失 $L_{\mathrm {score}}$；（c）夹爪开度分支损失 $L_{\mathrm {width}}$；（d）位姿分支损失 $L_{\mathrm {pose}}$；（e）验证集 Top Grasp Accuracy@0.65；（f）验证集 AUCPR；（g）验证集偏移量平均绝对误差；（h）学习率衰减曲线。橙色为训练曲线，蓝色为验证曲线，浅色细线表示原始标量，深色粗线表示指数滑动平均后的趋势。}{figure.3.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-7}{\ignorespaces 电连接器表面候选抓取位姿分布可视化结果（绿色：壳体稳定夹持区；黄色：插针端功能区；红色：线缆根部及禁入域；颜色越深表示抓取置信度越高）}}{57}{figure.3.7}\protected@file@percent }
+\newlabel{fig:ch3:grasp-dist}{{3-7}{57}{电连接器表面候选抓取位姿分布可视化结果（绿色：壳体稳定夹持区；黄色：插针端功能区；红色：线缆根部及禁入域；颜色越深表示抓取置信度越高）}{figure.3.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}抓取点选择策略研究}{58}{section.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}专用指尖结构设计与力封闭性评估}{58}{subsection.3.3.1}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-20}}{58}{equation.3.20}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3-8}{\ignorespaces Franka夹爪专用指尖结构与装配实物图（上：指尖实物与CAD结构；下：Franka Hand安装专用指尖后的末端实物状态）}}{59}{figure.3.8}\protected@file@percent }
+\newlabel{fig:ch3:fingertip-grasp}{{3-8}{59}{Franka夹爪专用指尖结构与装配实物图（上：指尖实物与CAD结构；下：Franka Hand安装专用指尖后的末端实物状态）}{figure.3.8}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-21}}{59}{equation.3.21}\protected@file@percent }
+\newlabel{eq:ch3:friction-cone}{{3-21}{59}{专用指尖结构设计与力封闭性评估}{equation.3.21}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-22}}{59}{equation.3.22}\protected@file@percent }
+\newlabel{eq:ch3:wrench}{{3-22}{59}{专用指尖结构设计与力封闭性评估}{equation.3.22}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-23}}{60}{equation.3.23}\protected@file@percent }
+\newlabel{eq:ch3:force-closure}{{3-23}{60}{专用指尖结构设计与力封闭性评估}{equation.3.23}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-24}}{60}{equation.3.24}\protected@file@percent }
+\newlabel{eq:ch3:alpha}{{3-24}{60}{专用指尖结构设计与力封闭性评估}{equation.3.24}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-25}}{60}{equation.3.25}\protected@file@percent }
+\newlabel{eq:ch3:Qn}{{3-25}{60}{专用指尖结构设计与力封闭性评估}{equation.3.25}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-26}}{60}{equation.3.26}\protected@file@percent }
+\newlabel{eq:ch3:Qa}{{3-26}{60}{专用指尖结构设计与力封闭性评估}{equation.3.26}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-27}}{60}{equation.3.27}\protected@file@percent }
+\newlabel{eq:ch3:Qtip}{{3-27}{60}{专用指尖结构设计与力封闭性评估}{equation.3.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-9}{\ignorespaces 专用指尖与普通平行指面夹持电连接器时的接触法向与接触面积对比示意图（左：普通平指局部接触面积较小、法向分布离散；右：专用指尖形成更大包络接触面积且法向分布更集中）}}{60}{figure.3.9}\protected@file@percent }
+\newlabel{fig:ch3:force-closure-vis}{{3-9}{60}{专用指尖与普通平行指面夹持电连接器时的接触法向与接触面积对比示意图（左：普通平指局部接触面积较小、法向分布离散；右：专用指尖形成更大包络接触面积且法向分布更集中）}{figure.3.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}基于逆运动学的可达性判别}{61}{subsection.3.3.2}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-28}}{61}{equation.3.28}\protected@file@percent }
+\newlabel{eq:ch3:fwd-kin}{{3-28}{61}{基于逆运动学的可达性判别}{equation.3.28}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-29}}{61}{equation.3.29}\protected@file@percent }
+\newlabel{eq:ch3:ik-eq}{{3-29}{61}{基于逆运动学的可达性判别}{equation.3.29}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-30}}{61}{equation.3.30}\protected@file@percent }
+\newlabel{eq:ch3:IK-ind}{{3-30}{61}{基于逆运动学的可达性判别}{equation.3.30}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-31}}{61}{equation.3.31}\protected@file@percent }
+\newlabel{eq:ch3:Jlim}{{3-31}{61}{基于逆运动学的可达性判别}{equation.3.31}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-32}}{62}{equation.3.32}\protected@file@percent }
+\newlabel{eq:ch3:qstar}{{3-32}{62}{基于逆运动学的可达性判别}{equation.3.32}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-33}}{62}{equation.3.33}\protected@file@percent }
+\newlabel{eq:ch3:mani}{{3-33}{62}{基于逆运动学的可达性判别}{equation.3.33}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-10}{\ignorespaces 基于逆运动学的可达性判别结果示意图（灰色：不可达候选；蓝色：可达但关节裕量较小或接近奇异的候选；绿色：可达且关节裕量充足的候选）}}{62}{figure.3.10}\protected@file@percent }
+\newlabel{fig:ch3:grasp-dist2}{{3-10}{62}{基于逆运动学的可达性判别结果示意图（灰色：不可达候选；蓝色：可达但关节裕量较小或接近奇异的候选；绿色：可达且关节裕量充足的候选）}{figure.3.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}面向线缆障碍的安全间隙评价}{63}{subsection.3.3.3}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-34}}{63}{equation.3.34}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-35}}{63}{equation.3.35}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-36}}{63}{equation.3.36}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3-11}{\ignorespaces 线缆障碍安全间隙导致的抓取不可达效果图}}{64}{figure.3.11}\protected@file@percent }
+\newlabel{fig:ch3:cable-clearance}{{3-11}{64}{线缆障碍安全间隙导致的抓取不可达效果图}{figure.3.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}面向任务的姿态相容性评价}{64}{subsection.3.3.4}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-37}}{64}{equation.3.37}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3-12}{\ignorespaces 电连接器表面候选抓取任务姿态相容性结果}}{65}{figure.3.12}\protected@file@percent }
+\newlabel{fig:ch3:align-vis}{{3-12}{65}{电连接器表面候选抓取任务姿态相容性结果}{figure.3.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.5}综合评分函数与最优抓取确定}{65}{subsection.3.3.5}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-38}}{66}{equation.3.38}\protected@file@percent }
+\newlabel{eq:ch3:gfeas}{{3-38}{66}{综合评分函数与最优抓取确定}{equation.3.38}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-39}}{66}{equation.3.39}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-40}}{66}{equation.3.40}\protected@file@percent }
+\newlabel{eq:ch3:gstar}{{3-40}{66}{综合评分函数与最优抓取确定}{equation.3.40}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-13}{\ignorespaces 基于多约束优化的最优抓取点筛选流程图（候选抓取经逆运动学筛选后形成可行子集，并结合线缆安全间隙、姿态相容性与综合评分输出最优抓取位姿）}}{66}{figure.3.13}\protected@file@percent }
+\newlabel{fig:ch3:filter-flow}{{3-13}{66}{基于多约束优化的最优抓取点筛选流程图（候选抓取经逆运动学筛选后形成可行子集，并结合线缆安全间隙、姿态相容性与综合评分输出最优抓取位姿）}{figure.3.13}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}GRRT-Connect 运动规划算法研究}{67}{section.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}混合障碍物地图构建}{67}{subsection.3.4.1}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-41}}{68}{equation.3.41}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3-14}{\ignorespaces 混合障碍物地图构建结果图（刚性障碍与柔性线缆障碍）}}{68}{figure.3.14}\protected@file@percent }
+\newlabel{fig:ch3:octomap}{{3-14}{68}{混合障碍物地图构建结果图（刚性障碍与柔性线缆障碍）}{figure.3.14}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-42}}{68}{equation.3.42}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3-15}{\ignorespaces 线缆障碍三维化处理效果图（真实场景与反投影点云、动态体素占据）}}{69}{figure.3.15}\protected@file@percent }
+\newlabel{fig:ch3:cable-proc}{{3-15}{69}{线缆障碍三维化处理效果图（真实场景与反投影点云、动态体素占据）}{figure.3.15}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-43}}{69}{equation.3.43}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-44}}{69}{equation.3.44}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-45}}{70}{equation.3.45}\protected@file@percent }
+\newlabel{eq:ch3:cable-ani-dist}{{3-45}{70}{混合障碍物地图构建}{equation.3.45}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-46}}{70}{equation.3.46}\protected@file@percent }
+\newlabel{eq:ch3:cable-ellipsoid}{{3-46}{70}{混合障碍物地图构建}{equation.3.46}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-47}}{70}{equation.3.47}\protected@file@percent }
+\newlabel{eq:ch3:cable-ellipsoid-set}{{3-47}{70}{混合障碍物地图构建}{equation.3.47}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-16}{\ignorespaces 动态线缆障碍的各向异性椭球包络效果图}}{70}{figure.3.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces 线缆点云局部分段与椭球包络效果}}{70}{figure.3.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces 动态线缆障碍在场景中的各向异性包络结果}}{70}{figure.3.16}\protected@file@percent }
+\newlabel{fig:ch3:cable-ellipsoid-vis}{{3-16}{70}{动态线缆障碍的各向异性椭球包络效果图}{figure.3.16}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-48}}{71}{equation.3.48}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.2}引导式采样与双树扩展策略}{71}{subsection.3.4.2}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-49}}{71}{equation.3.49}\protected@file@percent }
+\newlabel{eq:ch3:cable-dir-cloud}{{3-49}{71}{引导式采样与双树扩展策略}{equation.3.49}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-50}}{72}{equation.3.50}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-51}}{72}{equation.3.51}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-52}}{72}{equation.3.52}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-53}}{72}{equation.3.53}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-54}}{72}{equation.3.54}\protected@file@percent }
+\newlabel{eq:ch3:wd}{{3-54}{72}{引导式采样与双树扩展策略}{equation.3.54}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-55}}{72}{equation.3.55}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {3-56}}{72}{equation.3.56}\protected@file@percent }
+\newlabel{eq:ch3:cable-align}{{3-56}{72}{引导式采样与双树扩展策略}{equation.3.56}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-57}}{73}{equation.3.57}\protected@file@percent }
+\newlabel{eq:ch3:cable-ani-q}{{3-57}{73}{引导式采样与双树扩展策略}{equation.3.57}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-58}}{73}{equation.3.58}\protected@file@percent }
+\newlabel{eq:ch3:cable-safe-judge}{{3-58}{73}{引导式采样与双树扩展策略}{equation.3.58}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-59}}{74}{equation.3.59}\protected@file@percent }
+\newlabel{eq:ch3:Jdir}{{3-59}{74}{引导式采样与双树扩展策略}{equation.3.59}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-60}}{74}{equation.3.60}\protected@file@percent }
+\newlabel{eq:ch3:Pac}{{3-60}{74}{引导式采样与双树扩展策略}{equation.3.60}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-61}}{74}{equation.3.61}\protected@file@percent }
+\newlabel{eq:ch3:qnew}{{3-61}{74}{引导式采样与双树扩展策略}{equation.3.61}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-17}{\ignorespaces 基于双线缆点云输入的低频在线重规划与方向引导扩展示意图（障碍点云更新动态体素地图，局部方向点云估计主方向并参与采样接纳与双树扩展）}}{74}{figure.3.17}\protected@file@percent }
+\newlabel{fig:ch3:grrt-tree}{{3-17}{74}{基于双线缆点云输入的低频在线重规划与方向引导扩展示意图（障碍点云更新动态体素地图，局部方向点云估计主方向并参与采样接纳与双树扩展）}{figure.3.17}{}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {3-1}{\ignorespaces 基于双线缆点云输入的低频在线 GRRT-Connect 重规划}}{75}{algocf.3-1}\protected@file@percent }
+\newlabel{alg:ch3:grrt-dir}{{3-1}{75}{引导式采样与双树扩展策略}{algocf.3-1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.3}路径生成与后处理优化}{75}{subsection.3.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3-18}{\ignorespaces 路径生成与线段级碰撞检验流程示意图（双树连接—路径回溯拼接—分段稠密抽检—可行路径输出）}}{76}{figure.3.18}\protected@file@percent }
+\newlabel{fig:ch3:path-gen-flow}{{3-18}{76}{路径生成与线段级碰撞检验流程示意图（双树连接—路径回溯拼接—分段稠密抽检—可行路径输出）}{figure.3.18}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-62}}{76}{equation.3.62}\protected@file@percent }
+\newlabel{eq:ch3:seg-interp}{{3-62}{76}{路径生成与后处理优化}{equation.3.62}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-63}}{76}{equation.3.63}\protected@file@percent }
+\newlabel{eq:ch3:FK-path}{{3-63}{76}{路径生成与后处理优化}{equation.3.63}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-64}}{77}{equation.3.64}\protected@file@percent }
+\newlabel{eq:ch3:Jpath-grad-smooth}{{3-64}{77}{路径生成与后处理优化}{equation.3.64}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-65}}{77}{equation.3.65}\protected@file@percent }
+\newlabel{eq:ch3:Jpath}{{3-65}{77}{路径生成与后处理优化}{equation.3.65}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-66}}{77}{equation.3.66}\protected@file@percent }
+\newlabel{eq:ch3:phi-obs-path}{{3-66}{77}{路径生成与后处理优化}{equation.3.66}{}}
+\@writefile{loe}{\contentsline {equation}{\numberline {3-67}}{77}{equation.3.67}\protected@file@percent }
+\newlabel{eq:ch3:phi-grad}{{3-67}{77}{路径生成与后处理优化}{equation.3.67}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-19}{\ignorespaces 路径生成与平滑原理示意图（离散节点回溯、关节空间线性插值、混合障碍约束下的稠密检验以及平滑优化前后轨迹形态对比）}}{77}{figure.3.19}\protected@file@percent }
+\newlabel{fig:ch3:path-smooth-principle}{{3-19}{77}{路径生成与平滑原理示意图（离散节点回溯、关节空间线性插值、混合障碍约束下的稠密检验以及平滑优化前后轨迹形态对比）}{figure.3.19}{}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {3-2}{\ignorespaces 混合障碍物地图约束下的离散路径生成与后处理优化}}{78}{algocf.3-2}\protected@file@percent }
+\newlabel{alg:ch3:path-gen-post}{{3-2}{78}{路径生成与后处理优化}{algocf.3-2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-20}{\ignorespaces 基于方向引导与后处理优化的规划路径效果图（展示本文方法在柔性线缆障碍约束下生成的转运路径及其与线缆占据区域的空间关系）}}{79}{figure.3.20}\protected@file@percent }
+\newlabel{fig:ch3:path-compare}{{3-20}{79}{基于方向引导与后处理优化的规划路径效果图（展示本文方法在柔性线缆障碍约束下生成的转运路径及其与线缆占据区域的空间关系）}{figure.3.20}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}实验与结果分析}{79}{section.3.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3-21}{\ignorespaces 不同线缆布置工况下电连接器抓取实验效果图（实物抓取过程与对应算法筛选结果示意）}}{80}{figure.3.21}\protected@file@percent }
+\newlabel{fig:ch3:success-rate}{{3-21}{80}{不同线缆布置工况下电连接器抓取实验效果图（实物抓取过程与对应算法筛选结果示意）}{figure.3.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-22}{\ignorespaces 规划求解过程与关节空间轨迹形态示意（收敛趋势与折返程度）}}{80}{figure.3.22}\protected@file@percent }
+\newlabel{fig:ch3:boxplot}{{3-22}{80}{规划求解过程与关节空间轨迹形态示意（收敛趋势与折返程度）}{figure.3.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-23}{\ignorespaces 转运阶段末端轨迹与线缆体素占据的空间关系示意}}{81}{figure.3.23}\protected@file@percent }
+\newlabel{fig:ch3:exp-metrics}{{3-23}{81}{转运阶段末端轨迹与线缆体素占据的空间关系示意}{figure.3.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3-24}{\ignorespaces 成功抓取后转运至预装配区域的规划执行关键帧序列示意}}{81}{figure.3.24}\protected@file@percent }
+\newlabel{fig:ch3:exp-seq}{{3-24}{81}{成功抓取后转运至预装配区域的规划执行关键帧序列示意}{figure.3.24}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.6}本章小结}{81}{section.3.6}\protected@file@percent }
 \@setckpt{body/chapter03}{
-\setcounter{page}{66}
-\setcounter{equation}{50}
+\setcounter{page}{83}
+\setcounter{equation}{67}
 \setcounter{enumi}{0}
 \setcounter{enumii}{0}
 \setcounter{enumiii}{0}
@@ -168,10 +210,10 @@
 \setcounter{subsubsection}{0}
 \setcounter{paragraph}{0}
 \setcounter{subparagraph}{0}
-\setcounter{figure}{20}
+\setcounter{figure}{24}
 \setcounter{table}{0}
 \setcounter{parentequation}{0}
-\setcounter{endNonectr}{61}
+\setcounter{endNonectr}{78}
 \setcounter{currNonectr}{0}
 \setcounter{AM@survey}{0}
 \setcounter{pp@a@footnote}{3}
@@ -181,14 +223,14 @@
 \setcounter{Item}{0}
 \setcounter{Hfootnote}{0}
 \setcounter{Hy@AnnotLevel}{0}
-\setcounter{bookmark@seq@number}{52}
+\setcounter{bookmark@seq@number}{53}
 \setcounter{NAT@ctr}{0}
 \setcounter{cp@cntr}{0}
 \setcounter{subfigure}{0}
 \setcounter{lofdepth}{1}
 \setcounter{subtable}{0}
 \setcounter{lotdepth}{1}
-\setcounter{@contsubnum}{0}
+\setcounter{@contsubnum}{2}
 \setcounter{newflo@tctr}{8}
 \setcounter{pubctr}{0}
 \setcounter{translationbibi}{0}
@@ -236,9 +278,9 @@
 \setcounter{fact}{0}
 \setcounter{r@tfl@t}{0}
 \setcounter{AlgoLine}{10}
-\setcounter{algocfline}{4}
-\setcounter{algocfproc}{4}
-\setcounter{algocf}{3}
+\setcounter{algocfline}{3}
+\setcounter{algocfproc}{3}
+\setcounter{algocf}{2}
 \setcounter{algoen}{0}
 \setcounter{aendepth}{1}
 \setcounter{lstnumber}{1}

@@ -12,71 +12,83 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {2-2}{\ignorespaces 航空机舱非结构化环境中电连接器多实例堆叠、金属反光/阴影与柔性线缆遮挡的典型视觉场景对比图}}{13}{figure.2.2}\protected@file@percent }
 \newlabel{fig:ch2:scene}{{2-2}{13}{航空机舱非结构化环境中电连接器多实例堆叠、金属反光/阴影与柔性线缆遮挡的典型视觉场景对比图}{figure.2.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.1}数据采集与标注方案}{13}{subsection.2.2.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-3}{\ignorespaces 电连接器采集硬件布局示意图（机械臂腕部安装RealSense相机获取多视角RGB图像）}}{13}{figure.2.3}\protected@file@percent }
-\newlabel{fig:ch2:hardware}{{2-3}{13}{电连接器采集硬件布局示意图（机械臂腕部安装RealSense相机获取多视角RGB图像）}{figure.2.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.2}数据增强}{14}{subsection.2.2.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-4}{\ignorespaces 真实采集样本与仿真合成样本的混合数据集对比示例图（含TagID、实例掩膜、关键点与线缆掩膜标注展示）}}{15}{figure.2.4}\protected@file@percent }
-\newlabel{fig:ch2:mix-data}{{2-4}{15}{真实采集样本与仿真合成样本的混合数据集对比示例图（含TagID、实例掩膜、关键点与线缆掩膜标注展示）}{figure.2.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}数据集特征分析}{15}{subsection.2.2.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-5}{\ignorespaces 数据增强效果示例图（高斯噪声、随机旋转、亮度扰动等对标签区与线缆细结构的影响对比）}}{16}{figure.2.5}\protected@file@percent }
-\newlabel{fig:ch2:aug}{{2-5}{16}{数据增强效果示例图（高斯噪声、随机旋转、亮度扰动等对标签区与线缆细结构的影响对比）}{figure.2.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-6}{\ignorespaces 不同TagID、遮挡率区间与线缆方向样本的分布统计图（增强前后类别分布与工况覆盖对比）}}{16}{figure.2.6}\protected@file@percent }
-\newlabel{fig:ch2:dataset-stat}{{2-6}{16}{不同TagID、遮挡率区间与线缆方向样本的分布统计图（增强前后类别分布与工况覆盖对比）}{figure.2.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {2.3}基于 YOLOv8-seg 的目标检测与实例分割}{17}{section.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}算法选型与总体结构}{17}{subsection.2.3.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-7}{\ignorespaces YOLOv8-seg网络结构图（Backbone/Neck/Head与检测-分割联合输出的多尺度特征融合示意）}}{18}{figure.2.7}\protected@file@percent }
-\newlabel{fig:ch2:yolov8-arch}{{2-7}{18}{YOLOv8-seg网络结构图（Backbone/Neck/Head与检测-分割联合输出的多尺度特征融合示意）}{figure.2.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-8}{\ignorespaces YOLOv8-seg在多实例堆叠与线缆遮挡条件下的检测与实例分割效果图（含TagID识别结果展示）}}{19}{figure.2.8}\protected@file@percent }
-\newlabel{fig:ch2:yolov8-vis}{{2-8}{19}{YOLOv8-seg在多实例堆叠与线缆遮挡条件下的检测与实例分割效果图（含TagID识别结果展示）}{figure.2.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}损失函数与训练参数设置}{19}{subsection.2.3.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-9}{\ignorespaces YOLOv8-seg训练过程曲线图（分类/置信度/框回归/分割等损失与关键指标随epoch变化）}}{21}{figure.2.9}\protected@file@percent }
-\newlabel{fig:ch2:yolov8-train}{{2-9}{21}{YOLOv8-seg训练过程曲线图（分类/置信度/框回归/分割等损失与关键指标随epoch变化）}{figure.2.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}动态 ROI 裁剪策略}{22}{subsection.2.3.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-10}{\ignorespaces 基于检测置信度的动态ROI裁剪示意图（\(\gamma (s)\)自适应扩展与仿射回映射关系）}}{23}{figure.2.10}\protected@file@percent }
-\newlabel{fig:ch2:roi}{{2-10}{23}{基于检测置信度的动态ROI裁剪示意图（\(\gamma (s)\)自适应扩展与仿射回映射关系）}{figure.2.10}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {2.4}基于改进 DeepLabV3+的关键特征提取与线缆分割}{23}{section.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}网络模型分析}{24}{subsection.2.4.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-11}{\ignorespaces DeepLabV3+网络结构示意图（ASPP多空洞率上下文建模与编码器-解码器融合路径）}}{25}{figure.2.11}\protected@file@percent }
-\newlabel{fig:ch2:deeplab-arch}{{2-11}{25}{DeepLabV3+网络结构示意图（ASPP多空洞率上下文建模与编码器-解码器融合路径）}{figure.2.11}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}高斯热力图建模方法}{25}{subsection.2.4.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-12}{\ignorespaces 关键点监督形式对比示意图（单点坐标回归/高斯热力图软标签/soft-argmax解码）}}{26}{figure.2.12}\protected@file@percent }
-\newlabel{fig:ch2:heatmap-vs-reg}{{2-12}{26}{关键点监督形式对比示意图（单点坐标回归/高斯热力图软标签/soft-argmax解码）}{figure.2.12}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-13}{\ignorespaces 关键点高斯热力图建模示意图（\(\sigma \)控制扩散半径与峰值-邻域软标签监督形式）}}{27}{figure.2.13}\protected@file@percent }
-\newlabel{fig:ch2:heatmap}{{2-13}{27}{关键点高斯热力图建模示意图（\(\sigma \)控制扩散半径与峰值-邻域软标签监督形式）}{figure.2.13}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.3}改进输出头与联合损失设计}{28}{subsection.2.4.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-14}{\ignorespaces 改进DeepLabV3+双分支输出头示意图（关键点热力图分支+线缆分割分支的共享特征与输出通道定义）}}{29}{figure.2.14}\protected@file@percent }
-\newlabel{fig:ch2:deeplab-head}{{2-14}{29}{改进DeepLabV3+双分支输出头示意图（关键点热力图分支+线缆分割分支的共享特征与输出通道定义）}{figure.2.14}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-15}{\ignorespaces 二级网络训练与推理效果示意图（关键点热力图峰值定位+线缆精细分割结果可视化）}}{30}{figure.2.15}\protected@file@percent }
-\newlabel{fig:ch2:deeplab-vis}{{2-15}{30}{二级网络训练与推理效果示意图（关键点热力图峰值定位+线缆精细分割结果可视化）}{figure.2.15}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {2.5}基于 EPnP 与 RANSAC 的电连接器位姿解算}{31}{section.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5.1}相机投影模型与 EPnP 求解}{32}{subsection.2.5.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2-16}{\ignorespaces 相机模型与PnP位姿解算统一示意图（光心\(O\)、图像平面、物体系\(\{\mathcal  {O}\}\)与相机系\(\{\mathcal  {C}\}\)、三维点\(\mathbf  {P}_i^{\mathcal  {O}}\)/\(\mathbf  {P}_i^{\mathcal  {C}}\)、像素\(\mathbf  {p}_i\)、控制点\(\mathbf  {C}_j\)及位姿\(\mathbf  {R},\mathbf  {t}\)的几何与解算流程）}}{32}{figure.2.16}\protected@file@percent }
-\newlabel{fig:ch2:camera-model}{{2-16}{32}{相机模型与PnP位姿解算统一示意图（光心\(O\)、图像平面、物体系\(\{\mathcal {O}\}\)与相机系\(\{\mathcal {C}\}\)、三维点\(\mathbf {P}_i^{\mathcal {O}}\)/\(\mathbf {P}_i^{\mathcal {C}}\)、像素\(\mathbf {p}_i\)、控制点\(\mathbf {C}_j\)及位姿\(\mathbf {R},\mathbf {t}\)的几何与解算流程）}{figure.2.16}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5.2}基于 RANSAC 的外点剔除}{33}{subsection.2.5.2}\protected@file@percent }
-\@writefile{loa}{\contentsline {algocf}{\numberline {2-1}{\ignorespaces 基于 EPnP 的 RANSAC 位姿估计}}{34}{algocf.2-1}\protected@file@percent }
-\newlabel{alg:ch2:ransac}{{2-1}{34}{基于 RANSAC 的外点剔除}{algocf.2-1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-17}{\ignorespaces EPnP+RANSAC位姿解算流程图（关键点输入→EPnP初值→重投影误差判据→外点剔除→位姿重估）}}{34}{figure.2.17}\protected@file@percent }
-\newlabel{fig:ch2:pnp-flow}{{2-17}{34}{EPnP+RANSAC位姿解算流程图（关键点输入→EPnP初值→重投影误差判据→外点剔除→位姿重估）}{figure.2.17}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-18}{\ignorespaces RANSAC外点剔除效果图（剔除前后重投影误差分布与内点集合可视化）}}{35}{figure.2.18}\protected@file@percent }
-\newlabel{fig:ch2:ransac}{{2-18}{35}{RANSAC外点剔除效果图（剔除前后重投影误差分布与内点集合可视化）}{figure.2.18}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5.3}手眼标定与坐标系转换}{35}{subsection.2.5.3}\protected@file@percent }
-\@writefile{loe}{\contentsline {equation}{\numberline {2-1}}{35}{equation.2.1}\protected@file@percent }
-\newlabel{eq:ch2:handeye-chain}{{2-1}{35}{手眼标定与坐标系转换}{equation.2.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-19}{\ignorespaces Eye-in-Hand手眼标定过程与坐标系关系图（\(\{B\},\{E\},\{C\},\{O\}\)及\({}^{B}\mathbf  {T}_{O}\)链式变换）}}{36}{figure.2.19}\protected@file@percent }
-\newlabel{fig:ch2:handeye}{{2-19}{36}{Eye-in-Hand手眼标定过程与坐标系关系图（\(\{B\},\{E\},\{C\},\{O\}\)及\({}^{B}\mathbf {T}_{O}\)链式变换）}{figure.2.19}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {2.6}算法验证实验}{36}{section.2.6}\protected@file@percent }
-\newlabel{sec:ch2:verify}{{2.6}{36}{算法验证实验}{section.2.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-20}{\ignorespaces 第二章端到端验证链路图（RGB输入→YOLOv8-seg检测/粗分割/TagID→动态ROI裁剪→改进DeepLabV3+关键点+线缆→EPnP/RANSAC位姿→手眼变换到\(\{B\}\)）}}{37}{figure.2.20}\protected@file@percent }
-\newlabel{fig:ch2:eval-flow}{{2-20}{37}{第二章端到端验证链路图（RGB输入→YOLOv8-seg检测/粗分割/TagID→动态ROI裁剪→改进DeepLabV3+关键点+线缆→EPnP/RANSAC位姿→手眼变换到\(\{B\}\)）}{figure.2.20}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-21}{\ignorespaces YOLOv8-seg阶段输出可视化图（多实例堆叠与线缆遮挡场景下的检测框、实例掩膜与TagID识别结果）}}{37}{figure.2.21}\protected@file@percent }
-\newlabel{fig:ch2:yolo-verify}{{2-21}{37}{YOLOv8-seg阶段输出可视化图（多实例堆叠与线缆遮挡场景下的检测框、实例掩膜与TagID识别结果）}{figure.2.21}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-22}{\ignorespaces 改进DeepLabV3+阶段输出可视化图（ROI内关键点热力图峰值定位与线缆精细分割结果叠加展示）}}{38}{figure.2.22}\protected@file@percent }
-\newlabel{fig:ch2:deeplab-verify}{{2-22}{38}{改进DeepLabV3+阶段输出可视化图（ROI内关键点热力图峰值定位与线缆精细分割结果叠加展示）}{figure.2.22}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2-23}{\ignorespaces EPnP/RANSAC位姿估计结果可视化图（模型坐标轴或CAD投影轮廓叠加到图像，显示外点剔除前后的一致性差异）}}{38}{figure.2.23}\protected@file@percent }
-\newlabel{fig:ch2:pnp-verify}{{2-23}{38}{EPnP/RANSAC位姿估计结果可视化图（模型坐标轴或CAD投影轮廓叠加到图像，显示外点剔除前后的一致性差异）}{figure.2.23}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {2.7}本章小结}{39}{section.2.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-3}{\ignorespaces 本文研究对象电连接器实物图}}{13}{figure.2.3}\protected@file@percent }
+\newlabel{fig:ch2:connector-object}{{2-3}{13}{本文研究对象电连接器实物图}{figure.2.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-4}{\ignorespaces 电连接器视觉数据采集实物硬件布局图（机械臂腕部安装 RealSense 相机获取多视角 RGB 图像）}}{14}{figure.2.4}\protected@file@percent }
+\newlabel{fig:ch2:hardware}{{2-4}{14}{电连接器视觉数据采集实物硬件布局图（机械臂腕部安装 RealSense 相机获取多视角 RGB 图像）}{figure.2.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-5}{\ignorespaces 真实采集样本与仿真合成样本的混合数据集示例图（上：真实采集图像；下：仿真合成图像）}}{15}{figure.2.5}\protected@file@percent }
+\newlabel{fig:ch2:sim-data}{{2-5}{15}{真实采集样本与仿真合成样本的混合数据集示例图（上：真实采集图像；下：仿真合成图像）}{figure.2.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-6}{\ignorespaces 两级标注数据集界面展示图（上：整图实例与标签标注数据集；下：单目标 ROI 关键结构标注数据集）}}{16}{figure.2.6}\protected@file@percent }
+\newlabel{fig:ch2:mix-data}{{2-6}{16}{两级标注数据集界面展示图（上：整图实例与标签标注数据集；下：单目标 ROI 关键结构标注数据集）}{figure.2.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.2}数据增强}{17}{subsection.2.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-7}{\ignorespaces 数据增强效果示例图（上：真实采集样本增强结果；下：仿真合成样本增强结果）}}{17}{figure.2.7}\protected@file@percent }
+\newlabel{fig:ch2:aug}{{2-7}{17}{数据增强效果示例图（上：真实采集样本增强结果；下：仿真合成样本增强结果）}{figure.2.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}数据集特征分析}{18}{subsection.2.2.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-8}{\ignorespaces 不同 TagID、目标面积占比与实例形状复杂度样本的分布统计图（增强前后类别覆盖、尺度分布与重叠复杂度对比）}}{18}{figure.2.8}\protected@file@percent }
+\newlabel{fig:ch2:dataset-stat}{{2-8}{18}{不同 TagID、目标面积占比与实例形状复杂度样本的分布统计图（增强前后类别覆盖、尺度分布与重叠复杂度对比）}{figure.2.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.3}基于 YOLOv8-seg 的目标检测与实例分割}{19}{section.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}算法选型与总体结构}{19}{subsection.2.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-9}{\ignorespaces YOLOv8-seg网络结构图（Backbone/Neck/Head与检测-分割联合输出的多尺度特征融合示意）}}{20}{figure.2.9}\protected@file@percent }
+\newlabel{fig:ch2:yolov8-arch}{{2-9}{20}{YOLOv8-seg网络结构图（Backbone/Neck/Head与检测-分割联合输出的多尺度特征融合示意）}{figure.2.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-10}{\ignorespaces YOLOv8-seg在多实例堆叠与线缆遮挡条件下的检测与实例分割效果图（含TagID识别结果展示）}}{21}{figure.2.10}\protected@file@percent }
+\newlabel{fig:ch2:yolov8-vis}{{2-10}{21}{YOLOv8-seg在多实例堆叠与线缆遮挡条件下的检测与实例分割效果图（含TagID识别结果展示）}{figure.2.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}损失函数与训练参数设置}{21}{subsection.2.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-11}{\ignorespaces YOLOv8-seg训练过程曲线图（分类/置信度/框回归/分割等损失与关键指标随epoch变化）}}{23}{figure.2.11}\protected@file@percent }
+\newlabel{fig:ch2:yolov8-train}{{2-11}{23}{YOLOv8-seg训练过程曲线图（分类/置信度/框回归/分割等损失与关键指标随epoch变化）}{figure.2.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}动态 ROI 裁剪策略}{23}{subsection.2.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-12}{\ignorespaces 基于检测置信度的动态ROI裁剪示意图（\(\gamma (s)\)自适应扩展与仿射回映射关系）}}{24}{figure.2.12}\protected@file@percent }
+\newlabel{fig:ch2:roi}{{2-12}{24}{基于检测置信度的动态ROI裁剪示意图（\(\gamma (s)\)自适应扩展与仿射回映射关系）}{figure.2.12}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.4}基于改进 DeepLabV3+的关键特征提取与线缆分割}{25}{section.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}网络模型分析}{25}{subsection.2.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}高斯热力图建模方法}{26}{subsection.2.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-13}{\ignorespaces DeepLabV3+网络结构示意图（ASPP多空洞率上下文建模与编码器-解码器融合路径）}}{27}{figure.2.13}\protected@file@percent }
+\newlabel{fig:ch2:deeplab-arch}{{2-13}{27}{DeepLabV3+网络结构示意图（ASPP多空洞率上下文建模与编码器-解码器融合路径）}{figure.2.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-14}{\ignorespaces 关键点监督形式对比示意图（单点坐标回归/高斯热力图软标签/局部峰值搜索解码）}}{28}{figure.2.14}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces 单点坐标回归监督}}{28}{figure.2.14}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces 高斯热力图软标签监督}}{28}{figure.2.14}\protected@file@percent }
+\newlabel{fig:ch2:heatmap-vs-reg}{{2-14}{28}{关键点监督形式对比示意图（单点坐标回归/高斯热力图软标签/局部峰值搜索解码）}{figure.2.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-15}{\ignorespaces 关键点高斯热力图建模示意图（四类角点热力图采用多峰值监督；可视化时将热力图上采样后叠加于ROI图像，而非直接以下采样解码特征图为底图）}}{29}{figure.2.15}\protected@file@percent }
+\newlabel{fig:ch2:heatmap}{{2-15}{29}{关键点高斯热力图建模示意图（四类角点热力图采用多峰值监督；可视化时将热力图上采样后叠加于ROI图像，而非直接以下采样解码特征图为底图）}{figure.2.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.3}改进输出头与联合损失设计}{30}{subsection.2.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-16}{\ignorespaces 改进DeepLabV3+双分支输出头示意图（关键点热力图分支+线缆分割分支的共享特征与输出通道定义）}}{31}{figure.2.16}\protected@file@percent }
+\newlabel{fig:ch2:deeplab-head}{{2-16}{31}{改进DeepLabV3+双分支输出头示意图（关键点热力图分支+线缆分割分支的共享特征与输出通道定义）}{figure.2.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-17}{\ignorespaces 二级网络训练与推理效果示意图}}{33}{figure.2.17}\protected@file@percent }
+\newlabel{fig:ch2:deeplab-vis}{{2-17}{33}{二级网络训练与推理效果示意图}{figure.2.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-18}{\ignorespaces 二级网络训练曲线图（总损失、关键点热力图损失、线缆分割损失、线缆分割 mIoU、关键点像素误差与学习率调度随 epoch 变化）}}{35}{figure.2.18}\protected@file@percent }
+\newlabel{fig:ch2:deeplab-traincurve}{{2-18}{35}{二级网络训练曲线图（总损失、关键点热力图损失、线缆分割损失、线缆分割 mIoU、关键点像素误差与学习率调度随 epoch 变化）}{figure.2.18}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.5}基于 EPnP 与 RANSAC 的电连接器位姿解算}{36}{section.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5.1}相机投影模型与 EPnP 求解}{36}{subsection.2.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2-19}{\ignorespaces 相机模型与PnP位姿解算统一示意图（光心\(O\)、图像平面、物体系\(\{\mathcal  {O}\}\)与相机系\(\{\mathcal  {C}\}\)、三维点\(\mathbf  {P}_i^{\mathcal  {O}}\)/\(\mathbf  {P}_i^{\mathcal  {C}}\)、像素\(\mathbf  {p}_i\)、控制点\(\mathbf  {C}_j\)及位姿\(\mathbf  {R},\mathbf  {t}\)的几何与解算流程）}}{37}{figure.2.19}\protected@file@percent }
+\newlabel{fig:ch2:camera-model}{{2-19}{37}{相机模型与PnP位姿解算统一示意图（光心\(O\)、图像平面、物体系\(\{\mathcal {O}\}\)与相机系\(\{\mathcal {C}\}\)、三维点\(\mathbf {P}_i^{\mathcal {O}}\)/\(\mathbf {P}_i^{\mathcal {C}}\)、像素\(\mathbf {p}_i\)、控制点\(\mathbf {C}_j\)及位姿\(\mathbf {R},\mathbf {t}\)的几何与解算流程）}{figure.2.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-20}{\ignorespaces EPnP位姿解算实物检测效果图（左：二维关键点检测结果；右：EPnP位姿估计与三维包围框投影结果）}}{38}{figure.2.20}\protected@file@percent }
+\newlabel{fig:ch2:pnp-real}{{2-20}{38}{EPnP位姿解算实物检测效果图（左：二维关键点检测结果；右：EPnP位姿估计与三维包围框投影结果）}{figure.2.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5.2}基于 RANSAC 的外点剔除}{39}{subsection.2.5.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algocf}{\numberline {2-1}{\ignorespaces 基于 EPnP 的 RANSAC 位姿估计}}{41}{algocf.2-1}\protected@file@percent }
+\newlabel{alg:ch2:ransac}{{2-1}{41}{基于 RANSAC 的外点剔除}{algocf.2-1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-21}{\ignorespaces RANSAC外点剔除效果图（剔除前后重投影误差分布与内点集合可视化）}}{41}{figure.2.21}\protected@file@percent }
+\newlabel{fig:ch2:ransac}{{2-21}{41}{RANSAC外点剔除效果图（剔除前后重投影误差分布与内点集合可视化）}{figure.2.21}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5.3}手眼标定与坐标系转换}{42}{subsection.2.5.3}\protected@file@percent }
+\@writefile{loe}{\contentsline {equation}{\numberline {2-1}}{42}{equation.2.1}\protected@file@percent }
+\newlabel{eq:ch2:handeye-chain}{{2-1}{42}{手眼标定与坐标系转换}{equation.2.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-22}{\ignorespaces Eye-in-Hand手眼标定过程与坐标系关系图（\(\{B\},\{E\},\{C\},\{O\}\)及\({}^{B}\mathbf  {T}_{O}\)链式变换）}}{43}{figure.2.22}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces 坐标系链式关系示意}}{43}{figure.2.22}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces 实机标定场景示意}}{43}{figure.2.22}\protected@file@percent }
+\newlabel{fig:ch2:handeye}{{2-22}{43}{Eye-in-Hand手眼标定过程与坐标系关系图（\(\{B\},\{E\},\{C\},\{O\}\)及\({}^{B}\mathbf {T}_{O}\)链式变换）}{figure.2.22}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.6}算法验证实验}{43}{section.2.6}\protected@file@percent }
+\newlabel{sec:ch2:verify}{{2.6}{43}{算法验证实验}{section.2.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-23}{\ignorespaces 第二章端到端验证链路图（RGB输入→YOLOv8-seg检测/粗分割/TagID→动态ROI裁剪→改进DeepLabV3+关键点+线缆→EPnP/RANSAC位姿→手眼变换到\(\{B\}\)）}}{44}{figure.2.23}\protected@file@percent }
+\newlabel{fig:ch2:eval-flow}{{2-23}{44}{第二章端到端验证链路图（RGB输入→YOLOv8-seg检测/粗分割/TagID→动态ROI裁剪→改进DeepLabV3+关键点+线缆→EPnP/RANSAC位姿→手眼变换到\(\{B\}\)）}{figure.2.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-24}{\ignorespaces 端到端验证初始阶段实机定点观测图（上：连接器目标多视角原始观测图像；下：机械臂携带腕部相机执行固定观测位采样过程）}}{45}{figure.2.24}\protected@file@percent }
+\newlabel{fig:ch2:obs-raw}{{2-24}{45}{端到端验证初始阶段实机定点观测图（上：连接器目标多视角原始观测图像；下：机械臂携带腕部相机执行固定观测位采样过程）}{figure.2.24}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-25}{\ignorespaces YOLOv8-seg阶段输出可视化图（多实例堆叠与线缆遮挡场景下的检测框、实例掩膜与TagID识别结果）}}{45}{figure.2.25}\protected@file@percent }
+\newlabel{fig:ch2:yolo-verify}{{2-25}{45}{YOLOv8-seg阶段输出可视化图（多实例堆叠与线缆遮挡场景下的检测框、实例掩膜与TagID识别结果）}{figure.2.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-26}{\ignorespaces 改进DeepLabV3+阶段输出可视化图（ROI内关键点热力图峰值定位与线缆精细分割结果叠加展示）}}{46}{figure.2.26}\protected@file@percent }
+\newlabel{fig:ch2:deeplab-verify}{{2-26}{46}{改进DeepLabV3+阶段输出可视化图（ROI内关键点热力图峰值定位与线缆精细分割结果叠加展示）}{figure.2.26}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2-27}{\ignorespaces EPnP/RANSAC位姿估计结果可视化图（模型坐标轴或CAD投影轮廓叠加到图像，显示外点剔除前后的一致性差异）}}{47}{figure.2.27}\protected@file@percent }
+\newlabel{fig:ch2:pnp-verify}{{2-27}{47}{EPnP/RANSAC位姿估计结果可视化图（模型坐标轴或CAD投影轮廓叠加到图像，显示外点剔除前后的一致性差异）}{figure.2.27}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.7}本章小结}{47}{section.2.7}\protected@file@percent }
 \@setckpt{body/chapter02}{
-\setcounter{page}{40}
+\setcounter{page}{48}
 \setcounter{equation}{1}
 \setcounter{enumi}{0}
 \setcounter{enumii}{0}
@@ -91,7 +103,7 @@
 \setcounter{subsubsection}{0}
 \setcounter{paragraph}{0}
 \setcounter{subparagraph}{0}
-\setcounter{figure}{23}
+\setcounter{figure}{27}
 \setcounter{table}{0}
 \setcounter{parentequation}{0}
 \setcounter{endNonectr}{11}
@@ -111,7 +123,7 @@
 \setcounter{lofdepth}{1}
 \setcounter{subtable}{0}
 \setcounter{lotdepth}{1}
-\setcounter{@contsubnum}{0}
+\setcounter{@contsubnum}{2}
 \setcounter{newflo@tctr}{8}
 \setcounter{pubctr}{0}
 \setcounter{translationbibi}{0}
